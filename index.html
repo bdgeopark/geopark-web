@@ -28,7 +28,7 @@ async function sendLogin() {
             const pw = document.getElementById('my_pw').value;
 
             try {
-                const res = await fetch('https://geopark-server.onrender.com/login', {
+                const res = await fetch('https://bdgeopark.onrender.com/login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({uid: id, upw: pw})
