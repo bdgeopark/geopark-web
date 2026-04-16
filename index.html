@@ -2,43 +2,105 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>지질공원 테스트</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지질공원 해설사 시스템</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 100px; }
-        input { padding: 10px; margin: 5px; width: 200px; }
-        button { padding: 10px 20px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; }
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background-color: #f0f4f8; /* 아주 연한 푸른빛 배경 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 320px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .title {
+            color: #2c3e50;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #fafafa;
+        }
+        input:focus {
+            outline: none;
+            border-color: #27ae60;
+            background-color: white;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background-color: #27ae60; /* 지질공원 느낌의 초록색 */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        .btn-login:hover {
+            background-color: #219150;
+        }
     </style>
 </head>
 <body>
-    <h2>🔐 신규 시스템 로그인 테스트</h2>
-    <input type="text" id="my_id" placeholder="아이디(admin)"> <br>
-    <input type="password" id="my_pw" placeholder="비번(1234)"> <br><br>
-    <button onclick="sendLogin()">파이썬 서버에 물어보기</button>
+
+    <div class="login-box">
+        <div class="title">백령·대청 지질공원<br>스마트 일지</div>
+        <div class="subtitle">해설사 계정으로 로그인해주세요</div>
+        
+        <input type="text" id="my_id" placeholder="아이디 (예: admin)">
+        <input type="password" id="my_pw" placeholder="비밀번호">
+        
+        <button class="btn-login" onclick="sendLogin()">로그인</button>
+    </div>
 
     <script>
-        // [추가] 페이지가 열리자마자 도장이 있는지 확인합니다.
+        // 자동 로그인 체크
         const savedName = localStorage.getItem("user_name");
         if (savedName) {
-            // 이미 로그인한 적이 있다면 묻지도 따지지도 말고 메인으로 이동!
             location.href = "main.html";
         }
-        
+
         async function sendLogin() {
             const id = document.getElementById('my_id').value;
             const pw = document.getElementById('my_pw').value;
 
+            if(!id || !pw) {
+                alert("아이디와 비밀번호를 모두 입력해주세요.");
+                return;
+            }
+
             try {
-                // 주소 끝에 /가 붙지 않도록 주의하세요!
                 const res = await fetch('https://bdgeopark.onrender.com/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        uid: String(id),  // 문자로 변환해서 전송
-                        upw: String(pw)   // 문자로 변환해서 전송
-                    })
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ uid: String(id), upw: String(pw) })
                 });
 
                 if (res.ok) {
@@ -46,18 +108,12 @@
                     localStorage.setItem("user_name", data.name);
                     localStorage.setItem("user_role", data.role);
                     localStorage.setItem("user_island", data.island);
-
-                    alert(data.name + " 해설사님, 환영합니다!");
                     location.href = "main.html";
                 } else {
-                    // 서버가 왜 거절했는지 상세 내용을 가져옵니다.
-                    const errorData = await res.json();
-                    alert("실패 사유: " + JSON.stringify(errorData.detail));
+                    alert("로그인 실패: 아이디와 비밀번호를 확인해주세요.");
                 }
-
             } catch (error) {
-                console.error(error);
-                alert("서버 연결 실패! 인터넷 연결이나 주소를 확인하세요.");
+                alert("서버 연결 실패! 인터넷 상태를 확인하세요.");
             }
         }
     </script>
