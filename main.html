@@ -79,9 +79,13 @@
         .btn-act {
             width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 10px;
             font-family: 'Pretendard'; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .btn-in { background-color: #FEE500; }
         .btn-out { background-color: #EAEAEA; }
+        
+        /* 시간 표시용 글씨 스타일 */
+        .time-text { font-size: 0.85rem; font-weight: 400; color: #555; margin-top: 5px; }
 
         .logout {
             text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer;
@@ -103,8 +107,14 @@
     </div>
 
     <div id="attendance_area" class="attendance-section">
-        <button class="btn-act btn-in" onclick="sendAction('출근')">🟢 출근하기</button>
-        <button class="btn-act btn-out" onclick="sendAction('퇴근')">🔴 퇴근하기</button>
+        <button class="btn-act btn-in" onclick="sendAction('출근')">
+            <span>🟢 출근하기</span>
+            <div id="in_time_display" class="time-text"></div>
+        </button>
+        <button class="btn-act btn-out" onclick="sendAction('퇴근')">
+            <span>🔴 퇴근하기</span>
+            <div id="out_time_display" class="time-text"></div>
+        </button>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
@@ -119,32 +129,19 @@
         document.getElementById('name_display').innerText = `${userName} 님`;
         document.getElementById('role_display').innerText = `[${userRole}] ${userIsland} 거점센터`;
 
-        // 직책별 메뉴 리스트 정의
+        // 이전에 누른 시간 불러오기
+        const savedInTime = localStorage.getItem("last_in_time");
+        const savedOutTime = localStorage.getItem("last_out_time");
+        if (savedInTime) document.getElementById('in_time_display').innerText = `기록됨: ${savedInTime}`;
+        if (savedOutTime) document.getElementById('out_time_display').innerText = `기록됨: ${savedOutTime}`;
+
         const menuData = {
-            '해설사': [
-                '1. 출퇴근관리', 
-                '2. 안내소 운영일지 작성', 
-                '3. 활동계획서 작성', 
-                '4. 활동계획 변경'
-            ],
-            '조장': [
-                '1. 출퇴근관리', 
-                '2. 안내소 운영일지 작성', 
-                '3. 출퇴근 및 활동 현황 조회', 
-                '4. 활동계획서 작성', 
-                '5. 활동계획 변경', 
-                '6. 활동계획 및 변경 승인'
-            ],
-            '관리자': [
-                '1. 해설사 출퇴근 현황', 
-                '2. 해설사 활동 현황', 
-                '3. 활동계획 조회', 
-                '4. 통계'
-            ]
+            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경'],
+            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인'],
+            '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획 조회', '4. 통계']
         };
 
-        // 내 직책에 맞는 메뉴를 화면에 그리기
-        const myMenus = menuData[userRole] || menuData['해설사']; // 직책이 없으면 기본 해설사 메뉴
+        const myMenus = menuData[userRole] || menuData['해설사'];
         const container = document.getElementById('menu_container');
 
         myMenus.forEach(menu => {
@@ -172,9 +169,21 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: type })
                 });
+                
                 if (res.ok) {
-                    alert(`${type} 완료!`);
-                    document.getElementById('attendance_area').style.display = 'none';
+                    // 성공 시 현재 시간을 가져와서 화면에 표시하고 저장
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+                    if (type === '출근') {
+                        localStorage.setItem("last_in_time", timeStr);
+                        document.getElementById('in_time_display').innerText = `기록됨: ${timeStr}`;
+                    } else {
+                        localStorage.setItem("last_out_time", timeStr);
+                        document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`;
+                    }
+
+                    alert(`${type} 완료! (${timeStr})`);
                 } else {
                     alert("기록 실패!");
                 }
