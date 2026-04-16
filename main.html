@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Pretendard', sans-serif;
-            background-color: #F5F6F8; /* 카카오 채팅방 밖의 부드러운 배경색 */
+            background-color: #F5F6F8;
             margin: 0;
             display: flex;
             justify-content: center;
@@ -24,7 +24,7 @@
             width: 320px;
             text-align: center;
             box-sizing: border-box;
-            border-top: 6px solid #FEE500; /* 상단 포인트 */
+            border-top: 6px solid #FEE500;
         }
         .profile-img {
             width: 65px;
@@ -57,25 +57,25 @@
             gap: 12px;
         }
         .btn {
-            padding: 18px;
+            padding: 15px;
             border: none;
             border-radius: 14px;
-            font-size: 1.15rem;
-            font-weight: 700;
-            cursor: pointer;
             font-family: 'Pretendard', sans-serif;
+            cursor: pointer;
             transition: transform 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .btn:active { transform: scale(0.97); }
         
-        .btn-in { 
-            background-color: #FEE500; /* 카카오 옐로우 */
-            color: #191919;
-        }
-        .btn-out { 
-            background-color: #F2F2F2; /* 카카오 라이트그레이 */
-            color: #191919;
-        }
+        .btn-text { font-size: 1.15rem; font-weight: 700; }
+        .time-text { font-size: 0.85rem; margin-top: 4px; font-weight: 400; opacity: 0.8; }
+
+        .btn-in { background-color: #FEE500; color: #191919; }
+        .btn-out { background-color: #F2F2F2; color: #191919; }
+
         .logout {
             margin-top: 35px;
             font-size: 0.85rem;
@@ -89,13 +89,19 @@
 
     <div class="main-box">
         <div class="profile-img">🧑‍🌾</div>
-        
         <div id="name_display" class="greeting">해설사님</div>
         <div id="island_display" class="island-badge">소속 섬</div>
 
         <div class="btn-group">
-            <button class="btn btn-in" onclick="sendAction('출근')">출근하기</button>
-            <button class="btn btn-out" onclick="sendAction('퇴근')">퇴근하기</button>
+            <button class="btn btn-in" onclick="sendAction('출근')">
+                <span class="btn-text">출근하기</span>
+                <span id="in_time_display" class="time-text"></span>
+            </button>
+            
+            <button class="btn btn-out" onclick="sendAction('퇴근')">
+                <span class="btn-text">퇴근하기</span>
+                <span id="out_time_display" class="time-text"></span>
+            </button>
         </div>
 
         <div class="logout" onclick="logout()">로그아웃</div>
@@ -105,11 +111,18 @@
         const userName = localStorage.getItem("user_name");
         const userIsland = localStorage.getItem("user_island");
 
+        // 페이지 로드 시 정보 표시 및 저장된 시간 불러오기
         if (!userName) {
             location.href = "index.html";
         } else {
             document.getElementById('name_display').innerHTML = `${userName} <span style="font-weight:400;">해설사님</span>`;
             document.getElementById('island_display').innerText = `📍 ${userIsland} 거점센터`;
+            
+            // 기존에 저장된 출퇴근 시간이 있다면 표시
+            const savedInTime = localStorage.getItem("last_in_time");
+            const savedOutTime = localStorage.getItem("last_out_time");
+            if (savedInTime) document.getElementById('in_time_display').innerText = `기록됨: ${savedInTime}`;
+            if (savedOutTime) document.getElementById('out_time_display').innerText = `기록됨: ${savedOutTime}`;
         }
 
         async function sendAction(type) {
@@ -129,13 +142,24 @@
                 });
 
                 if (res.ok) {
-                    alert(`${type} 기록이 완료되었습니다!`);
+                    // 현재 시간을 포맷팅 (예: 오후 02:30)
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+                    if (type === '출근') {
+                        localStorage.setItem("last_in_time", timeStr);
+                        document.getElementById('in_time_display').innerText = `기록됨: ${timeStr}`;
+                    } else {
+                        localStorage.setItem("last_out_time", timeStr);
+                        document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`;
+                    }
+
+                    alert(`${type} 기록이 완료되었습니다! (${timeStr})`);
                 } else {
-                    const err = await res.json();
-                    alert("기록 실패: " + JSON.stringify(err.detail));
+                    alert("기록 실패! 다시 시도해 주세요.");
                 }
             } catch (error) {
-                alert("인터넷 상태를 확인해 주세요.");
+                alert("인터넷 연결을 확인해 주세요.");
             }
         }
 
