@@ -11,29 +11,17 @@
         .profile-icon { width: 50px; height: 50px; background-color: #FEE500; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-right: 15px; }
         .user-info .name { font-size: 1.2rem; font-weight: 800; }
         .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
-        
-        .menu-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; padding-left: 5px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        
-        .menu-card { background-color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); font-size: 1.05rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #EAEAEA; transition: all 0.2s; }
-        .menu-card:active { transform: scale(0.98); background-color: #FAFAFA; }
-        .menu-card::after { content: '>'; color: #CCC; font-weight: 300; }
-
-        /* 숨김 영역 공통 스타일 */
         .hidden-section { display: none; background-color: white; padding: 20px; border-radius: 16px; margin-top: 10px; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        
-        /* 버튼 스타일 */
-        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 10px; font-family: 'Pretendard'; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .btn-in { background-color: #FEE500; }
-        .btn-out { background-color: #F2F2F2; }
-        .time-text { font-size: 0.85rem; font-weight: 400; color: #555; margin-top: 5px; }
-
-        /* 입력 폼 스타일 */
+        .menu-card { background-color: white; padding: 20px; border-radius: 16px; margin-bottom: 12px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: #333; }
-        .form-group select, .form-group input { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 8px; font-family: 'Pretendard'; font-size: 1rem; box-sizing: border-box; }
-        .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 10px; }
-
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
+        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
+        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
+        .btn-act:active { transform: scale(0.98); }
+        .btn-in { background-color: #FEE500; color: #191919; }
+        .btn-move { background-color: #3498db; color: white; }
+        .btn-out { background-color: #EAEAEA; color: #191919; }
+        .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
@@ -47,45 +35,30 @@
         </div>
     </div>
 
-    <div class="menu-title">바로가기 메뉴</div>
-    <div id="menu_container" class="menu-grid"></div>
+    <div id="menu_container"></div>
 
     <div id="attendance_area" class="hidden-section">
-        <button class="btn-act btn-in" onclick="sendAction('출근')">
-            <span>🟢 출근하기</span>
-            <div id="in_time_display" class="time-text"></div>
-        </button>
-        <button class="btn-act btn-out" onclick="sendAction('퇴근')">
-            <span>🔴 퇴근하기</span>
-            <div id="out_time_display" class="time-text"></div>
-        </button>
+        <div class="form-group">
+            <label>📍 안내소 선택</label>
+            <select id="location_select">
+                <option value="거점센터">거점센터</option>
+                <option value="사곶안내소">사곶안내소</option>
+                <option value="두무진안내소">두무진안내소</option>
+                <option value="콩돌안내소">콩돌안내소</option>
+            </select>
+        </div>
+        <button class="btn-act btn-in" onclick="sendAction('출근')">출근하기</button>
+        <button class="btn-act btn-move" onclick="sendAction('이동')">이동하기 (장소변경)</button>
+        <button class="btn-act btn-out" onclick="sendAction('퇴근')">퇴근하기</button>
     </div>
 
     <div id="log_area" class="hidden-section">
-        <div class="form-group">
-            <label>시간 선택</label>
-            <select id="log_time">
-                </select>
-        </div>
-        <div class="form-group">
-            <label>공동해설 여부</label>
-            <select id="log_co">
-                <option value="X">X (단독해설)</option>
-                <option value="O">O (공동해설)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>탐방객 수 (명)</label>
-            <input type="number" id="log_visitors" value="0" min="0">
-        </div>
-        <div class="form-group">
-            <label>해설 청취자 수 (명)</label>
-            <input type="number" id="log_listeners" value="0" min="0">
-        </div>
-        <div class="form-group">
-            <label>해설 횟수 (회)</label>
-            <input type="number" id="log_count" value="0" min="0">
-        </div>
+        <div class="form-group"><label>시간 선택</label><select id="log_time"></select></div>
+        <div class="form-group"><label>탐방객 수 (명)</label><input type="number" id="log_visitors" value="0"></div>
+        <div class="form-group"><label>청취자 수 (명)</label><input type="number" id="log_listeners" value="0"></div>
+        <div class="form-group"><label>해설 횟수 (회)</label><input type="number" id="log_count" value="0"></div>
+        <div class="form-group"><label>공동해설 여부</label><select id="log_co"><option value="X">X (단독)</option><option value="O">O (공동)</option></select></div>
+        <div class="form-group"><label>📝 특이사항</label><textarea id="log_remarks" rows="3" placeholder="기타 전달사항을 입력하세요"></textarea></div>
         <button class="btn-submit" onclick="submitLog()">일지 저장하기</button>
     </div>
 
@@ -97,23 +70,13 @@
         const userIsland = localStorage.getItem("user_island");
 
         if (!userName) location.href = "index.html";
+        document.getElementById('name_display').innerText = userName + " 님";
+        document.getElementById('role_display').innerText = `[${userRole}] ${userIsland}`;
 
-        document.getElementById('name_display').innerText = `${userName} 님`;
-        document.getElementById('role_display').innerText = `[${userRole}] ${userIsland} 거점센터`;
-
-        const savedInTime = localStorage.getItem("last_in_time");
-        const savedOutTime = localStorage.getItem("last_out_time");
-        if (savedInTime) document.getElementById('in_time_display').innerText = `기록됨: ${savedInTime}`;
-        if (savedOutTime) document.getElementById('out_time_display').innerText = `기록됨: ${savedOutTime}`;
-
-        // 시간 선택창에 06시 ~ 19시 채워넣기
-        const timeSelect = document.getElementById('log_time');
+        const logTime = document.getElementById('log_time');
         for(let i=6; i<=19; i++) {
-            let hour = i < 10 ? '0' + i : i;
-            let option = document.createElement('option');
-            option.value = `${hour}:00`;
-            option.text = `${hour}:00`;
-            timeSelect.appendChild(option);
+            let h = i < 10 ? '0'+i : i;
+            logTime.add(new Option(`${h}:00`, `${h}:00`));
         }
 
         const menuData = {
@@ -122,111 +85,54 @@
             '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획 조회', '4. 통계']
         };
 
-        const myMenus = menuData[userRole] || menuData['해설사'];
         const container = document.getElementById('menu_container');
-
-        myMenus.forEach(menu => {
-            const div = document.createElement('div');
-            div.className = 'menu-card';
-            div.innerText = menu;
-            div.onclick = () => handleMenuClick(menu);
-            container.appendChild(div);
+        (menuData[userRole] || menuData['해설사']).forEach(m => {
+            const d = document.createElement('div');
+            d.className = 'menu-card'; d.innerText = m;
+            d.onclick = () => {
+                document.getElementById('attendance_area').style.display = m.includes('1') ? 'block' : 'none';
+                document.getElementById('log_area').style.display = m.includes('2') ? 'block' : 'none';
+            };
+            container.appendChild(d);
         });
 
-        function handleMenuClick(menuName) {
-            // 모든 숨김 영역 닫기
-            document.getElementById('attendance_area').style.display = 'none';
-            document.getElementById('log_area').style.display = 'none';
-
-            // 누른 메뉴만 열기
-            if (menuName.includes('출퇴근관리')) {
-                document.getElementById('attendance_area').style.display = 'block';
-            } else if (menuName.includes('운영일지 작성')) {
-                document.getElementById('log_area').style.display = 'block';
-            } else {
-                alert(`[${menuName}] 기능은 현재 준비 중입니다.`);
-            }
-        }
-
-        // 출퇴근 기록 함수 (유지)
-        async function sendAction(type) {
-            if (!confirm(`[${type}] 기록하시겠습니까?`)) return;
+        async function sendAction(action) {
+            const loc = document.getElementById('location_select').value;
+            if(!confirm(`[${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
             try {
                 const res = await fetch('https://bdgeopark.onrender.com/record', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: type })
+                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: action, location: loc })
                 });
-                
-                if (res.ok) {
-                    const now = new Date();
-                    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
-                    if (type === '출근') {
-                        localStorage.setItem("last_in_time", timeStr);
-                        document.getElementById('in_time_display').innerText = `기록됨: ${timeStr}`;
-                    } else {
-                        localStorage.setItem("last_out_time", timeStr);
-                        document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`;
-                    }
-                    alert(`${type} 완료! (${timeStr})`);
-                } else {
-                    alert("기록 실패!");
-                }
-            } catch (error) {
-                alert("통신 오류!");
-            }
+                if(res.ok) alert(action + " 완료!");
+                else alert("기록에 실패했습니다.");
+            } catch (e) { alert("서버 연결 오류"); }
         }
 
-        // 운영일지 작성 제출 함수 (새로 추가됨)
         async function submitLog() {
-            const time = document.getElementById('log_time').value;
-            const co = document.getElementById('log_co').value;
-            const visitors = document.getElementById('log_visitors').value;
-            const listeners = document.getElementById('log_listeners').value;
-            const count = document.getElementById('log_count').value;
-
-            if (!confirm(`${time} 기준 운영일지를 저장하시겠습니까?`)) return;
-
+            if(!confirm("운영일지를 저장하시겠습니까?")) return;
             try {
                 const res = await fetch('https://bdgeopark.onrender.com/log_operation', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        name: userName, 
-                        island: userIsland, 
-                        role: userRole, 
-                        target_time: time,
-                        co_commentary: co,
-                        visitors: parseInt(visitors),
-                        listeners: parseInt(listeners),
-                        count: parseInt(count)
+                    body: JSON.stringify({
+                        name: userName, island: userIsland, role: userRole,
+                        target_time: document.getElementById('log_time').value,
+                        visitors: parseInt(document.getElementById('log_visitors').value),
+                        listeners: parseInt(document.getElementById('log_listeners').value),
+                        count: parseInt(document.getElementById('log_count').value),
+                        co_commentary: document.getElementById('log_co').value,
+                        remarks: document.getElementById('log_remarks').value
                     })
                 });
-
-                if (res.ok) {
-                    alert("운영일지가 성공적으로 저장되었습니다!");
-                    document.getElementById('log_area').style.display = 'none'; // 저장 후 폼 숨기기
-                    
-                    // 입력창 초기화
-                    document.getElementById('log_visitors').value = 0;
-                    document.getElementById('log_listeners').value = 0;
-                    document.getElementById('log_count').value = 0;
-                    document.getElementById('log_co').value = "X";
-                } else {
-                    const err = await res.json();
-                    alert("저장 실패: " + err.detail);
-                }
-            } catch (error) {
-                alert("서버 연결 실패! 인터넷 상태를 확인해 주세요.");
-            }
+                if(res.ok) { alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; }
+                else alert("저장 실패");
+            } catch (e) { alert("서버 연결 오류"); }
         }
 
         function logout() {
-            if(confirm("로그아웃 하시겠습니까?")) {
-                localStorage.clear();
-                location.href = "index.html";
-            }
+            if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; }
         }
     </script>
 </body>
