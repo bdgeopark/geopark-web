@@ -3,163 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>활동일지 기록</title>
+    <title>지질공원 통합관리 시스템</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <style>
         body {
             font-family: 'Pretendard', sans-serif;
             background-color: #F5F6F8;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            padding: 20px;
             color: #191919;
-        }
-        .main-box {
-            background-color: white;
-            padding: 45px 30px;
-            border-radius: 28px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            width: 320px;
-            text-align: center;
             box-sizing: border-box;
-            border-top: 6px solid #FEE500;
         }
-        .profile-img {
-            width: 65px;
-            height: 65px;
+        .header {
+            background-color: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            border-left: 6px solid #FEE500;
+        }
+        .profile-icon {
+            width: 50px;
+            height: 50px;
             background-color: #FEE500;
-            border-radius: 24px;
-            margin: 0 auto 15px;
+            border-radius: 18px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
+            margin-right: 15px;
         }
-        .greeting {
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
+        .user-info .name { font-size: 1.2rem; font-weight: 800; }
+        .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
+        
+        .menu-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-left: 5px;
         }
-        .island-badge {
-            display: inline-block;
-            color: #888;
-            font-size: 0.95rem;
-            margin-bottom: 30px;
-            margin-top: 5px;
-            font-weight: 500;
-        }
-        .btn-group {
-            display: flex;
-            flex-direction: column;
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 12px;
         }
-        .btn {
-            padding: 15px;
-            border: none;
-            border-radius: 14px;
-            font-family: 'Pretendard', sans-serif;
-            cursor: pointer;
-            transition: transform 0.1s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .btn:active { transform: scale(0.97); }
         
-        .btn-text { font-size: 1.15rem; font-weight: 700; }
-        .time-text { font-size: 0.85rem; margin-top: 4px; font-weight: 400; opacity: 0.8; }
+        .menu-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #EAEAEA;
+            transition: all 0.2s;
+        }
+        .menu-card:active { transform: scale(0.98); background-color: #FAFAFA; }
+        .menu-card::after { content: '>'; color: #CCC; font-weight: 300; }
 
-        .btn-in { background-color: #FEE500; color: #191919; }
-        .btn-out { background-color: #F2F2F2; color: #191919; }
+        .attendance-section {
+            display: none;
+            background-color: #FAFAFA;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 1px dashed #CCC;
+        }
+        .btn-act {
+            width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 10px;
+            font-family: 'Pretendard'; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+        }
+        .btn-in { background-color: #FEE500; }
+        .btn-out { background-color: #EAEAEA; }
 
         .logout {
-            margin-top: 35px;
-            font-size: 0.85rem;
-            color: #999;
-            text-decoration: underline;
-            cursor: pointer;
+            text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="main-box">
-        <div class="profile-img">🧑‍🌾</div>
-        <div id="name_display" class="greeting">해설사님</div>
-        <div id="island_display" class="island-badge">소속 섬</div>
-
-        <div class="btn-group">
-            <button class="btn btn-in" onclick="sendAction('출근')">
-                <span class="btn-text">출근하기</span>
-                <span id="in_time_display" class="time-text"></span>
-            </button>
-            
-            <button class="btn btn-out" onclick="sendAction('퇴근')">
-                <span class="btn-text">퇴근하기</span>
-                <span id="out_time_display" class="time-text"></span>
-            </button>
+    <div class="header">
+        <div class="profile-icon">👤</div>
+        <div class="user-info">
+            <div id="name_display" class="name">로딩중...</div>
+            <div id="role_display" class="role">직책 / 소속</div>
         </div>
-
-        <div class="logout" onclick="logout()">로그아웃</div>
     </div>
+
+    <div class="menu-title">바로가기 메뉴</div>
+    <div id="menu_container" class="menu-grid">
+    </div>
+
+    <div id="attendance_area" class="attendance-section">
+        <button class="btn-act btn-in" onclick="sendAction('출근')">🟢 출근하기</button>
+        <button class="btn-act btn-out" onclick="sendAction('퇴근')">🔴 퇴근하기</button>
+    </div>
+
+    <div class="logout" onclick="logout()">로그아웃</div>
 
     <script>
         const userName = localStorage.getItem("user_name");
+        const userRole = localStorage.getItem("user_role");
         const userIsland = localStorage.getItem("user_island");
 
-        // 페이지 로드 시 정보 표시 및 저장된 시간 불러오기
-        if (!userName) {
-            location.href = "index.html";
-        } else {
-            document.getElementById('name_display').innerHTML = `${userName} <span style="font-weight:400;">해설사님</span>`;
-            document.getElementById('island_display').innerText = `📍 ${userIsland} 거점센터`;
-            
-            // 기존에 저장된 출퇴근 시간이 있다면 표시
-            const savedInTime = localStorage.getItem("last_in_time");
-            const savedOutTime = localStorage.getItem("last_out_time");
-            if (savedInTime) document.getElementById('in_time_display').innerText = `기록됨: ${savedInTime}`;
-            if (savedOutTime) document.getElementById('out_time_display').innerText = `기록됨: ${savedOutTime}`;
+        if (!userName) location.href = "index.html";
+
+        document.getElementById('name_display').innerText = `${userName} 님`;
+        document.getElementById('role_display').innerText = `[${userRole}] ${userIsland} 거점센터`;
+
+        // 직책별 메뉴 리스트 정의
+        const menuData = {
+            '해설사': [
+                '1. 출퇴근관리', 
+                '2. 안내소 운영일지 작성', 
+                '3. 활동계획서 작성', 
+                '4. 활동계획 변경'
+            ],
+            '조장': [
+                '1. 출퇴근관리', 
+                '2. 안내소 운영일지 작성', 
+                '3. 출퇴근 및 활동 현황 조회', 
+                '4. 활동계획서 작성', 
+                '5. 활동계획 변경', 
+                '6. 활동계획 및 변경 승인'
+            ],
+            '관리자': [
+                '1. 해설사 출퇴근 현황', 
+                '2. 해설사 활동 현황', 
+                '3. 활동계획 조회', 
+                '4. 통계'
+            ]
+        };
+
+        // 내 직책에 맞는 메뉴를 화면에 그리기
+        const myMenus = menuData[userRole] || menuData['해설사']; // 직책이 없으면 기본 해설사 메뉴
+        const container = document.getElementById('menu_container');
+
+        myMenus.forEach(menu => {
+            const div = document.createElement('div');
+            div.className = 'menu-card';
+            div.innerText = menu;
+            div.onclick = () => handleMenuClick(menu);
+            container.appendChild(div);
+        });
+
+        function handleMenuClick(menuName) {
+            if (menuName.includes('출퇴근관리')) {
+                const area = document.getElementById('attendance_area');
+                area.style.display = area.style.display === 'block' ? 'none' : 'block';
+            } else {
+                alert(`[${menuName}] 기능은 현재 준비 중입니다.`);
+            }
         }
 
         async function sendAction(type) {
-            const role = localStorage.getItem("user_role");
-            if (!confirm(`${userName} 해설사님, [${type}] 기록하시겠습니까?`)) return;
-
+            if (!confirm(`[${type}] 기록하시겠습니까?`)) return;
             try {
                 const res = await fetch('https://bdgeopark.onrender.com/record', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        name: userName,
-                        island: userIsland,
-                        role: role,
-                        action: type
-                    })
+                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: type })
                 });
-
                 if (res.ok) {
-                    // 현재 시간을 포맷팅 (예: 오후 02:30)
-                    const now = new Date();
-                    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-
-                    if (type === '출근') {
-                        localStorage.setItem("last_in_time", timeStr);
-                        document.getElementById('in_time_display').innerText = `기록됨: ${timeStr}`;
-                    } else {
-                        localStorage.setItem("last_out_time", timeStr);
-                        document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`;
-                    }
-
-                    alert(`${type} 기록이 완료되었습니다! (${timeStr})`);
+                    alert(`${type} 완료!`);
+                    document.getElementById('attendance_area').style.display = 'none';
                 } else {
-                    alert("기록 실패! 다시 시도해 주세요.");
+                    alert("기록 실패!");
                 }
             } catch (error) {
-                alert("인터넷 연결을 확인해 주세요.");
+                alert("통신 오류!");
             }
         }
 
