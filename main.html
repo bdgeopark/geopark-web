@@ -13,15 +13,19 @@
         .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
         .hidden-section { display: none; background-color: white; padding: 20px; border-radius: 16px; margin-top: 10px; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .menu-card { background-color: white; padding: 20px; border-radius: 16px; margin-bottom: 12px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
         select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
-        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s; }
+        
+        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .btn-act:active { transform: scale(0.98); }
         .btn-in { background-color: #FEE500; color: #191919; }
         .btn-move { background-color: #3498db; color: white; }
         .btn-out { background-color: #EAEAEA; color: #191919; }
         .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
+        
+        .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
@@ -41,15 +45,17 @@
         <div class="form-group">
             <label>📍 안내소 선택</label>
             <select id="location_select">
-                <option value="거점센터">거점센터</option>
-                <option value="사곶안내소">사곶안내소</option>
-                <option value="두무진안내소">두무진안내소</option>
-                <option value="콩돌안내소">콩돌안내소</option>
-            </select>
+                </select>
         </div>
-        <button class="btn-act btn-in" onclick="sendAction('출근')">출근하기</button>
-        <button class="btn-act btn-move" onclick="sendAction('이동')">이동하기 (장소변경)</button>
-        <button class="btn-act btn-out" onclick="sendAction('퇴근')">퇴근하기</button>
+        <button class="btn-act btn-in" onclick="sendAction('출근')">
+            <span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div>
+        </button>
+        <button class="btn-act btn-move" onclick="sendAction('이동')">
+            <span>🔵 이동하기 (장소변경)</span><div id="move_time_display" class="time-text"></div>
+        </button>
+        <button class="btn-act btn-out" onclick="sendAction('퇴근')">
+            <span>🔴 퇴근하기</span><div id="out_time_display" class="time-text"></div>
+        </button>
     </div>
 
     <div id="log_area" class="hidden-section">
@@ -73,10 +79,32 @@
         document.getElementById('name_display').innerText = userName + " 님";
         document.getElementById('role_display').innerText = `[${userRole}] ${userIsland}`;
 
+        // 1. 저장된 출퇴근 시간 불러오기
+        if (localStorage.getItem("last_in_time")) document.getElementById('in_time_display').innerText = `기록됨: ${localStorage.getItem("last_in_time")}`;
+        if (localStorage.getItem("last_move_time")) document.getElementById('move_time_display').innerText = `기록됨: ${localStorage.getItem("last_move_time")}`;
+        if (localStorage.getItem("last_out_time")) document.getElementById('out_time_display').innerText = `기록됨: ${localStorage.getItem("last_out_time")}`;
+
+        // 2. 소속 섬에 맞춰 안내소 목록 자동 세팅
+        const locSelect = document.getElementById('location_select');
+        let myLocations = [];
+        if (userIsland.includes('백령')) {
+            myLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
+        } else if (userIsland.includes('대청')) {
+            myLocations = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
+        } else if (userIsland.includes('소청')) {
+            myLocations = ['탑동', '분바위'];
+        } else {
+            myLocations = ['거점센터']; // 혹시 섬 정보가 없을 때를 대비한 기본값
+        }
+        myLocations.forEach(loc => locSelect.add(new Option(loc, loc)));
+
+        // 3. 운영일지 시간 옵션 생성 (06:00 ~ 07:00 형식)
         const logTime = document.getElementById('log_time');
         for(let i=6; i<=19; i++) {
-            let h = i < 10 ? '0'+i : i;
-            logTime.add(new Option(`${h}:00`, `${h}:00`));
+            let startHour = i < 10 ? '0'+i : i;
+            let endHour = (i+1) < 10 ? '0'+(i+1) : (i+1);
+            let timeStr = `${startHour}:00 ~ ${endHour}:00`;
+            logTime.add(new Option(timeStr, timeStr));
         }
 
         const menuData = {
@@ -105,8 +133,25 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: action, location: loc })
                 });
-                if(res.ok) alert(action + " 완료!");
-                else alert("기록에 실패했습니다.");
+                
+                if(res.ok) {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+                    
+                    if (action === '출근') {
+                        localStorage.setItem("last_in_time", timeStr);
+                        document.getElementById('in_time_display').innerText = `기록됨: ${timeStr}`;
+                    } else if (action === '이동') {
+                        localStorage.setItem("last_move_time", timeStr);
+                        document.getElementById('move_time_display').innerText = `기록됨: ${timeStr}`;
+                    } else if (action === '퇴근') {
+                        localStorage.setItem("last_out_time", timeStr);
+                        document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`;
+                    }
+                    alert(action + " 완료!");
+                } else {
+                    alert("기록에 실패했습니다.");
+                }
             } catch (e) { alert("서버 연결 오류"); }
         }
 
