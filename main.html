@@ -6,90 +6,35 @@
     <title>지질공원 통합관리 시스템</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <style>
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #F5F6F8;
-            margin: 0;
-            padding: 20px;
-            color: #191919;
-            box-sizing: border-box;
-        }
-        .header {
-            background-color: white;
-            padding: 25px 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            border-left: 6px solid #FEE500;
-        }
-        .profile-icon {
-            width: 50px;
-            height: 50px;
-            background-color: #FEE500;
-            border-radius: 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            margin-right: 15px;
-        }
+        body { font-family: 'Pretendard', sans-serif; background-color: #F5F6F8; margin: 0; padding: 20px; color: #191919; box-sizing: border-box; }
+        .header { background-color: white; padding: 25px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; border-left: 6px solid #FEE500; }
+        .profile-icon { width: 50px; height: 50px; background-color: #FEE500; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-right: 15px; }
         .user-info .name { font-size: 1.2rem; font-weight: 800; }
         .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
         
-        .menu-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            padding-left: 5px;
-        }
+        .menu-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; padding-left: 5px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-        }
-        
-        .menu-card {
-            background-color: white;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-            font-size: 1.05rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #EAEAEA;
-            transition: all 0.2s;
-        }
+        .menu-card { background-color: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); font-size: 1.05rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid #EAEAEA; transition: all 0.2s; }
         .menu-card:active { transform: scale(0.98); background-color: #FAFAFA; }
         .menu-card::after { content: '>'; color: #CCC; font-weight: 300; }
 
-        .attendance-section {
-            display: none;
-            background-color: #FAFAFA;
-            padding: 15px;
-            border-radius: 12px;
-            margin-top: 10px;
-            border: 1px dashed #CCC;
-        }
-        .btn-act {
-            width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 10px;
-            font-family: 'Pretendard'; font-size: 1.1rem; font-weight: 700; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .btn-in { background-color: #FEE500; }
-        .btn-out { background-color: #EAEAEA; }
+        /* 숨김 영역 공통 스타일 */
+        .hidden-section { display: none; background-color: white; padding: 20px; border-radius: 16px; margin-top: 10px; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         
-        /* 시간 표시용 글씨 스타일 */
+        /* 버튼 스타일 */
+        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 10px; font-family: 'Pretendard'; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .btn-in { background-color: #FEE500; }
+        .btn-out { background-color: #F2F2F2; }
         .time-text { font-size: 0.85rem; font-weight: 400; color: #555; margin-top: 5px; }
 
-        .logout {
-            text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer;
-        }
+        /* 입력 폼 스타일 */
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; color: #333; }
+        .form-group select, .form-group input { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 8px; font-family: 'Pretendard'; font-size: 1rem; box-sizing: border-box; }
+        .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 10px; }
+
+        .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -103,10 +48,9 @@
     </div>
 
     <div class="menu-title">바로가기 메뉴</div>
-    <div id="menu_container" class="menu-grid">
-    </div>
+    <div id="menu_container" class="menu-grid"></div>
 
-    <div id="attendance_area" class="attendance-section">
+    <div id="attendance_area" class="hidden-section">
         <button class="btn-act btn-in" onclick="sendAction('출근')">
             <span>🟢 출근하기</span>
             <div id="in_time_display" class="time-text"></div>
@@ -115,6 +59,34 @@
             <span>🔴 퇴근하기</span>
             <div id="out_time_display" class="time-text"></div>
         </button>
+    </div>
+
+    <div id="log_area" class="hidden-section">
+        <div class="form-group">
+            <label>시간 선택</label>
+            <select id="log_time">
+                </select>
+        </div>
+        <div class="form-group">
+            <label>공동해설 여부</label>
+            <select id="log_co">
+                <option value="X">X (단독해설)</option>
+                <option value="O">O (공동해설)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>탐방객 수 (명)</label>
+            <input type="number" id="log_visitors" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label>해설 청취자 수 (명)</label>
+            <input type="number" id="log_listeners" value="0" min="0">
+        </div>
+        <div class="form-group">
+            <label>해설 횟수 (회)</label>
+            <input type="number" id="log_count" value="0" min="0">
+        </div>
+        <button class="btn-submit" onclick="submitLog()">일지 저장하기</button>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
@@ -129,11 +101,20 @@
         document.getElementById('name_display').innerText = `${userName} 님`;
         document.getElementById('role_display').innerText = `[${userRole}] ${userIsland} 거점센터`;
 
-        // 이전에 누른 시간 불러오기
         const savedInTime = localStorage.getItem("last_in_time");
         const savedOutTime = localStorage.getItem("last_out_time");
         if (savedInTime) document.getElementById('in_time_display').innerText = `기록됨: ${savedInTime}`;
         if (savedOutTime) document.getElementById('out_time_display').innerText = `기록됨: ${savedOutTime}`;
+
+        // 시간 선택창에 06시 ~ 19시 채워넣기
+        const timeSelect = document.getElementById('log_time');
+        for(let i=6; i<=19; i++) {
+            let hour = i < 10 ? '0' + i : i;
+            let option = document.createElement('option');
+            option.value = `${hour}:00`;
+            option.text = `${hour}:00`;
+            timeSelect.appendChild(option);
+        }
 
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경'],
@@ -153,14 +134,21 @@
         });
 
         function handleMenuClick(menuName) {
+            // 모든 숨김 영역 닫기
+            document.getElementById('attendance_area').style.display = 'none';
+            document.getElementById('log_area').style.display = 'none';
+
+            // 누른 메뉴만 열기
             if (menuName.includes('출퇴근관리')) {
-                const area = document.getElementById('attendance_area');
-                area.style.display = area.style.display === 'block' ? 'none' : 'block';
+                document.getElementById('attendance_area').style.display = 'block';
+            } else if (menuName.includes('운영일지 작성')) {
+                document.getElementById('log_area').style.display = 'block';
             } else {
                 alert(`[${menuName}] 기능은 현재 준비 중입니다.`);
             }
         }
 
+        // 출퇴근 기록 함수 (유지)
         async function sendAction(type) {
             if (!confirm(`[${type}] 기록하시겠습니까?`)) return;
             try {
@@ -171,7 +159,6 @@
                 });
                 
                 if (res.ok) {
-                    // 성공 시 현재 시간을 가져와서 화면에 표시하고 저장
                     const now = new Date();
                     const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
@@ -182,13 +169,56 @@
                         localStorage.setItem("last_out_time", timeStr);
                         document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`;
                     }
-
                     alert(`${type} 완료! (${timeStr})`);
                 } else {
                     alert("기록 실패!");
                 }
             } catch (error) {
                 alert("통신 오류!");
+            }
+        }
+
+        // 운영일지 작성 제출 함수 (새로 추가됨)
+        async function submitLog() {
+            const time = document.getElementById('log_time').value;
+            const co = document.getElementById('log_co').value;
+            const visitors = document.getElementById('log_visitors').value;
+            const listeners = document.getElementById('log_listeners').value;
+            const count = document.getElementById('log_count').value;
+
+            if (!confirm(`${time} 기준 운영일지를 저장하시겠습니까?`)) return;
+
+            try {
+                const res = await fetch('https://bdgeopark.onrender.com/log_operation', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        name: userName, 
+                        island: userIsland, 
+                        role: userRole, 
+                        target_time: time,
+                        co_commentary: co,
+                        visitors: parseInt(visitors),
+                        listeners: parseInt(listeners),
+                        count: parseInt(count)
+                    })
+                });
+
+                if (res.ok) {
+                    alert("운영일지가 성공적으로 저장되었습니다!");
+                    document.getElementById('log_area').style.display = 'none'; // 저장 후 폼 숨기기
+                    
+                    // 입력창 초기화
+                    document.getElementById('log_visitors').value = 0;
+                    document.getElementById('log_listeners').value = 0;
+                    document.getElementById('log_count').value = 0;
+                    document.getElementById('log_co').value = "X";
+                } else {
+                    const err = await res.json();
+                    alert("저장 실패: " + err.detail);
+                }
+            } catch (error) {
+                alert("서버 연결 실패! 인터넷 상태를 확인해 주세요.");
             }
         }
 
