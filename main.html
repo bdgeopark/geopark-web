@@ -54,9 +54,18 @@
             const role = localStorage.getItem("user_role");
             const island = localStorage.getItem("user_island");
 
-            if (!confirm(name + " 해설사님, [" + type + "] 기록하시겠습니까?")) return;
+            // 로그인 정보가 없으면 튕겨내기
+            if (!name) {
+                alert("로그인 정보가 없습니다. 다시 로그인해 주세요.");
+                location.href = "index.html";
+                return;
+            }
+
+            // [확인 창] 예/아니오 선택
+            if (!confirm(name + " 해설사님, [" + type + "] 하시겠습니까?")) return;
 
             try {
+                // 렌더 서버 주소로 전송
                 const res = await fetch('https://bdgeopark.onrender.com/record', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -64,17 +73,18 @@
                         name: name,
                         island: island,
                         role: role,
-                        action: type // "출근" 또는 "퇴근"이 '특이사항' 컬럼으로 들어갑니다.
+                        action: type // "출근" 또는 "퇴근"
                     })
                 });
 
                 if (res.ok) {
-                    alert(type + " 기록 완료!");
+                    alert(type + " 기록이 완료되었습니다! (구글 시트 확인)");
                 } else {
-                    alert("기록 실패!");
+                    const err = await res.json();
+                    alert("실패: " + JSON.stringify(err.detail));
                 }
             } catch (error) {
-                alert("네트워크 오류!");
+                alert("서버와 연결할 수 없습니다. 인터넷 상태를 확인해 주세요.");
             }
         }
     </script>
