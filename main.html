@@ -11,18 +11,13 @@
         .profile-icon { width: 50px; height: 50px; background-color: #FEE500; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-right: 15px; }
         .user-info .name { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
         .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
-        
-        /* 현재 안내소 뱃지 스타일 */
         .current-badge { background-color: #3498db; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
-
         .hidden-section { display: none; background-color: white; padding: 20px; border-radius: 16px; margin-top: 10px; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .menu-card { background-color: white; padding: 20px; border-radius: 16px; margin-bottom: 12px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
         select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
         select:disabled { background-color: #EEEEEE; color: #999; }
-        
         .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .btn-act:active { transform: scale(0.98); }
         .btn-in { background-color: #FEE500; color: #191919; }
@@ -30,10 +25,8 @@
         .btn-out { background-color: #EAEAEA; color: #191919; }
         .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
         .btn-submit:disabled { background-color: #CCC; cursor: not-allowed; }
-        
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
-        
         #stats_group { transition: all 0.3s; }
         .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
     </style>
@@ -58,12 +51,10 @@
             <label>📍 기록할 안내소 선택</label>
             <select id="location_select"></select>
         </div>
-        
         <div class="time-input-wrap">
             <label style="font-size: 0.8rem; font-weight: 600; color:#555; display:block; margin-bottom:5px;">⏱ 기록할 시간 (직접 수정 가능)</label>
             <input type="time" id="action_time_input">
         </div>
-
         <button class="btn-act btn-in" onclick="sendAction('출근')">
             <span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div>
         </button>
@@ -80,7 +71,6 @@
             <label>📍 작성할 안내소</label>
             <select id="log_location_select"></select>
         </div>
-
         <div class="form-group">
             <label>시간 선택</label>
             <select id="log_time"></select>
@@ -89,13 +79,13 @@
         <div class="form-group">
             <label>공동해설 여부</label>
             <select id="log_co">
-                <option value="X">X (단독해설 - 실적 입력)</option>
-                <option value="O">O (공동해설 - 실적 면제)</option>
+                <option value="X">X (단독해설 - 실적 직접 입력)</option>
+                <option value="O">O (공동해설 - 나는 실적 0, 상대가 입력)</option>
             </select>
         </div>
 
         <div class="form-group" id="co_guide_group" style="display: none;">
-            <label>👥 공동해설자 선택 (오늘 이 안내소 근무자)</label>
+            <label>👥 실적을 대신 입력할 동료 선택</label>
             <select id="log_co_guide">
                 <option value="">해설사 확인 중...</option>
             </select>
@@ -123,7 +113,6 @@
         document.getElementById('name_display').innerText = userName + " 님";
         document.getElementById('role_display').innerText = `[${userRole}] ${userIsland}`;
         
-        // 현재 위치 뱃지 업데이트
         function updateCurrentLocBadge() {
             const badge = document.getElementById('current_loc_badge');
             badge.innerText = currentLoc;
@@ -135,7 +124,6 @@
         if (localStorage.getItem("last_move_time")) document.getElementById('move_time_display').innerText = `기록됨: ${localStorage.getItem("last_move_time")}`;
         if (localStorage.getItem("last_out_time")) document.getElementById('out_time_display').innerText = `기록됨: ${localStorage.getItem("last_out_time")}`;
 
-        // 안내소 목록 생성
         const locSelect = document.getElementById('location_select');
         const logLocSelect = document.getElementById('log_location_select');
         let myLocations = [];
@@ -149,12 +137,9 @@
             logLocSelect.add(new Option(loc, loc));
         });
 
-        // 켜자마자 현재 시간 세팅
         function setCurrentTimeInput() {
             const now = new Date();
-            let hh = String(now.getHours()).padStart(2, '0');
-            let mm = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('action_time_input').value = `${hh}:${mm}`;
+            document.getElementById('action_time_input').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         }
 
         const logTime = document.getElementById('log_time');
@@ -178,16 +163,15 @@
                 document.getElementById('attendance_area').style.display = m.includes('1') ? 'block' : 'none';
                 document.getElementById('log_area').style.display = m.includes('2') ? 'block' : 'none';
                 
-                if(m.includes('1')) setCurrentTimeInput(); // 출퇴근 탭 열 때 현재 시간 자동세팅
+                if(m.includes('1')) setCurrentTimeInput();
                 if(m.includes('2')) {
-                    if(currentLoc !== "미출근") logLocSelect.value = currentLoc; // 기본값을 현재 위치로 세팅
+                    if(currentLoc !== "미출근") logLocSelect.value = currentLoc;
                     checkDuplicateAndLock();
                 }
             };
             container.appendChild(d);
         });
 
-        // 중복 확인
         document.getElementById('log_time').addEventListener('change', checkDuplicateAndLock);
         document.getElementById('log_location_select').addEventListener('change', checkDuplicateAndLock);
         document.getElementById('log_co').addEventListener('change', updateCoGuideUI);
@@ -202,20 +186,34 @@
                 const res = await fetch(`https://bdgeopark.onrender.com/check_co_status?name=${encodeURIComponent(userName)}&target_time=${encodeURIComponent(selectedTime)}`);
                 const data = await res.json();
 
-                if (data.status === 'exists') {
-                    coSelect.innerHTML = '<option value="○">○ (공동해설 자동등록됨)</option>';
+                if (data.status === 'already_logged') {
+                    // 본인이 이미 일지를 작성한 경우
+                    coSelect.innerHTML = '<option value="">이미 작성 완료</option>';
                     coSelect.disabled = true;
                     statsGroup.style.display = 'none';
                     document.getElementById('co_guide_group').style.display = 'none';
                     submitBtn.disabled = true;
-                    submitBtn.innerText = "동료가 이미 공동해설로 기록했습니다";
+                    submitBtn.innerText = "이 시간대는 이미 작성했습니다";
+                    submitBtn.style.backgroundColor = "#CCC";
+                } else if (data.status === 'designated') {
+                    // 테스트 1이 나(테스트 2)를 지목한 경우! -> 실적 입력창을 열어줌
+                    coSelect.innerHTML = `<option value="○">○ (${data.designated_by} 님이 공동해설 지정함)</option>`;
+                    coSelect.disabled = true;
+                    coSelect.value = "○";
+                    statsGroup.style.display = 'block'; // 숫자 입력할 수 있게 보임!
+                    document.getElementById('co_guide_group').style.display = 'none';
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "실적 입력 후 저장하기";
+                    submitBtn.style.backgroundColor = "#3C1E1E";
                 } else {
+                    // 아무 일도 없는 정상 상태
                     if (coSelect.disabled) {
-                        coSelect.innerHTML = '<option value="X">X (단독해설 - 실적 입력)</option><option value="O">O (공동해설 - 실적 면제)</option>';
+                        coSelect.innerHTML = '<option value="X">X (단독해설 - 실적 직접 입력)</option><option value="O">O (공동해설 - 나는 실적 0, 상대가 입력)</option>';
                         coSelect.disabled = false;
                         coSelect.value = "X";
                         submitBtn.disabled = false;
                         submitBtn.innerText = "일지 저장하기";
+                        submitBtn.style.backgroundColor = "#3C1E1E";
                     }
                     updateCoGuideUI();
                 }
@@ -230,26 +228,24 @@
             if (isCo) {
                 const loc = document.getElementById('log_location_select').value;
                 const coGuideSelect = document.getElementById('log_co_guide');
-                coGuideSelect.innerHTML = '<option value="">동료 해설사 확인 중...</option>';
-                
+                coGuideSelect.innerHTML = '<option value="">동료 확인 중...</option>';
                 try {
-                    // 퇴근 여부 상관없이, 오늘 하루 해당 안내소에 기록이 있는 사람 모두 불러옴
                     const res = await fetch(`https://bdgeopark.onrender.com/active_guides?location=${encodeURIComponent(loc)}&name=${encodeURIComponent(userName)}`);
                     if(res.ok) {
                         const data = await res.json();
                         if(data.guides && data.guides.length > 0) {
                             coGuideSelect.innerHTML = data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('');
                         } else {
-                            coGuideSelect.innerHTML = '<option value="">오늘 이 안내소에 기록된 다른 해설사가 없습니다.</option>';
+                            coGuideSelect.innerHTML = '<option value="">해당 안내소 출근자가 없습니다.</option>';
                         }
                     }
-                } catch (e) { coGuideSelect.innerHTML = '<option value="">오류 발생</option>'; }
+                } catch (e) { coGuideSelect.innerHTML = '<option value="">오류</option>'; }
             }
         }
 
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
-            const inputTime = document.getElementById('action_time_input').value; // 사용자가 직접 쓴 시간
+            const inputTime = document.getElementById('action_time_input').value; 
             
             if(!inputTime) { alert("시간을 입력해 주세요!"); return; }
             if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
@@ -263,13 +259,9 @@
                 
                 if(res.ok) {
                     if (action === '출근' || action === '이동') {
-                        currentLoc = loc;
-                        localStorage.setItem("current_location", loc);
-                        updateCurrentLocBadge();
+                        currentLoc = loc; localStorage.setItem("current_location", loc); updateCurrentLocBadge();
                     } else if (action === '퇴근') {
-                        currentLoc = "미출근";
-                        localStorage.setItem("current_location", "미출근");
-                        updateCurrentLocBadge();
+                        currentLoc = "미출근"; localStorage.setItem("current_location", "미출근"); updateCurrentLocBadge();
                     }
 
                     if (action === '출근') { localStorage.setItem("last_in_time", inputTime); document.getElementById('in_time_display').innerText = `기록됨: ${inputTime}`; }
@@ -281,19 +273,26 @@
         }
 
         async function submitLog() {
-            const isCo = document.getElementById('log_co').value === 'O';
-            const coCommentaryValue = isCo ? document.getElementById('log_co_guide').value : document.getElementById('log_co').value;
+            const coSelectValue = document.getElementById('log_co').value;
+            
+            // O: 내가 테스트 1(실적 0) / ○: 내가 테스트 2(실적 입력해야함) / X: 단독해설
+            const isCoInitiator = coSelectValue === 'O'; 
+            const isDesignated = coSelectValue === '○'; 
 
-            if (isCo && (!coCommentaryValue || coCommentaryValue.includes("없습니다") || coCommentaryValue.includes("오류"))) {
-                alert("선택 가능한 공동해설자가 없습니다. 단독해설(X)로 변경해주세요.");
-                return;
+            let coCommentaryValue = "";
+            if (isCoInitiator) coCommentaryValue = document.getElementById('log_co_guide').value;
+            else if (isDesignated) coCommentaryValue = "○";
+            else coCommentaryValue = "X";
+
+            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없습니다"))) {
+                alert("선택 가능한 공동해설자가 없습니다. 단독해설(X)로 변경해주세요."); return;
             }
-
             if(!confirm("운영일지를 저장하시겠습니까?")) return;
 
-            const finalVisitors = isCo ? 0 : parseInt(document.getElementById('log_visitors').value);
-            const finalListeners = isCo ? 0 : parseInt(document.getElementById('log_listeners').value);
-            const finalCount = isCo ? 0 : parseInt(document.getElementById('log_count').value);
+            // 지목한 사람(O)만 실적이 0이 되고, 지목당한 사람(○)이나 단독(X)은 입력값을 그대로 전송!
+            const finalVisitors = isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value);
+            const finalListeners = isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value);
+            const finalCount = isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value);
 
             try {
                 const res = await fetch('https://bdgeopark.onrender.com/log_operation', {
