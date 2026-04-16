@@ -27,6 +27,9 @@
         
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
+        
+        /* 공동해설 시 통계 숨김을 위한 그룹화 */
+        #stats_group { transition: all 0.3s; }
     </style>
 </head>
 <body>
@@ -44,8 +47,7 @@
     <div id="attendance_area" class="hidden-section">
         <div class="form-group">
             <label>📍 안내소 선택</label>
-            <select id="location_select">
-                </select>
+            <select id="location_select"></select>
         </div>
         <button class="btn-act btn-in" onclick="sendAction('출근')">
             <span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div>
@@ -60,10 +62,28 @@
 
     <div id="log_area" class="hidden-section">
         <div class="form-group"><label>시간 선택</label><select id="log_time"></select></div>
-        <div class="form-group"><label>탐방객 수 (명)</label><input type="number" id="log_visitors" value="0"></div>
-        <div class="form-group"><label>청취자 수 (명)</label><input type="number" id="log_listeners" value="0"></div>
-        <div class="form-group"><label>해설 횟수 (회)</label><input type="number" id="log_count" value="0"></div>
-        <div class="form-group"><label>공동해설 여부</label><select id="log_co"><option value="X">X (단독)</option><option value="O">O (공동)</option></select></div>
+        
+        <div class="form-group">
+            <label>공동해설 여부</label>
+            <select id="log_co">
+                <option value="X">X (단독해설 - 실적 입력)</option>
+                <option value="O">O (공동해설 - 실적 면제)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="co_guide_group" style="display: none;">
+            <label>👥 공동해설자 선택</label>
+            <select id="log_co_guide">
+                <option value="">해설사 확인 중...</option>
+            </select>
+        </div>
+
+        <div id="stats_group">
+            <div class="form-group"><label>탐방객 수 (명)</label><input type="number" id="log_visitors" value="0"></div>
+            <div class="form-group"><label>청취자 수 (명)</label><input type="number" id="log_listeners" value="0"></div>
+            <div class="form-group"><label>해설 횟수 (회)</label><input type="number" id="log_count" value="0"></div>
+        </div>
+
         <div class="form-group"><label>📝 특이사항</label><textarea id="log_remarks" rows="3" placeholder="기타 전달사항을 입력하세요"></textarea></div>
         <button class="btn-submit" onclick="submitLog()">일지 저장하기</button>
     </div>
@@ -79,32 +99,23 @@
         document.getElementById('name_display').innerText = userName + " 님";
         document.getElementById('role_display').innerText = `[${userRole}] ${userIsland}`;
 
-        // 1. 저장된 출퇴근 시간 불러오기
         if (localStorage.getItem("last_in_time")) document.getElementById('in_time_display').innerText = `기록됨: ${localStorage.getItem("last_in_time")}`;
         if (localStorage.getItem("last_move_time")) document.getElementById('move_time_display').innerText = `기록됨: ${localStorage.getItem("last_move_time")}`;
         if (localStorage.getItem("last_out_time")) document.getElementById('out_time_display').innerText = `기록됨: ${localStorage.getItem("last_out_time")}`;
 
-        // 2. 소속 섬에 맞춰 안내소 목록 자동 세팅
         const locSelect = document.getElementById('location_select');
         let myLocations = [];
-        if (userIsland.includes('백령')) {
-            myLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
-        } else if (userIsland.includes('대청')) {
-            myLocations = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
-        } else if (userIsland.includes('소청')) {
-            myLocations = ['탑동', '분바위'];
-        } else {
-            myLocations = ['거점센터']; // 혹시 섬 정보가 없을 때를 대비한 기본값
-        }
+        if (userIsland.includes('백령')) myLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
+        else if (userIsland.includes('대청')) myLocations = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
+        else if (userIsland.includes('소청')) myLocations = ['탑동', '분바위'];
+        else myLocations = ['거점센터'];
         myLocations.forEach(loc => locSelect.add(new Option(loc, loc)));
 
-        // 3. 운영일지 시간 옵션 생성 (06:00 ~ 07:00 형식)
         const logTime = document.getElementById('log_time');
         for(let i=6; i<=19; i++) {
-            let startHour = i < 10 ? '0'+i : i;
-            let endHour = (i+1) < 10 ? '0'+(i+1) : (i+1);
-            let timeStr = `${startHour}:00 ~ ${endHour}:00`;
-            logTime.add(new Option(timeStr, timeStr));
+            let start = i < 10 ? '0'+i : i;
+            let end = (i+1) < 10 ? '0'+(i+1) : (i+1);
+            logTime.add(new Option(`${start}:00 ~ ${end}:00`, `${start}:00 ~ ${end}:00`));
         }
 
         const menuData = {
@@ -124,6 +135,36 @@
             container.appendChild(d);
         });
 
+        // --- 공동해설 여부 변경 시 이벤트 ---
+        document.getElementById('log_co').addEventListener('change', async function() {
+            const isCo = this.value === 'O';
+            document.getElementById('co_guide_group').style.display = isCo ? 'block' : 'none';
+            document.getElementById('stats_group').style.display = isCo ? 'none' : 'block'; // 실적 입력창 숨기기
+            
+            if (isCo) {
+                const loc = document.getElementById('location_select').value;
+                const coGuideSelect = document.getElementById('log_co_guide');
+                coGuideSelect.innerHTML = '<option value="">현재 안내소 해설사 확인 중...</option>';
+                
+                try {
+                    // 서버에 같은 안내소에 있는 해설사 명단을 요청
+                    const res = await fetch(`https://bdgeopark.onrender.com/active_guides?island=${encodeURIComponent(userIsland)}&location=${encodeURIComponent(loc)}&name=${encodeURIComponent(userName)}`);
+                    if(res.ok) {
+                        const data = await res.json();
+                        if(data.guides && data.guides.length > 0) {
+                            coGuideSelect.innerHTML = data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('');
+                        } else {
+                            coGuideSelect.innerHTML = '<option value="">동일 장소에 출근한 다른 해설사가 없습니다.</option>';
+                        }
+                    } else {
+                        coGuideSelect.innerHTML = '<option value="">불러오기 실패</option>';
+                    }
+                } catch (e) {
+                    coGuideSelect.innerHTML = '<option value="">서버 연결 오류</option>';
+                }
+            }
+        });
+
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
             if(!confirm(`[${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
@@ -137,26 +178,31 @@
                 if(res.ok) {
                     const now = new Date();
                     const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-                    
-                    if (action === '출근') {
-                        localStorage.setItem("last_in_time", timeStr);
-                        document.getElementById('in_time_display').innerText = `기록됨: ${timeStr}`;
-                    } else if (action === '이동') {
-                        localStorage.setItem("last_move_time", timeStr);
-                        document.getElementById('move_time_display').innerText = `기록됨: ${timeStr}`;
-                    } else if (action === '퇴근') {
-                        localStorage.setItem("last_out_time", timeStr);
-                        document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`;
-                    }
+                    if (action === '출근') { localStorage.setItem("last_in_time", timeStr); document.getElementById('in_time_display').innerText = `기록됨: ${timeStr}`; }
+                    else if (action === '이동') { localStorage.setItem("last_move_time", timeStr); document.getElementById('move_time_display').innerText = `기록됨: ${timeStr}`; }
+                    else if (action === '퇴근') { localStorage.setItem("last_out_time", timeStr); document.getElementById('out_time_display').innerText = `기록됨: ${timeStr}`; }
                     alert(action + " 완료!");
-                } else {
-                    alert("기록에 실패했습니다.");
-                }
+                } else alert("기록 실패!");
             } catch (e) { alert("서버 연결 오류"); }
         }
 
         async function submitLog() {
+            const isCo = document.getElementById('log_co').value === 'O';
+            const coCommentaryValue = isCo ? document.getElementById('log_co_guide').value : "";
+
+            // 공동해설인데 선택할 해설사가 없는 경우 막기
+            if (isCo && (!coCommentaryValue || coCommentaryValue.includes("없습니다") || coCommentaryValue.includes("오류"))) {
+                alert("선택 가능한 공동해설자가 없습니다. 다른 해설사의 출근 기록을 확인하거나 단독해설(X)로 기록해주세요.");
+                return;
+            }
+
             if(!confirm("운영일지를 저장하시겠습니까?")) return;
+
+            // 공동해설이면 실적을 모두 0으로 덮어씌워서 전송
+            const finalVisitors = isCo ? 0 : parseInt(document.getElementById('log_visitors').value);
+            const finalListeners = isCo ? 0 : parseInt(document.getElementById('log_listeners').value);
+            const finalCount = isCo ? 0 : parseInt(document.getElementById('log_count').value);
+
             try {
                 const res = await fetch('https://bdgeopark.onrender.com/log_operation', {
                     method: 'POST',
@@ -164,15 +210,21 @@
                     body: JSON.stringify({
                         name: userName, island: userIsland, role: userRole,
                         target_time: document.getElementById('log_time').value,
-                        visitors: parseInt(document.getElementById('log_visitors').value),
-                        listeners: parseInt(document.getElementById('log_listeners').value),
-                        count: parseInt(document.getElementById('log_count').value),
-                        co_commentary: document.getElementById('log_co').value,
+                        visitors: finalVisitors,
+                        listeners: finalListeners,
+                        count: finalCount,
+                        co_commentary: coCommentaryValue,
                         remarks: document.getElementById('log_remarks').value
                     })
                 });
-                if(res.ok) { alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; }
-                else alert("저장 실패");
+                if(res.ok) { 
+                    alert("저장되었습니다."); 
+                    document.getElementById('log_area').style.display = 'none'; 
+                    document.getElementById('log_visitors').value = 0;
+                    document.getElementById('log_listeners').value = 0;
+                    document.getElementById('log_count').value = 0;
+                    document.getElementById('log_remarks').value = "";
+                } else alert("저장 실패");
             } catch (e) { alert("서버 연결 오류"); }
         }
 
