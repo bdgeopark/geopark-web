@@ -22,41 +22,44 @@
             // 이미 로그인한 적이 있다면 묻지도 따지지도 말고 메인으로 이동!
             location.href = "main.html";
         }
-async function sendLogin() {
+        
+        async function sendLogin() {
             const id = document.getElementById('my_id').value;
             const pw = document.getElementById('my_pw').value;
 
             try {
+                // 주소 끝에 /가 붙지 않도록 주의하세요!
                 const res = await fetch('https://bdgeopark.onrender.com/login', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({uid: id, upw: pw})
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: String(id),  // 문자로 변환해서 전송
+                        upw: String(pw)   // 문자로 변환해서 전송
+                    })
                 });
 
-                // --- 여기부터가 수정된 핵심 로직입니다 ---
-                if(res.ok) {
+                if (res.ok) {
                     const data = await res.json();
-                    
-                    // 1. 스마트폰 메모리(로컬 스토리지)에 로그인 정보를 저장합니다.
-                    // 이렇게 저장해두면 main.html에서 누가 로그인했는지 알 수 있습니다.
-                    localStorage.setItem("user_id", id);
-                    localStorage.setItem("user_pw", pw);
                     localStorage.setItem("user_name", data.name);
                     localStorage.setItem("user_role", data.role);
                     localStorage.setItem("user_island", data.island);
 
-                    alert(data.name + "님 환영합니다! 확인을 누르면 메인 화면으로 이동합니다.");
-                    
-                    // 2. 메인 화면(main.html)으로 페이지를 강제 이동시킵니다.
-                    location.href = "main.html"; 
+                    alert(data.name + " 해설사님, 환영합니다!");
+                    location.href = "main.html";
                 } else {
-                    alert("로그인 실패! 아이디나 비밀번호를 다시 확인해 주세요.");
+                    // 서버가 왜 거절했는지 상세 내용을 가져옵니다.
+                    const errorData = await res.json();
+                    alert("실패 사유: " + JSON.stringify(errorData.detail));
                 }
-                // --- 여기까지 ---
 
             } catch (error) {
-                alert("서버 연결 오류! 파이썬 서버가 켜져 있는지 확인하세요.");
+                console.error(error);
+                alert("서버 연결 실패! 인터넷 연결이나 주소를 확인하세요.");
             }
-        }    </script>
+        }
+    </script>
 </body>
 </html>
