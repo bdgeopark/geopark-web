@@ -4,73 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>활동일지 기록</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <style>
         body {
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-            background-color: #f0f4f8;
+            font-family: 'Pretendard', sans-serif;
+            background-color: #F5F6F8; /* 카카오 채팅방 밖의 부드러운 배경색 */
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: #191919;
         }
         .main-box {
             background-color: white;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 45px 30px;
+            border-radius: 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             width: 320px;
             text-align: center;
             box-sizing: border-box;
+            border-top: 6px solid #FEE500; /* 상단 포인트 */
         }
-        .header {
-            margin-bottom: 35px;
+        .profile-img {
+            width: 65px;
+            height: 65px;
+            background-color: #FEE500;
+            border-radius: 24px;
+            margin: 0 auto 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+        }
+        .greeting {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
         }
         .island-badge {
             display: inline-block;
-            background-color: #3498db; /* 바다 느낌의 파란색 */
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .greeting {
-            color: #2c3e50;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin: 0;
+            color: #888;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            margin-top: 5px;
+            font-weight: 500;
         }
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
         .btn {
-            padding: 20px;
+            padding: 18px;
             border: none;
-            border-radius: 15px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: white;
+            border-radius: 14px;
+            font-size: 1.15rem;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s, background-color 0.2s;
+            font-family: 'Pretendard', sans-serif;
+            transition: transform 0.1s;
         }
-        .btn:active {
-            transform: scale(0.96); /* 누를 때 살짝 들어가는 효과 */
-        }
-        .btn-in { background-color: #27ae60; }
-        .btn-in:hover { background-color: #219150; }
+        .btn:active { transform: scale(0.97); }
         
-        .btn-out { background-color: #e74c3c; }
-        .btn-out:hover { background-color: #c0392b; }
-
+        .btn-in { 
+            background-color: #FEE500; /* 카카오 옐로우 */
+            color: #191919;
+        }
+        .btn-out { 
+            background-color: #F2F2F2; /* 카카오 라이트그레이 */
+            color: #191919;
+        }
         .logout {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            color: #95a5a6;
+            margin-top: 35px;
+            font-size: 0.85rem;
+            color: #999;
             text-decoration: underline;
             cursor: pointer;
         }
@@ -79,35 +88,32 @@
 <body>
 
     <div class="main-box">
-        <div class="header">
-            <span id="island_display" class="island-badge">소속 섬</span>
-            <div id="name_display" class="greeting">해설사님<br>환영합니다</div>
-        </div>
+        <div class="profile-img">🧑‍🌾</div>
+        
+        <div id="name_display" class="greeting">해설사님</div>
+        <div id="island_display" class="island-badge">소속 섬</div>
 
         <div class="btn-group">
-            <button class="btn btn-in" onclick="sendAction('출근')">🟢 출근하기</button>
-            <button class="btn btn-out" onclick="sendAction('퇴근')">🔴 퇴근하기</button>
+            <button class="btn btn-in" onclick="sendAction('출근')">출근하기</button>
+            <button class="btn btn-out" onclick="sendAction('퇴근')">퇴근하기</button>
         </div>
 
-        <div class="logout" onclick="logout()">다른 계정으로 로그인 (로그아웃)</div>
+        <div class="logout" onclick="logout()">로그아웃</div>
     </div>
 
     <script>
-        // 페이지 열리자마자 사용자 정보 세팅
         const userName = localStorage.getItem("user_name");
         const userIsland = localStorage.getItem("user_island");
 
         if (!userName) {
-            alert("로그인 정보가 없습니다.");
             location.href = "index.html";
         } else {
-            document.getElementById('name_display').innerHTML = `<span style="color:#27ae60;">${userName}</span> 해설사님`;
-            document.getElementById('island_display').innerText = userIsland;
+            document.getElementById('name_display').innerHTML = `${userName} <span style="font-weight:400;">해설사님</span>`;
+            document.getElementById('island_display').innerText = `📍 ${userIsland} 거점센터`;
         }
 
         async function sendAction(type) {
             const role = localStorage.getItem("user_role");
-
             if (!confirm(`${userName} 해설사님, [${type}] 기록하시겠습니까?`)) return;
 
             try {
@@ -123,20 +129,19 @@
                 });
 
                 if (res.ok) {
-                    alert(`${type} 기록이 정상적으로 완료되었습니다!`);
+                    alert(`${type} 기록이 완료되었습니다!`);
                 } else {
                     const err = await res.json();
                     alert("기록 실패: " + JSON.stringify(err.detail));
                 }
             } catch (error) {
-                alert("서버 연결 실패! 인터넷 상태를 확인해 주세요.");
+                alert("인터넷 상태를 확인해 주세요.");
             }
         }
 
-        // 로그아웃 기능
         function logout() {
             if(confirm("로그아웃 하시겠습니까?")) {
-                localStorage.clear(); // 저장된 도장 지우기
+                localStorage.clear();
                 location.href = "index.html";
             }
         }
