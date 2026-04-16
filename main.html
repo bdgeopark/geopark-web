@@ -1,4 +1,55 @@
-async function sendAction(type) {
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지질공원 관리 시스템</title>
+    <style>
+        /* 스마트폰에서 보기 좋게 디자인 */
+        body { font-family: '나눔고딕', sans-serif; text-align: center; padding: 20px; background-color: #f8f9fa; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .info-box { background: #e9ecef; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 1.1em; }
+        .btn { display: block; width: 100%; padding: 20px; margin: 10px 0; font-size: 1.5em; font-weight: bold; color: white; border: none; border-radius: 15px; cursor: pointer; }
+        .btn-in { background-color: #28a745; } /* 출근 초록색 */
+        .btn-out { background-color: #dc3545; } /* 퇴근 빨간색 */
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🪨 지질공원 관리</h1>
+        
+        <div class="info-box">
+            <span id="user_name" style="font-weight: bold; color: #007bff;">---</span> 해설사님<br>
+            <small id="user_role">정보 불러오는 중...</small>
+        </div>
+
+        <button class="btn btn-in" onclick="sendAction('출근')">🟢 출근하기</button>
+        <button class="btn btn-out" onclick="sendAction('퇴근')">🔴 퇴근하기</button>
+    </div>
+
+    <script>
+        // 로그인할 때 index.html에서 저장해둔 도장(정보)을 꺼냅니다.
+        const name = localStorage.getItem("user_name");
+        const role = localStorage.getItem("user_role");
+        const island = localStorage.getItem("user_island");
+
+        // 만약 도장이 없으면(로그인 안 하고 들어오면) 다시 로그인창으로 보냅니다.
+        if (!name) {
+            alert("로그인이 필요합니다!");
+            location.href = "index.html";
+        } else {
+            // 화면에 해설사님 정보를 뿌려줍니다.
+            document.getElementById("user_name").innerText = name;
+            document.getElementById("user_role").innerText = island + " / " + role;
+        }
+
+        // 출퇴근 버튼 눌렀을 때 실행될 함수
+        function sendAction(type) {
+            alert(name + " 해설사님, " + type + " 기록은 다음 단계에서 연결하겠습니다!");
+        }
+		async function sendAction(type) {
             const name = localStorage.getItem("user_name");
             const role = localStorage.getItem("user_role");
             const island = localStorage.getItem("user_island");
@@ -26,3 +77,6 @@ async function sendAction(type) {
                 alert("네트워크 오류!");
             }
         }
+    </script>
+</body>
+</html>
