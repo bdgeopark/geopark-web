@@ -17,18 +17,19 @@
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
         select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
+        select:disabled { background-color: #EEEEEE; color: #999; }
         
         .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .btn-act:active { transform: scale(0.98); }
         .btn-in { background-color: #FEE500; color: #191919; }
         .btn-move { background-color: #3498db; color: white; }
         .btn-out { background-color: #EAEAEA; color: #191919; }
-        .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
+        .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; transition: background-color 0.2s; }
+        .btn-submit:disabled { background-color: #CCC; cursor: not-allowed; }
         
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
         
-        /* 공동해설 시 통계 숨김을 위한 그룹화 */
         #stats_group { transition: all 0.3s; }
     </style>
 </head>
@@ -61,7 +62,10 @@
     </div>
 
     <div id="log_area" class="hidden-section">
-        <div class="form-group"><label>시간 선택</label><select id="log_time"></select></div>
+        <div class="form-group">
+            <label>시간 선택</label>
+            <select id="log_time"></select>
+        </div>
         
         <div class="form-group">
             <label>공동해설 여부</label>
@@ -131,15 +135,60 @@
             d.onclick = () => {
                 document.getElementById('attendance_area').style.display = m.includes('1') ? 'block' : 'none';
                 document.getElementById('log_area').style.display = m.includes('2') ? 'block' : 'none';
+                
+                // 2번 메뉴를 열었을 때 자동으로 해당 시간대 중복 체크 실행
+                if(m.includes('2')) checkDuplicateAndLock();
             };
             container.appendChild(d);
         });
 
-        // --- 공동해설 여부 변경 시 이벤트 ---
-        document.getElementById('log_co').addEventListener('change', async function() {
-            const isCo = this.value === 'O';
+        // --- 자동 잠금 및 중복 확인 로직 ---
+        document.getElementById('log_time').addEventListener('change', checkDuplicateAndLock);
+        document.getElementById('log_co').addEventListener('change', updateCoGuideUI);
+
+        async function checkDuplicateAndLock() {
+            const selectedTime = document.getElementById('log_time').value;
+            const statsGroup = document.getElementById('stats_group');
+            const submitBtn = document.querySelector('.btn-submit');
+            const coSelect = document.getElementById('log_co');
+            const coGuideGroup = document.getElementById('co_guide_group');
+
+            try {
+                // 서버에 현재 내가 이 시간대에 '○' 표시가 되어있는지 물어봄
+                const res = await fetch(`https://bdgeopark.onrender.com/check_co_status?name=${encodeURIComponent(userName)}&target_time=${encodeURIComponent(selectedTime)}`);
+                const data = await res.json();
+
+                if (data.status === 'exists') {
+                    // 이미 등록된 경우: 화면을 잠그고 안내
+                    coSelect.innerHTML = '<option value="○">○ (공동해설 자동등록됨)</option>';
+                    coSelect.disabled = true;
+                    statsGroup.style.display = 'none';
+                    coGuideGroup.style.display = 'none';
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "동료 해설사가 이미 등록했습니다";
+                    submitBtn.style.backgroundColor = "#CCC";
+                } else {
+                    // 등록되지 않은 경우: 정상 입력 모드로 복구
+                    if (coSelect.disabled) {
+                        coSelect.innerHTML = '<option value="X">X (단독해설 - 실적 입력)</option><option value="O">O (공동해설 - 실적 면제)</option>';
+                        coSelect.disabled = false;
+                        coSelect.value = "X";
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "일지 저장하기";
+                        submitBtn.style.backgroundColor = "#3C1E1E";
+                    }
+                    // 현재 선택된 값(X 또는 O)에 맞게 화면 갱신
+                    updateCoGuideUI();
+                }
+            } catch (e) {
+                console.error("중복 체크 오류", e);
+            }
+        }
+
+        async function updateCoGuideUI() {
+            const isCo = document.getElementById('log_co').value === 'O';
             document.getElementById('co_guide_group').style.display = isCo ? 'block' : 'none';
-            document.getElementById('stats_group').style.display = isCo ? 'none' : 'block'; // 실적 입력창 숨기기
+            document.getElementById('stats_group').style.display = isCo ? 'none' : 'block';
             
             if (isCo) {
                 const loc = document.getElementById('location_select').value;
@@ -147,7 +196,6 @@
                 coGuideSelect.innerHTML = '<option value="">현재 안내소 해설사 확인 중...</option>';
                 
                 try {
-                    // 서버에 같은 안내소에 있는 해설사 명단을 요청
                     const res = await fetch(`https://bdgeopark.onrender.com/active_guides?island=${encodeURIComponent(userIsland)}&location=${encodeURIComponent(loc)}&name=${encodeURIComponent(userName)}`);
                     if(res.ok) {
                         const data = await res.json();
@@ -156,14 +204,10 @@
                         } else {
                             coGuideSelect.innerHTML = '<option value="">동일 장소에 출근한 다른 해설사가 없습니다.</option>';
                         }
-                    } else {
-                        coGuideSelect.innerHTML = '<option value="">불러오기 실패</option>';
                     }
-                } catch (e) {
-                    coGuideSelect.innerHTML = '<option value="">서버 연결 오류</option>';
-                }
+                } catch (e) { coGuideSelect.innerHTML = '<option value="">오류 발생</option>'; }
             }
-        });
+        }
 
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
@@ -188,17 +232,15 @@
 
         async function submitLog() {
             const isCo = document.getElementById('log_co').value === 'O';
-            const coCommentaryValue = isCo ? document.getElementById('log_co_guide').value : "";
+            const coCommentaryValue = isCo ? document.getElementById('log_co_guide').value : document.getElementById('log_co').value;
 
-            // 공동해설인데 선택할 해설사가 없는 경우 막기
             if (isCo && (!coCommentaryValue || coCommentaryValue.includes("없습니다") || coCommentaryValue.includes("오류"))) {
-                alert("선택 가능한 공동해설자가 없습니다. 다른 해설사의 출근 기록을 확인하거나 단독해설(X)로 기록해주세요.");
+                alert("선택 가능한 공동해설자가 없습니다. 단독해설(X)로 변경해주세요.");
                 return;
             }
 
             if(!confirm("운영일지를 저장하시겠습니까?")) return;
 
-            // 공동해설이면 실적을 모두 0으로 덮어씌워서 전송
             const finalVisitors = isCo ? 0 : parseInt(document.getElementById('log_visitors').value);
             const finalListeners = isCo ? 0 : parseInt(document.getElementById('log_listeners').value);
             const finalCount = isCo ? 0 : parseInt(document.getElementById('log_count').value);
