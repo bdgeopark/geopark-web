@@ -35,11 +35,14 @@
         .calc-hours.over { color: #e74c3c; }
 
         /* 조장 승인 전용 스타일 */
-        .approval-card { background:#f9f9f9; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:10px; }
+        .approval-header { display:flex; justify-content:space-between; align-items:center; background:white; padding:12px; border-radius:12px; border:1px solid #E5E5E5; margin-bottom:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .approval-card { display:flex; gap:10px; align-items:flex-start; background:#f9f9f9; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:10px; }
+        .chk-box { transform: scale(1.3); margin-top:5px; cursor:pointer; }
+        .app-content { flex: 1; }
         .app-tag { display:inline-block; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold; margin-bottom:5px; }
         .tag-plan { background:#e1f5fe; color:#01579b; }
         .tag-change { background:#fff3e0; color:#e65100; }
-        .app-info { font-size:0.9rem; line-height:1.5; margin-bottom:10px; }
+        .app-info { font-size:0.9rem; line-height:1.5; margin-bottom:8px; }
         .app-btns { display:flex; gap:8px; }
         .btn-small { flex:1; padding:8px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; }
         .btn-approve { background:#27ae60; color:white; }
@@ -151,6 +154,17 @@
     <div id="approval_area" class="hidden-section">
         <div class="form-group">
             <label>📁 조원 결재함 (승인 대기 목록)</label>
+            
+            <div id="approval_header" class="approval-header" style="display:none;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:bold;">
+                    <input type="checkbox" id="chk_all" class="chk-box" onclick="toggleAllApprovals(this)"> 전체 선택
+                </label>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-small btn-approve" style="padding:6px 12px;" onclick="processBulkApp('승인완료')">선택 승인</button>
+                    <button class="btn-small btn-reject" style="padding:6px 12px;" onclick="processBulkApp('반려')">선택 반려</button>
+                </div>
+            </div>
+
             <div id="pending_container">
                 <p style="text-align:center; color:#999; padding:20px;">대기 중인 요청을 불러오는 중...</p>
             </div>
@@ -160,7 +174,6 @@
     <div class="logout" onclick="logout()">로그아웃</div>
 
     <script>
-        // ★★★ 정상적인 Railway 주소 명시적 지정 ★★★
         const API_BASE = "https://geopark-system-production.up.railway.app"; 
         
         const userName = localStorage.getItem("user_name");
@@ -467,10 +480,14 @@
             } catch (e) {}
         }
 
-        // ----------------------- 4. [조장 전용] 승인 로직 -----------------------
+        // ----------------------- 4. [조장 전용] 승인 로직 (일괄 처리 추가) -----------------------
         async function loadPendingRequests() {
             const container = document.getElementById('pending_container');
+            const header = document.getElementById('approval_header');
+            
             container.innerHTML = '<p style="text-align:center; color:#999;">목록을 불러오고 있습니다...</p>';
+            header.style.display = 'none';
+            document.getElementById('chk_all').checked = false;
             
             try {
                 const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`);
@@ -481,32 +498,34 @@
                     return;
                 }
 
+                header.style.display = 'flex'; // 목록이 있으면 상단 일괄처리 바 표시
                 let html = '';
+                
                 data.plans.forEach(p => {
+                    let valObj = JSON.stringify({sheet_name: '활동계획서(NEW)', row_index: p.row_index});
                     html += `
                         <div class="approval-card">
-                            <span class="app-tag tag-plan">신규 계획</span>
-                            <div class="app-info">
-                                <b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}<br>장소: ${p['장소']} (${p['활동여부']})
-                            </div>
-                            <div class="app-btns">
-                                <button class="btn-small btn-approve" onclick="processApp('활동계획서(NEW)', ${p.row_index}, '승인완료')">승인</button>
-                                <button class="btn-small btn-reject" onclick="processApp('활동계획서(NEW)', ${p.row_index}, '반려')">반려</button>
+                            <input type="checkbox" class="chk-box item-chk" value='${valObj}'>
+                            <div class="app-content">
+                                <span class="app-tag tag-plan">신규 계획</span>
+                                <div class="app-info">
+                                    <b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}<br>장소: ${p['장소']} (${p['활동여부']})
+                                </div>
                             </div>
                         </div>
                     `;
                 });
 
                 data.changes.forEach(c => {
+                    let valObj = JSON.stringify({sheet_name: '활동계획_변경신청', row_index: c.row_index});
                     html += `
                         <div class="approval-card">
-                            <span class="app-tag tag-change">변경/취소 요청</span>
-                            <div class="app-info">
-                                <b>${c['신청자']}</b> 해설사<br>대상일: ${c['변경대상일']}<br>내용: ${c['변경유형']} - ${c['상세내용']}
-                            </div>
-                            <div class="app-btns">
-                                <button class="btn-small btn-approve" onclick="processApp('활동계획_변경신청', ${c.row_index}, '승인완료')">승인</button>
-                                <button class="btn-small btn-reject" onclick="processApp('활동계획_변경신청', ${c.row_index}, '반려')">반려</button>
+                            <input type="checkbox" class="chk-box item-chk" value='${valObj}'>
+                            <div class="app-content">
+                                <span class="app-tag tag-change">변경/취소 요청</span>
+                                <div class="app-info">
+                                    <b>${c['신청자']}</b> 해설사<br>대상일: ${c['변경대상일']}<br>내용: ${c['변경유형']} - ${c['상세내용']}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -515,15 +534,48 @@
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터 로드 실패</p>'; }
         }
 
-        async function processApp(sheet, row, status) {
-            if(!confirm(`해당 요청을 [${status}] 처리하시겠습니까?`)) return;
+        // 전체 선택 체크박스 기능
+        function toggleAllApprovals(source) {
+            checkboxes = document.querySelectorAll('.item-chk');
+            for(var i=0, n=checkboxes.length; i<n; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        // 선택된 항목 일괄 전송
+        async function processBulkApp(status) {
+            const checkedBoxes = document.querySelectorAll('.item-chk:checked');
+            if(checkedBoxes.length === 0) {
+                alert("선택된 항목이 없습니다.");
+                return;
+            }
+
+            if(!confirm(`선택한 ${checkedBoxes.length}개의 요청을 일괄 [${status}] 처리하시겠습니까?`)) return;
+            
+            let approvals = [];
+            checkedBoxes.forEach(box => {
+                let data = JSON.parse(box.value);
+                data.status = status;
+                approvals.push(data);
+            });
+
             try {
-                const res = await fetch(`${API_BASE}/process_approval`, {
+                const res = await fetch(`${API_BASE}/process_approval_bulk`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ sheet_name: sheet, row_index: row, status: status })
+                    body: JSON.stringify({ approvals: approvals })
                 });
-                if(res.ok) { alert(`${status} 처리되었습니다.`); loadPendingRequests(); }
-            } catch (e) {}
+                if(res.ok) { 
+                    alert(`${status} 처리되었습니다.`); 
+                    loadPendingRequests(); // 목록 새로고침
+                } else {
+                    alert("처리 중 서버 오류가 발생했습니다.");
+                }
+            } catch (e) { alert("서버 연결에 실패했습니다."); }
+        }
+
+        // 기존의 단일 승인 버튼은 제외하고 일괄 처리로 일원화 (원하면 개별 체크 후 승인 누르면 됨)
+        async function processApp(sheet, row, status) {
+            // 안 쓰는 함수지만 에러 방지용으로 유지
         }
 
         function logout() {
