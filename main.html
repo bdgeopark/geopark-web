@@ -28,7 +28,6 @@
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
         .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
-        
         .plan-row { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #E5E5E5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .plan-date-label { font-size: 1.05rem; font-weight: 800; color: #2c3e50; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid #FEE500; padding-bottom: 5px; }
         .flex-group { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
@@ -93,34 +92,72 @@
                     <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
                 </select>
                 <select id="plan_half" style="flex:1.5;">
-                    <option value="1">전반기 (1~15일)</option>
-                    <option value="2">하반기 (16~말일)</option>
+                    <option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option>
                 </select>
             </div>
             <button class="btn-act btn-move" style="margin-top:10px; padding:12px; font-size:1rem; border-radius:8px;" onclick="generatePlanForm()">📝 15일치 양식 펼치기</button>
         </div>
-
         <div id="plan_list_container" style="display:none; margin-top:20px; border-top:2px dashed #CCC; padding-top:20px;">
             <div class="time-input-wrap">
                 <label style="font-size: 0.85rem; font-weight: 700; color:#333; margin-bottom:5px;">⚙️ 일괄 적용 설정</label>
                 <div class="flex-group">
-                    <select id="batch_loc" style="flex:1;"></select>
-                    <select id="batch_start" style="flex:1;"></select>
-                    <span style="font-weight:bold;">~</span>
-                    <select id="batch_end" style="flex:1;"></select>
+                    <select id="batch_loc" style="flex:1;"></select><select id="batch_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="batch_end" style="flex:1;"></select>
                 </div>
                 <button onclick="applyBatchSettings()" style="width:100%; margin-top:8px; padding:10px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">전체 일괄 적용하기</button>
             </div>
-
             <div id="plan_rows"></div>
-            
             <button class="btn-submit" onclick="submitBulkPlan()">🚀 15일치 스케줄 제출하기</button>
         </div>
+    </div>
+
+    <div id="change_area" class="hidden-section">
+        <div class="form-group">
+            <label>📅 변경 대상 날짜</label>
+            <input type="date" id="change_target_date">
+        </div>
+        <div class="form-group">
+            <label>⚙️ 변경 유형</label>
+            <select id="change_type" onchange="updateChangeUI()">
+                <option value="시간 변경">시간 변경</option>
+                <option value="해설사 변경(대타)">해설사 변경 (대타 요청)</option>
+                <option value="계획 취소">계획 취소 (휴무 전환)</option>
+            </select>
+        </div>
+
+        <div id="change_ui_time" class="time-input-wrap">
+            <label style="font-size: 0.8rem; font-weight: 600;">새로운 시간 설정</label>
+            <div class="flex-group" style="margin-top: 5px;">
+                <select id="change_time_start" style="flex:1;"></select>
+                <span style="font-weight:bold;">~</span>
+                <select id="change_time_end" style="flex:1;"></select>
+            </div>
+        </div>
+
+        <div id="change_ui_guide" class="time-input-wrap" style="display:none;">
+            <label style="font-size: 0.8rem; font-weight: 600;">대타를 요청할 동료 해설사</label>
+            <select id="change_target_guide" style="margin-top: 5px;">
+                <option value="">불러오는 중...</option>
+            </select>
+        </div>
+
+        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;">
+            <label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환한다.</label>
+        </div>
+
+        <div class="form-group">
+            <label>📝 변경 사유</label>
+            <textarea id="change_remarks" rows="2" placeholder="변경 사유를 간략히 적어주세요"></textarea>
+        </div>
+
+        <button class="btn-submit" onclick="submitPlanChange()">승인 요청하기</button>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
 
     <script>
+        // ★★★ 여기에 본인의 레일웨이 주소를 입력하세요 (끝에 / 없이 적습니다) ★★★
+        const API_BASE = "https://본인의_레일웨이_주소.up.railway.app"; 
+        
         const userName = localStorage.getItem("user_name");
         const userRole = localStorage.getItem("user_role");
         const userIsland = localStorage.getItem("user_island");
@@ -180,9 +217,12 @@
         }
         document.getElementById('batch_start').innerHTML = timeOptionsHtml;
         document.getElementById('batch_end').innerHTML = timeOptionsHtml;
-        // 기본 세팅을 08시 ~ 17시 (순수 8시간) 로 잡아둠
         document.getElementById('batch_start').value = "08:00";
         document.getElementById('batch_end').value = "17:00";
+        
+        // 활동계획 변경용 시간 옵션
+        document.getElementById('change_time_start').innerHTML = timeOptionsHtml;
+        document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
 
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경'],
@@ -198,8 +238,10 @@
                 document.getElementById('attendance_area').style.display = m.includes('출퇴근관리') ? 'block' : 'none';
                 document.getElementById('log_area').style.display = m.includes('운영일지 작성') ? 'block' : 'none';
                 document.getElementById('plan_area').style.display = m.includes('활동계획서 작성') ? 'block' : 'none';
+                document.getElementById('change_area').style.display = m.includes('활동계획 변경') ? 'block' : 'none';
                 
                 if(m.includes('출퇴근관리')) setCurrentTimeInput();
+                if(m.includes('활동계획 변경')) loadGuideList(); // 변경 메뉴 열 때 동료 명단 불러오기
             };
             container.appendChild(d);
         });
@@ -211,7 +253,7 @@
             if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하겠는가?`)) return;
 
             try {
-                const res = await fetch('geopark-system-production.up.railway.app/record', {
+                const res = await fetch(`${API_BASE}/record`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: action, location: loc, action_time: inputTime })
                 });
@@ -227,7 +269,6 @@
         }
 
         async function submitLog() {
-            // 운영일지 제출 로직 (기존 유지)
             const coSelectValue = document.getElementById('log_co').value;
             const isCoInitiator = coSelectValue === 'O'; 
             const isDesignated = coSelectValue === '○'; 
@@ -236,7 +277,7 @@
             else if (isDesignated) coCommentaryValue = "○";
             else coCommentaryValue = "X";
 
-            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없습니다"))) { alert("선택 가능한 공동해설자가 없다."); return; }
+            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없다"))) { alert("선택 가능한 공동해설자가 없다."); return; }
             if(!confirm("운영일지를 저장하겠는가?")) return;
 
             const finalVisitors = isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value);
@@ -244,7 +285,7 @@
             const finalCount = isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value);
 
             try {
-                const res = await fetch('geopark-system-production.up.railway.app/log_operation', {
+                const res = await fetch(`${API_BASE}/log_operation`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         name: userName, island: userIsland, role: userRole, log_location: document.getElementById('log_location_select').value,
@@ -259,18 +300,15 @@
             } catch (e) {}
         }
 
-        // --- 15일 일괄 작성 로직 ---
+        // --- 15일 일괄 작성 로직 유지 ---
         function generatePlanForm() {
             const month = parseInt(document.getElementById('plan_month').value);
             const half = parseInt(document.getElementById('plan_half').value);
             const year = new Date().getFullYear();
-            
             let startDay = half === 1 ? 1 : 16;
             let endDay = half === 1 ? 15 : new Date(year, month, 0).getDate(); 
-            
             const container = document.getElementById('plan_rows');
             container.innerHTML = '';
-            
             const days = ['일', '월', '화', '수', '목', '금', '토'];
             
             for(let i = startDay; i <= endDay; i++) {
@@ -282,8 +320,7 @@
                 let html = `
                     <div class="plan-row" data-date="${year}-${month}-${i}" data-day="${dayIdx}">
                         <div class="plan-date-label">
-                            <span style="${isWeekend}">${dateStr}</span>
-                            <span class="calc-hours">0시간</span>
+                            <span style="${isWeekend}">${dateStr}</span><span class="calc-hours">0시간</span>
                         </div>
                         <div class="flex-group">
                             <select class="p-loc" style="flex:1;" onchange="handleRowChange(this)">${locOptionsHtml}</select>
@@ -296,7 +333,6 @@
                 `;
                 container.innerHTML += html;
             }
-            
             document.getElementById('plan_list_container').style.display = 'block';
             applyBatchSettings(); 
         }
@@ -305,18 +341,13 @@
             const loc = document.getElementById('batch_loc').value;
             const start = document.getElementById('batch_start').value;
             const end = document.getElementById('batch_end').value;
-
             document.querySelectorAll('.plan-row').forEach(row => {
-                row.querySelector('.p-loc').value = loc;
-                row.querySelector('.p-start').value = start;
-                row.querySelector('.p-end').value = end;
+                row.querySelector('.p-loc').value = loc; row.querySelector('.p-start').value = start; row.querySelector('.p-end').value = end;
                 calcRowHours(row);
             });
         }
 
-        function handleRowChange(elem) {
-            calcRowHours(elem.closest('.plan-row'));
-        }
+        function handleRowChange(elem) { calcRowHours(elem.closest('.plan-row')); }
 
         function calcRowHours(row) {
             const loc = row.querySelector('.p-loc').value;
@@ -325,43 +356,25 @@
             const hoursSpan = row.querySelector('.calc-hours');
 
             if (loc === '휴무') {
-                hoursSpan.innerText = "휴무";
-                hoursSpan.className = "calc-hours";
-                row.querySelector('.p-start').disabled = true;
-                row.querySelector('.p-end').disabled = true;
+                hoursSpan.innerText = "휴무"; hoursSpan.className = "calc-hours";
+                row.querySelector('.p-start').disabled = true; row.querySelector('.p-end').disabled = true;
                 return;
             }
+            row.querySelector('.p-start').disabled = false; row.querySelector('.p-end').disabled = false;
 
-            row.querySelector('.p-start').disabled = false;
-            row.querySelector('.p-end').disabled = false;
-
-            let sHour = parseInt(start.split(':')[0]);
-            let eHour = parseInt(end.split(':')[0]);
+            let sHour = parseInt(start.split(':')[0]); let eHour = parseInt(end.split(':')[0]);
             let rawDiff = eHour - sHour;
-            let diff = rawDiff;
+            let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
 
-            // 핵심 로직: 총 시간이 5시간 이상일 때만 식사시간 1시간을 뺀다.
-            if (rawDiff >= 5) {
-                diff = rawDiff - 1;
-            }
-
-            if (rawDiff <= 0) {
-                hoursSpan.innerText = "시간 오류";
-                hoursSpan.className = "calc-hours over";
-            } else {
+            if (rawDiff <= 0) { hoursSpan.innerText = "시간 오류"; hoursSpan.className = "calc-hours over"; } 
+            else {
                 hoursSpan.innerText = `${diff}시간 (식사제외)`;
-                if (diff > 8) hoursSpan.className = "calc-hours over";
-                else hoursSpan.className = "calc-hours";
+                if (diff > 8) hoursSpan.className = "calc-hours over"; else hoursSpan.className = "calc-hours";
             }
         }
 
         async function submitBulkPlan() {
-            let plans = [];
-            let totalRestDays = 0;
-            let isValid = true;
-            let requiresApproval = false;
-            let currentWeekWorkDays = 0;
-            let weekWarningTriggered = false;
+            let plans = []; let totalRestDays = 0; let isValid = true; let requiresApproval = false; let currentWeekWorkDays = 0; let weekWarningTriggered = false;
 
             document.querySelectorAll('.plan-row').forEach(row => {
                 let dateStr = row.querySelector('.plan-date-label span').innerText;
@@ -372,68 +385,101 @@
                 let remarks = row.querySelector('.p-remarks').value;
                 
                 if (dayIdx === 0) currentWeekWorkDays = 0;
+                let activityStatus = ""; let statusStr = "대기중";
 
-                let activityStatus = "";
-                let statusStr = "대기중";
-
-                if (loc === '휴무') {
-                    activityStatus = "휴무";
-                    totalRestDays++;
-                } else {
+                if (loc === '휴무') { activityStatus = "휴무"; totalRestDays++; } 
+                else {
                     let rawDiff = parseInt(eTime.split(':')[0]) - parseInt(sTime.split(':')[0]);
                     if (rawDiff <= 0) { alert(`${dateStr}의 시간이 잘못되었다.`); isValid = false; }
-                    
                     let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
-                    
                     activityStatus = `${sTime}~${eTime} (${diff}시간)`;
                     currentWeekWorkDays++;
-                    
-                    if (diff > 8) {
-                        statusStr = "초과승인대기";
-                        requiresApproval = true;
-                    }
+                    if (diff > 8) { statusStr = "초과승인대기"; requiresApproval = true; }
                 }
 
                 if (dayIdx === 6 || row === document.querySelectorAll('.plan-row')[document.querySelectorAll('.plan-row').length - 1]) {
                     if (currentWeekWorkDays >= 7) weekWarningTriggered = true;
                 }
                 
-                plans.push({
-                    plan_date: dateStr,
-                    location: loc === '휴무' ? '-' : loc,
-                    activity_status: activityStatus,
-                    remarks: remarks,
-                    status: statusStr
-                });
+                plans.push({ plan_date: dateStr, location: loc === '휴무' ? '-' : loc, activity_status: activityStatus, remarks: remarks, status: statusStr });
             });
 
             if (!isValid) return;
-
-            if (totalRestDays < 5) {
-                if(!confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장된다. (현재 ${totalRestDays}일 휴무)\n\n이대로 제출하겠는가?`)) return;
-            }
-
-            if (weekWarningTriggered) {
-                if(!confirm(`경고: 일주일(일~토) 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있다.\n\n이대로 제출하겠는가?`)) return;
-            }
+            if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장된다. (현재 ${totalRestDays}일 휴무)\n\n이대로 제출하겠는가?`)) return;
+            if (weekWarningTriggered && !confirm(`경고: 일주일(일~토) 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있다.\n\n이대로 제출하겠는가?`)) return;
 
             let confirmMsg = `총 ${plans.length}일치의 활동계획을 제출하겠는가?`;
             if (requiresApproval) confirmMsg += `\n\n※ 주의: 8시간을 초과하는 근무가 포함되어 조장 승인이 추가로 필요하다.`;
-
             if(!confirm(confirmMsg)) return;
 
             try {
-                const res = await fetch('geopark-system-production.up.railway.app/submit_plan_bulk', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                const res = await fetch(`${API_BASE}/submit_plan_bulk`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, plans: plans })
                 });
-                
-                if(res.ok) {
-                    alert("활동계획서 일괄 제출이 완료되었다.");
-                    document.getElementById('plan_list_container').style.display = 'none';
-                } else { alert("제출에 실패했다."); }
+                if(res.ok) { alert("활동계획서 일괄 제출이 완료되었다."); document.getElementById('plan_list_container').style.display = 'none'; } 
+                else { alert("제출에 실패했다."); }
             } catch (e) { alert("서버 연결 오류"); }
+        }
+
+        // --- 활동계획 변경 관련 함수 ---
+        function updateChangeUI() {
+            const type = document.getElementById('change_type').value;
+            document.getElementById('change_ui_time').style.display = type === '시간 변경' ? 'block' : 'none';
+            document.getElementById('change_ui_guide').style.display = type === '해설사 변경(대타)' ? 'block' : 'none';
+            document.getElementById('change_ui_cancel').style.display = type === '계획 취소' ? 'block' : 'none';
+        }
+
+        async function loadGuideList() {
+            const select = document.getElementById('change_target_guide');
+            try {
+                const res = await fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=${encodeURIComponent(userName)}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    if(data.guides.length > 0) select.innerHTML = data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('');
+                    else select.innerHTML = '<option value="">대타 가능한 동료가 없다.</option>';
+                }
+            } catch (e) { select.innerHTML = '<option value="">명단 불러오기 실패</option>'; }
+        }
+
+        async function submitPlanChange() {
+            const targetDate = document.getElementById('change_target_date').value;
+            const changeType = document.getElementById('change_type').value;
+            const remarks = document.getElementById('change_remarks').value;
+            
+            if(!targetDate) { alert("변경할 날짜를 선택해라."); return; }
+            if(!remarks) { alert("변경 사유를 간략히 입력해라."); return; }
+
+            let changeDetail = "";
+            let targetGuide = "";
+
+            if(changeType === '시간 변경') {
+                const sTime = document.getElementById('change_time_start').value;
+                const eTime = document.getElementById('change_time_end').value;
+                changeDetail = `${sTime}~${eTime} 로 변경 신청`;
+            } else if(changeType === '해설사 변경(대타)') {
+                targetGuide = document.getElementById('change_target_guide').value;
+                if(!targetGuide) { alert("대타를 지정할 동료를 선택해라."); return; }
+                changeDetail = `${targetGuide} 해설사에게 대타 요청`;
+            } else {
+                changeDetail = "계획 취소 및 휴무 처리 요청";
+            }
+
+            if(!confirm(`[${targetDate}] 일자의 계획을 변경(승인 요청)하겠는가?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/request_plan_change`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: userName, island: userIsland, target_date: targetDate,
+                        change_type: changeType, change_detail: changeDetail, target_guide: targetGuide
+                    })
+                });
+                if(res.ok) { 
+                    alert("변경 신청이 정상적으로 접수되었다. (승인 대기중)"); 
+                    document.getElementById('change_area').style.display = 'none';
+                } else alert("신청 실패");
+            } catch (e) { alert("서버 통신 오류"); }
         }
 
         function logout() {
