@@ -37,6 +37,10 @@ class PlanChangeData(BaseModel):
 class ApprovalData(BaseModel):
     sheet_name: str; row_index: int; status: str
 
+# [추가] 일괄 승인 처리를 위한 데이터 형식
+class ApprovalBulkData(BaseModel):
+    approvals: List[Dict]
+
 @app.post("/login")
 async def login(data: dict):
     try:
@@ -118,9 +122,7 @@ async def submit_plan_bulk(data: PlanDataBulk):
         rows = [[p['plan_date'], data.island, p['location'], data.name, p['activity_status'], p['remarks'], timestamp, now.year, now.month, p.get('status', '대기중'), "", ""] for p in data.plans]
         sh.append_rows(rows)
         return {"status": "ok"}
-    except Exception as e: 
-        print("Bulk Plan Error:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e: raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/get_guides")
 async def get_guides(island: str, exclude_name: str):
@@ -166,9 +168,7 @@ async def get_pending_requests(island: str):
                 pending_changes.append(r)
                 
         return {"status": "ok", "plans": pending_plans, "changes": pending_changes}
-    except Exception as e: 
-        print("Get Pending Error:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e: raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/process_approval")
 async def process_approval(data: ApprovalData):
@@ -179,3 +179,34 @@ async def process_approval(data: ApprovalData):
         sh.update_cell(data.row_index, col_idx, data.status)
         return {"status": "ok"}
     except Exception as e: raise HTTPException(status_code=500, detail=str(e))
+
+# [추가] 일괄 승인 엔드포인트
+@app.post("/process_approval_bulk")
+async def process_approval_bulk(data: ApprovalBulkData):
+    try:
+        client = get_gsheet_client()
+        db = client.open("지질공원_운영일지_DB")
+        
+        updates_by_sheet = {}
+        for app in data.approvals:
+            sheet = app['sheet_name']
+            if sheet not in updates_by_sheet:
+                updates_by_sheet[sheet] = []
+            updates_by_sheet[sheet].append(app)
+            
+        for sheet_name, apps in updates_by_sheet.items():
+            sh = db.worksheet(sheet_name)
+            col_idx = 10 if sheet_name == "활동계획서(NEW)" else 8
+            
+            # gspread의 update_cells()를 이용해 일괄 업데이트 (속도 향상)
+            cells = []
+            for app in apps:
+                cells.append(gspread.Cell(row=app['row_index'], col=col_idx, value=app['status']))
+            
+            if cells:
+                sh.update_cells(cells)
+                
+        return {"status": "ok"}
+    except Exception as e: 
+        print("Bulk Approval Error:", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
