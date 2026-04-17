@@ -47,35 +47,19 @@
     <div id="menu_container"></div>
 
     <div id="attendance_area" class="hidden-section">
-        <div class="form-group">
-            <label>📍 기록할 안내소 선택</label>
-            <select id="location_select"></select>
-        </div>
+        <div class="form-group"><label>📍 기록할 안내소 선택</label><select id="location_select"></select></div>
         <div class="time-input-wrap">
             <label style="font-size: 0.8rem; font-weight: 600; color:#555; display:block; margin-bottom:5px;">⏱ 기록할 시간 (직접 수정 가능)</label>
             <input type="time" id="action_time_input">
         </div>
-        <button class="btn-act btn-in" onclick="sendAction('출근')">
-            <span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div>
-        </button>
-        <button class="btn-act btn-move" onclick="sendAction('이동')">
-            <span>🔵 이동하기 (장소변경)</span><div id="move_time_display" class="time-text"></div>
-        </button>
-        <button class="btn-act btn-out" onclick="sendAction('퇴근')">
-            <span>🔴 퇴근하기</span><div id="out_time_display" class="time-text"></div>
-        </button>
+        <button class="btn-act btn-in" onclick="sendAction('출근')"><span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div></button>
+        <button class="btn-act btn-move" onclick="sendAction('이동')"><span>🔵 이동하기 (장소변경)</span><div id="move_time_display" class="time-text"></div></button>
+        <button class="btn-act btn-out" onclick="sendAction('퇴근')"><span>🔴 퇴근하기</span><div id="out_time_display" class="time-text"></div></button>
     </div>
 
     <div id="log_area" class="hidden-section">
-        <div class="form-group">
-            <label>📍 작성할 안내소</label>
-            <select id="log_location_select"></select>
-        </div>
-        <div class="form-group">
-            <label>시간 선택</label>
-            <select id="log_time"></select>
-        </div>
-        
+        <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select"></select></div>
+        <div class="form-group"><label>시간 선택</label><select id="log_time"></select></div>
         <div class="form-group">
             <label>공동해설 여부</label>
             <select id="log_co">
@@ -83,22 +67,42 @@
                 <option value="O">O (공동해설 - 나는 실적 0, 상대가 입력)</option>
             </select>
         </div>
-
         <div class="form-group" id="co_guide_group" style="display: none;">
             <label>👥 실적을 대신 입력할 동료 선택</label>
-            <select id="log_co_guide">
-                <option value="">해설사 확인 중...</option>
-            </select>
+            <select id="log_co_guide"><option value="">해설사 확인 중...</option></select>
         </div>
-
         <div id="stats_group">
             <div class="form-group"><label>탐방객 수 (명)</label><input type="number" id="log_visitors" value="0"></div>
             <div class="form-group"><label>청취자 수 (명)</label><input type="number" id="log_listeners" value="0"></div>
             <div class="form-group"><label>해설 횟수 (회)</label><input type="number" id="log_count" value="0"></div>
         </div>
-
         <div class="form-group"><label>📝 특이사항</label><textarea id="log_remarks" rows="3" placeholder="기타 전달사항을 입력하세요"></textarea></div>
         <button class="btn-submit" onclick="submitLog()">일지 저장하기</button>
+    </div>
+
+    <div id="plan_area" class="hidden-section">
+        <div class="form-group">
+            <label>📅 계획 근무 날짜</label>
+            <input type="date" id="plan_date">
+        </div>
+        <div class="form-group">
+            <label>📍 근무 장소(안내소)</label>
+            <select id="plan_location_select"></select>
+        </div>
+        <div class="form-group">
+            <label>⏱ 활동 여부 (계획 시간)</label>
+            <select id="plan_hours" onchange="toggleCustomHours()">
+                <option value="8시간">8시간</option>
+                <option value="4시간">4시간</option>
+                <option value="기타">기타시간 (직접입력)</option>
+            </select>
+            <input type="number" id="plan_hours_custom" style="display:none; margin-top:8px;" placeholder="시간 입력 (예: 5)">
+        </div>
+        <div class="form-group">
+            <label>📝 비고 (전달사항 등)</label>
+            <textarea id="plan_remarks" rows="2" placeholder="필요시 입력해주세요"></textarea>
+        </div>
+        <button class="btn-submit" onclick="submitPlan()">활동계획서 제출 (승인 요청)</button>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
@@ -126,6 +130,8 @@
 
         const locSelect = document.getElementById('location_select');
         const logLocSelect = document.getElementById('log_location_select');
+        const planLocSelect = document.getElementById('plan_location_select');
+        
         let myLocations = [];
         if (userIsland.includes('백령')) myLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
         else if (userIsland.includes('대청')) myLocations = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
@@ -135,6 +141,7 @@
         myLocations.forEach(loc => {
             locSelect.add(new Option(loc, loc));
             logLocSelect.add(new Option(loc, loc));
+            planLocSelect.add(new Option(loc, loc));
         });
 
         function setCurrentTimeInput() {
@@ -160,17 +167,23 @@
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
-                document.getElementById('attendance_area').style.display = m.includes('1') ? 'block' : 'none';
-                document.getElementById('log_area').style.display = m.includes('2') ? 'block' : 'none';
+                document.getElementById('attendance_area').style.display = m.includes('출퇴근관리') ? 'block' : 'none';
+                document.getElementById('log_area').style.display = m.includes('운영일지 작성') ? 'block' : 'none';
+                document.getElementById('plan_area').style.display = m.includes('활동계획서 작성') ? 'block' : 'none';
                 
-                if(m.includes('1')) setCurrentTimeInput();
-                if(m.includes('2')) {
+                if(m.includes('출퇴근관리')) setCurrentTimeInput();
+                if(m.includes('운영일지 작성')) {
                     if(currentLoc !== "미출근") logLocSelect.value = currentLoc;
                     checkDuplicateAndLock();
                 }
             };
             container.appendChild(d);
         });
+
+        function toggleCustomHours() {
+            const sel = document.getElementById('plan_hours').value;
+            document.getElementById('plan_hours_custom').style.display = (sel === '기타') ? 'block' : 'none';
+        }
 
         document.getElementById('log_time').addEventListener('change', checkDuplicateAndLock);
         document.getElementById('log_location_select').addEventListener('change', checkDuplicateAndLock);
@@ -179,7 +192,7 @@
         async function checkDuplicateAndLock() {
             const selectedTime = document.getElementById('log_time').value;
             const statsGroup = document.getElementById('stats_group');
-            const submitBtn = document.querySelector('.btn-submit');
+            const submitBtn = document.querySelector('#log_area .btn-submit');
             const coSelect = document.getElementById('log_co');
 
             try {
@@ -187,33 +200,12 @@
                 const data = await res.json();
 
                 if (data.status === 'already_logged') {
-                    // 본인이 이미 일지를 작성한 경우
-                    coSelect.innerHTML = '<option value="">이미 작성 완료</option>';
-                    coSelect.disabled = true;
-                    statsGroup.style.display = 'none';
-                    document.getElementById('co_guide_group').style.display = 'none';
-                    submitBtn.disabled = true;
-                    submitBtn.innerText = "이 시간대는 이미 작성했습니다";
-                    submitBtn.style.backgroundColor = "#CCC";
+                    coSelect.innerHTML = '<option value="">이미 작성 완료</option>'; coSelect.disabled = true; statsGroup.style.display = 'none'; document.getElementById('co_guide_group').style.display = 'none'; submitBtn.disabled = true; submitBtn.innerText = "이 시간대는 이미 작성했습니다"; submitBtn.style.backgroundColor = "#CCC";
                 } else if (data.status === 'designated') {
-                    // 테스트 1이 나(테스트 2)를 지목한 경우! -> 실적 입력창을 열어줌
-                    coSelect.innerHTML = `<option value="○">○ (${data.designated_by} 님이 공동해설 지정함)</option>`;
-                    coSelect.disabled = true;
-                    coSelect.value = "○";
-                    statsGroup.style.display = 'block'; // 숫자 입력할 수 있게 보임!
-                    document.getElementById('co_guide_group').style.display = 'none';
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "실적 입력 후 저장하기";
-                    submitBtn.style.backgroundColor = "#3C1E1E";
+                    coSelect.innerHTML = `<option value="○">○ (${data.designated_by} 님이 공동해설 지정함)</option>`; coSelect.disabled = true; coSelect.value = "○"; statsGroup.style.display = 'block'; document.getElementById('co_guide_group').style.display = 'none'; submitBtn.disabled = false; submitBtn.innerText = "실적 입력 후 저장하기"; submitBtn.style.backgroundColor = "#3C1E1E";
                 } else {
-                    // 아무 일도 없는 정상 상태
                     if (coSelect.disabled) {
-                        coSelect.innerHTML = '<option value="X">X (단독해설 - 실적 직접 입력)</option><option value="O">O (공동해설 - 나는 실적 0, 상대가 입력)</option>';
-                        coSelect.disabled = false;
-                        coSelect.value = "X";
-                        submitBtn.disabled = false;
-                        submitBtn.innerText = "일지 저장하기";
-                        submitBtn.style.backgroundColor = "#3C1E1E";
+                        coSelect.innerHTML = '<option value="X">X (단독해설 - 실적 직접 입력)</option><option value="O">O (공동해설 - 나는 실적 0, 상대가 입력)</option>'; coSelect.disabled = false; coSelect.value = "X"; submitBtn.disabled = false; submitBtn.innerText = "일지 저장하기"; submitBtn.style.backgroundColor = "#3C1E1E";
                     }
                     updateCoGuideUI();
                 }
@@ -222,9 +214,7 @@
 
         async function updateCoGuideUI() {
             const isCo = document.getElementById('log_co').value === 'O';
-            document.getElementById('co_guide_group').style.display = isCo ? 'block' : 'none';
-            document.getElementById('stats_group').style.display = isCo ? 'none' : 'block';
-            
+            document.getElementById('co_guide_group').style.display = isCo ? 'block' : 'none'; document.getElementById('stats_group').style.display = isCo ? 'none' : 'block';
             if (isCo) {
                 const loc = document.getElementById('log_location_select').value;
                 const coGuideSelect = document.getElementById('log_co_guide');
@@ -233,11 +223,8 @@
                     const res = await fetch(`https://bdgeopark.onrender.com/active_guides?location=${encodeURIComponent(loc)}&name=${encodeURIComponent(userName)}`);
                     if(res.ok) {
                         const data = await res.json();
-                        if(data.guides && data.guides.length > 0) {
-                            coGuideSelect.innerHTML = data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('');
-                        } else {
-                            coGuideSelect.innerHTML = '<option value="">해당 안내소 출근자가 없습니다.</option>';
-                        }
+                        if(data.guides && data.guides.length > 0) coGuideSelect.innerHTML = data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('');
+                        else coGuideSelect.innerHTML = '<option value="">해당 안내소 출근자가 없습니다.</option>';
                     }
                 } catch (e) { coGuideSelect.innerHTML = '<option value="">오류</option>'; }
             }
@@ -246,24 +233,17 @@
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
             const inputTime = document.getElementById('action_time_input').value; 
-            
             if(!inputTime) { alert("시간을 입력해 주세요!"); return; }
             if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
 
             try {
                 const res = await fetch('https://bdgeopark.onrender.com/record', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: action, location: loc, action_time: inputTime })
                 });
-                
                 if(res.ok) {
-                    if (action === '출근' || action === '이동') {
-                        currentLoc = loc; localStorage.setItem("current_location", loc); updateCurrentLocBadge();
-                    } else if (action === '퇴근') {
-                        currentLoc = "미출근"; localStorage.setItem("current_location", "미출근"); updateCurrentLocBadge();
-                    }
-
+                    if (action === '출근' || action === '이동') { currentLoc = loc; localStorage.setItem("current_location", loc); updateCurrentLocBadge(); } 
+                    else if (action === '퇴근') { currentLoc = "미출근"; localStorage.setItem("current_location", "미출근"); updateCurrentLocBadge(); }
                     if (action === '출근') { localStorage.setItem("last_in_time", inputTime); document.getElementById('in_time_display').innerText = `기록됨: ${inputTime}`; }
                     else if (action === '이동') { localStorage.setItem("last_move_time", inputTime); document.getElementById('move_time_display').innerText = `기록됨: ${inputTime}`; }
                     else if (action === '퇴근') { localStorage.setItem("last_out_time", inputTime); document.getElementById('out_time_display').innerText = `기록됨: ${inputTime}`; }
@@ -274,8 +254,6 @@
 
         async function submitLog() {
             const coSelectValue = document.getElementById('log_co').value;
-            
-            // O: 내가 테스트 1(실적 0) / ○: 내가 테스트 2(실적 입력해야함) / X: 단독해설
             const isCoInitiator = coSelectValue === 'O'; 
             const isDesignated = coSelectValue === '○'; 
 
@@ -284,39 +262,70 @@
             else if (isDesignated) coCommentaryValue = "○";
             else coCommentaryValue = "X";
 
-            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없습니다"))) {
-                alert("선택 가능한 공동해설자가 없습니다. 단독해설(X)로 변경해주세요."); return;
-            }
+            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없습니다"))) { alert("선택 가능한 공동해설자가 없습니다."); return; }
             if(!confirm("운영일지를 저장하시겠습니까?")) return;
 
-            // 지목한 사람(O)만 실적이 0이 되고, 지목당한 사람(○)이나 단독(X)은 입력값을 그대로 전송!
             const finalVisitors = isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value);
             const finalListeners = isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value);
             const finalCount = isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value);
 
             try {
                 const res = await fetch('https://bdgeopark.onrender.com/log_operation', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         name: userName, island: userIsland, role: userRole,
                         log_location: document.getElementById('log_location_select').value,
                         target_time: document.getElementById('log_time').value,
-                        visitors: finalVisitors,
-                        listeners: finalListeners,
-                        count: finalCount,
-                        co_commentary: coCommentaryValue,
-                        remarks: document.getElementById('log_remarks').value
+                        visitors: finalVisitors, listeners: finalListeners, count: finalCount,
+                        co_commentary: coCommentaryValue, remarks: document.getElementById('log_remarks').value
                     })
                 });
                 if(res.ok) { 
-                    alert("저장되었습니다."); 
-                    document.getElementById('log_area').style.display = 'none'; 
-                    document.getElementById('log_visitors').value = 0;
-                    document.getElementById('log_listeners').value = 0;
-                    document.getElementById('log_count').value = 0;
-                    document.getElementById('log_remarks').value = "";
+                    alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; 
+                    document.getElementById('log_visitors').value = 0; document.getElementById('log_listeners').value = 0; document.getElementById('log_count').value = 0; document.getElementById('log_remarks').value = "";
                 } else alert("저장 실패");
+            } catch (e) { alert("서버 연결 오류"); }
+        }
+
+        // --- 활동계획서 제출 실행 ---
+        async function submitPlan() {
+            const rawDate = document.getElementById('plan_date').value; 
+            const loc = document.getElementById('plan_location_select').value;
+            const hoursSelect = document.getElementById('plan_hours').value;
+            const remarksValue = document.getElementById('plan_remarks').value;
+            
+            if (!rawDate) { alert("계획하실 근무 날짜를 선택해주세요."); return; }
+
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const d = new Date(rawDate);
+            const formattedDate = `${d.getMonth()+1}월 ${d.getDate()}일(${days[d.getDay()]})`;
+
+            let finalHours = hoursSelect;
+            if (hoursSelect === '기타') {
+                const customH = document.getElementById('plan_hours_custom').value;
+                if (!customH) { alert("계획 시간을 직접 입력해주세요."); return; }
+                finalHours = customH + "시간";
+            }
+
+            if(!confirm(`[${formattedDate}] ${loc} (${finalHours})\n계획을 제출하고 승인을 요청하시겠습니까?`)) return;
+
+            try {
+                const res = await fetch('https://bdgeopark.onrender.com/submit_plan', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: userName, island: userIsland,
+                        plan_date: formattedDate, location: loc, activity_status: finalHours, remarks: remarksValue
+                    })
+                });
+                
+                if(res.ok) {
+                    alert("활동계획서가 성공적으로 제출되었습니다. (조장 승인 대기 중)");
+                    document.getElementById('plan_area').style.display = 'none';
+                    document.getElementById('plan_date').value = "";
+                    document.getElementById('plan_hours_custom').value = "";
+                    document.getElementById('plan_remarks').value = "";
+                } else { alert("제출에 실패했습니다."); }
             } catch (e) { alert("서버 연결 오류"); }
         }
 
