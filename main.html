@@ -12,12 +12,15 @@
         .user-info .name { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
         .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
         .current-badge { background-color: #3498db; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
+        
         .hidden-section { display: none; background-color: white; padding: 20px; border-radius: 16px; margin-top: 10px; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .menu-card { background-color: white; padding: 20px; border-radius: 16px; margin-bottom: 12px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
         select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
         select:disabled { background-color: #EEEEEE; color: #999; }
+        
         .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .btn-act:active { transform: scale(0.98); }
         .btn-in { background-color: #FEE500; color: #191919; }
@@ -25,14 +28,28 @@
         .btn-out { background-color: #EAEAEA; color: #191919; }
         .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
         .btn-submit:disabled { background-color: #CCC; cursor: not-allowed; }
+        
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
         .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
+        
+        /* 활동계획서 전용 스타일 */
         .plan-row { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #E5E5E5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .plan-date-label { font-size: 1.05rem; font-weight: 800; color: #2c3e50; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid #FEE500; padding-bottom: 5px; }
         .flex-group { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
         .calc-hours { font-size: 0.85rem; font-weight: bold; color: #27ae60; }
         .calc-hours.over { color: #e74c3c; }
+
+        /* 조장 승인 전용 스타일 */
+        .approval-card { background:#f9f9f9; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:10px; }
+        .app-tag { display:inline-block; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold; margin-bottom:5px; }
+        .tag-plan { background:#e1f5fe; color:#01579b; }
+        .tag-change { background:#fff3e0; color:#e65100; }
+        .app-info { font-size:0.9rem; line-height:1.5; margin-bottom:10px; }
+        .app-btns { display:flex; gap:8px; }
+        .btn-small { flex:1; padding:8px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; }
+        .btn-approve { background:#27ae60; color:white; }
+        .btn-reject { background:#e74c3c; color:white; }
     </style>
 </head>
 <body>
@@ -111,10 +128,7 @@
     </div>
 
     <div id="change_area" class="hidden-section">
-        <div class="form-group">
-            <label>📅 변경 대상 날짜</label>
-            <input type="date" id="change_target_date">
-        </div>
+        <div class="form-group"><label>📅 변경 대상 날짜</label><input type="date" id="change_target_date"></div>
         <div class="form-group">
             <label>⚙️ 변경 유형</label>
             <select id="change_type" onchange="updateChangeUI()">
@@ -123,40 +137,37 @@
                 <option value="계획 취소">계획 취소 (휴무 전환)</option>
             </select>
         </div>
-
         <div id="change_ui_time" class="time-input-wrap">
             <label style="font-size: 0.8rem; font-weight: 600;">새로운 시간 설정</label>
             <div class="flex-group" style="margin-top: 5px;">
-                <select id="change_time_start" style="flex:1;"></select>
-                <span style="font-weight:bold;">~</span>
-                <select id="change_time_end" style="flex:1;"></select>
+                <select id="change_time_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="change_time_end" style="flex:1;"></select>
             </div>
         </div>
-
         <div id="change_ui_guide" class="time-input-wrap" style="display:none;">
             <label style="font-size: 0.8rem; font-weight: 600;">대타를 요청할 동료 해설사</label>
-            <select id="change_target_guide" style="margin-top: 5px;">
-                <option value="">불러오는 중...</option>
-            </select>
+            <select id="change_target_guide" style="margin-top: 5px;"><option value="">불러오는 중...</option></select>
         </div>
-
         <div id="change_ui_cancel" class="time-input-wrap" style="display:none;">
             <label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환한다.</label>
         </div>
-
-        <div class="form-group">
-            <label>📝 변경 사유</label>
-            <textarea id="change_remarks" rows="2" placeholder="변경 사유를 간략히 적어주세요"></textarea>
-        </div>
-
+        <div class="form-group"><label>📝 변경 사유</label><textarea id="change_remarks" rows="2" placeholder="변경 사유를 간략히 적어주세요"></textarea></div>
         <button class="btn-submit" onclick="submitPlanChange()">승인 요청하기</button>
+    </div>
+
+    <div id="approval_area" class="hidden-section">
+        <div class="form-group">
+            <label>📁 조원 결재함 (승인 대기 목록)</label>
+            <div id="pending_container">
+                <p style="text-align:center; color:#999; padding:20px;">대기 중인 요청을 불러오는 중...</p>
+            </div>
+        </div>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
 
     <script>
         // ★★★ 여기에 본인의 레일웨이 주소를 입력하세요 (끝에 / 없이 적습니다) ★★★
-        const API_BASE = "https://geopark-system-production.up.railway.app"; 
+        const API_BASE = "geopark-system-production.up.railway.app"; 
         
         const userName = localStorage.getItem("user_name");
         const userRole = localStorage.getItem("user_role");
@@ -220,7 +231,6 @@
         document.getElementById('batch_start').value = "08:00";
         document.getElementById('batch_end').value = "17:00";
         
-        // 활동계획 변경용 시간 옵션
         document.getElementById('change_time_start').innerHTML = timeOptionsHtml;
         document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
 
@@ -235,17 +245,21 @@
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
+                // 메뉴명(글자)으로 찾아서 열고 닫기 (순서가 달라도 안전함)
                 document.getElementById('attendance_area').style.display = m.includes('출퇴근관리') ? 'block' : 'none';
                 document.getElementById('log_area').style.display = m.includes('운영일지 작성') ? 'block' : 'none';
                 document.getElementById('plan_area').style.display = m.includes('활동계획서 작성') ? 'block' : 'none';
                 document.getElementById('change_area').style.display = m.includes('활동계획 변경') ? 'block' : 'none';
+                document.getElementById('approval_area').style.display = m.includes('변경 승인') ? 'block' : 'none';
                 
                 if(m.includes('출퇴근관리')) setCurrentTimeInput();
-                if(m.includes('활동계획 변경')) loadGuideList(); // 변경 메뉴 열 때 동료 명단 불러오기
+                if(m.includes('활동계획 변경')) loadGuideList(); 
+                if(m.includes('변경 승인')) loadPendingRequests(); // 조장용 결재함 열 때 리스트 불러오기
             };
             container.appendChild(d);
         });
 
+        // ----------------------- 1. 출퇴근 & 일지 로직 -----------------------
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
             const inputTime = document.getElementById('action_time_input').value; 
@@ -300,7 +314,7 @@
             } catch (e) {}
         }
 
-        // --- 15일 일괄 작성 로직 유지 ---
+        // ----------------------- 2. 15일 계획 로직 -----------------------
         function generatePlanForm() {
             const month = parseInt(document.getElementById('plan_month').value);
             const half = parseInt(document.getElementById('plan_half').value);
@@ -319,14 +333,10 @@
 
                 let html = `
                     <div class="plan-row" data-date="${year}-${month}-${i}" data-day="${dayIdx}">
-                        <div class="plan-date-label">
-                            <span style="${isWeekend}">${dateStr}</span><span class="calc-hours">0시간</span>
-                        </div>
+                        <div class="plan-date-label"><span style="${isWeekend}">${dateStr}</span><span class="calc-hours">0시간</span></div>
                         <div class="flex-group">
                             <select class="p-loc" style="flex:1;" onchange="handleRowChange(this)">${locOptionsHtml}</select>
-                            <select class="p-start" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select>
-                            <span>~</span>
-                            <select class="p-end" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select>
+                            <select class="p-start" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select><span>~</span><select class="p-end" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select>
                         </div>
                         <input type="text" class="p-remarks" placeholder="비고 (선택사항)">
                     </div>
@@ -357,8 +367,7 @@
 
             if (loc === '휴무') {
                 hoursSpan.innerText = "휴무"; hoursSpan.className = "calc-hours";
-                row.querySelector('.p-start').disabled = true; row.querySelector('.p-end').disabled = true;
-                return;
+                row.querySelector('.p-start').disabled = true; row.querySelector('.p-end').disabled = true; return;
             }
             row.querySelector('.p-start').disabled = false; row.querySelector('.p-end').disabled = false;
 
@@ -379,10 +388,7 @@
             document.querySelectorAll('.plan-row').forEach(row => {
                 let dateStr = row.querySelector('.plan-date-label span').innerText;
                 let dayIdx = parseInt(row.getAttribute('data-day'));
-                let loc = row.querySelector('.p-loc').value;
-                let sTime = row.querySelector('.p-start').value;
-                let eTime = row.querySelector('.p-end').value;
-                let remarks = row.querySelector('.p-remarks').value;
+                let loc = row.querySelector('.p-loc').value; let sTime = row.querySelector('.p-start').value; let eTime = row.querySelector('.p-end').value; let remarks = row.querySelector('.p-remarks').value;
                 
                 if (dayIdx === 0) currentWeekWorkDays = 0;
                 let activityStatus = ""; let statusStr = "대기중";
@@ -400,16 +406,15 @@
                 if (dayIdx === 6 || row === document.querySelectorAll('.plan-row')[document.querySelectorAll('.plan-row').length - 1]) {
                     if (currentWeekWorkDays >= 7) weekWarningTriggered = true;
                 }
-                
                 plans.push({ plan_date: dateStr, location: loc === '휴무' ? '-' : loc, activity_status: activityStatus, remarks: remarks, status: statusStr });
             });
 
             if (!isValid) return;
-            if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장된다. (현재 ${totalRestDays}일 휴무)\n\n이대로 제출하겠는가?`)) return;
-            if (weekWarningTriggered && !confirm(`경고: 일주일(일~토) 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있다.\n\n이대로 제출하겠는가?`)) return;
+            if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장된다.\n이대로 제출하겠는가?`)) return;
+            if (weekWarningTriggered && !confirm(`경고: 일주일 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있다.\n이대로 제출하겠는가?`)) return;
 
             let confirmMsg = `총 ${plans.length}일치의 활동계획을 제출하겠는가?`;
-            if (requiresApproval) confirmMsg += `\n\n※ 주의: 8시간을 초과하는 근무가 포함되어 조장 승인이 추가로 필요하다.`;
+            if (requiresApproval) confirmMsg += `\n※ 주의: 8시간 초과 근무가 포함되어 조장 승인이 추가로 필요하다.`;
             if(!confirm(confirmMsg)) return;
 
             try {
@@ -417,12 +422,11 @@
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, plans: plans })
                 });
-                if(res.ok) { alert("활동계획서 일괄 제출이 완료되었다."); document.getElementById('plan_list_container').style.display = 'none'; } 
-                else { alert("제출에 실패했다."); }
-            } catch (e) { alert("서버 연결 오류"); }
+                if(res.ok) { alert("일괄 제출 완료."); document.getElementById('plan_list_container').style.display = 'none'; } else alert("제출 실패.");
+            } catch (e) { alert("서버 오류"); }
         }
 
-        // --- 활동계획 변경 관련 함수 ---
+        // ----------------------- 3. 변경 신청 로직 -----------------------
         function updateChangeUI() {
             const type = document.getElementById('change_type').value;
             document.getElementById('change_ui_time').style.display = type === '시간 변경' ? 'block' : 'none';
@@ -446,40 +450,87 @@
             const targetDate = document.getElementById('change_target_date').value;
             const changeType = document.getElementById('change_type').value;
             const remarks = document.getElementById('change_remarks').value;
-            
             if(!targetDate) { alert("변경할 날짜를 선택해라."); return; }
-            if(!remarks) { alert("변경 사유를 간략히 입력해라."); return; }
+            if(!remarks) { alert("변경 사유를 입력해라."); return; }
 
-            let changeDetail = "";
-            let targetGuide = "";
-
+            let changeDetail = ""; let targetGuide = "";
             if(changeType === '시간 변경') {
-                const sTime = document.getElementById('change_time_start').value;
-                const eTime = document.getElementById('change_time_end').value;
+                const sTime = document.getElementById('change_time_start').value; const eTime = document.getElementById('change_time_end').value;
                 changeDetail = `${sTime}~${eTime} 로 변경 신청`;
             } else if(changeType === '해설사 변경(대타)') {
                 targetGuide = document.getElementById('change_target_guide').value;
-                if(!targetGuide) { alert("대타를 지정할 동료를 선택해라."); return; }
+                if(!targetGuide) { alert("동료를 선택해라."); return; }
                 changeDetail = `${targetGuide} 해설사에게 대타 요청`;
-            } else {
-                changeDetail = "계획 취소 및 휴무 처리 요청";
-            }
+            } else { changeDetail = "계획 취소 및 휴무 처리 요청"; }
 
-            if(!confirm(`[${targetDate}] 일자의 계획을 변경(승인 요청)하겠는가?`)) return;
+            if(!confirm(`변경(승인 요청)하겠는가?`)) return;
 
             try {
                 const res = await fetch(`${API_BASE}/request_plan_change`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        name: userName, island: userIsland, target_date: targetDate,
-                        change_type: changeType, change_detail: changeDetail, target_guide: targetGuide
-                    })
+                    body: JSON.stringify({ name: userName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: targetGuide })
                 });
-                if(res.ok) { 
-                    alert("변경 신청이 정상적으로 접수되었다. (승인 대기중)"); 
-                    document.getElementById('change_area').style.display = 'none';
-                } else alert("신청 실패");
-            } catch (e) { alert("서버 통신 오류"); }
+                if(res.ok) { alert("신청 완료."); document.getElementById('change_area').style.display = 'none'; } else alert("신청 실패");
+            } catch (e) {}
+        }
+
+        // ----------------------- 4. [조장 전용] 승인 로직 -----------------------
+        async function loadPendingRequests() {
+            const container = document.getElementById('pending_container');
+            container.innerHTML = '<p style="text-align:center; color:#999;">목록을 불러오고 있습니다...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`);
+                const data = await res.json();
+                
+                if(data.plans.length === 0 && data.changes.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">승인 대기 중인 내역이 없습니다. 😊</p>';
+                    return;
+                }
+
+                let html = '';
+                data.plans.forEach(p => {
+                    html += `
+                        <div class="approval-card">
+                            <span class="app-tag tag-plan">신규 계획</span>
+                            <div class="app-info">
+                                <b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}<br>장소: ${p['장소']} (${p['활동여부']})
+                            </div>
+                            <div class="app-btns">
+                                <button class="btn-small btn-approve" onclick="processApp('활동계획서(NEW)', ${p.row_index}, '승인완료')">승인</button>
+                                <button class="btn-small btn-reject" onclick="processApp('활동계획서(NEW)', ${p.row_index}, '반려')">반려</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                data.changes.forEach(c => {
+                    html += `
+                        <div class="approval-card">
+                            <span class="app-tag tag-change">변경/취소 요청</span>
+                            <div class="app-info">
+                                <b>${c['신청자']}</b> 해설사<br>대상일: ${c['변경대상일']}<br>내용: ${c['변경유형']} - ${c['상세내용']}
+                            </div>
+                            <div class="app-btns">
+                                <button class="btn-small btn-approve" onclick="processApp('활동계획_변경신청', ${c.row_index}, '승인완료')">승인</button>
+                                <button class="btn-small btn-reject" onclick="processApp('활동계획_변경신청', ${c.row_index}, '반려')">반려</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터 로드 실패</p>'; }
+        }
+
+        async function processApp(sheet, row, status) {
+            if(!confirm(`해당 요청을 [${status}] 하시겠습니까?`)) return;
+            try {
+                const res = await fetch(`${API_BASE}/process_approval`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ sheet_name: sheet, row_index: row, status: status })
+                });
+                if(res.ok) { alert(`${status} 처리되었습니다.`); loadPendingRequests(); }
+            } catch (e) {}
         }
 
         function logout() {
