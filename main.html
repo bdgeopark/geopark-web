@@ -142,7 +142,7 @@
             <select id="change_target_guide" style="margin-top: 5px;"><option value="">불러오는 중...</option></select>
         </div>
         <div id="change_ui_cancel" class="time-input-wrap" style="display:none;">
-            <label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환한다.</label>
+            <label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환합니다.</label>
         </div>
         <div class="form-group"><label>📝 변경 사유</label><textarea id="change_remarks" rows="2" placeholder="변경 사유를 간략히 적어주세요"></textarea></div>
         <button class="btn-submit" onclick="submitPlanChange()">승인 요청하기</button>
@@ -160,7 +160,7 @@
     <div class="logout" onclick="logout()">로그아웃</div>
 
     <script>
-        // 정상적인 Railway 주소 적용
+        // ★★★ 정상적인 Railway 주소 명시적 지정 ★★★
         const API_BASE = "https://geopark-system-production.up.railway.app"; 
         
         const userName = localStorage.getItem("user_name");
@@ -257,7 +257,7 @@
             const loc = document.getElementById('location_select').value;
             const inputTime = document.getElementById('action_time_input').value; 
             if(!inputTime) return;
-            if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하겠는가?`)) return;
+            if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
 
             try {
                 const res = await fetch(`${API_BASE}/record`, {
@@ -284,8 +284,8 @@
             else if (isDesignated) coCommentaryValue = "○";
             else coCommentaryValue = "X";
 
-            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없다"))) { alert("선택 가능한 공동해설자가 없다."); return; }
-            if(!confirm("운영일지를 저장하겠는가?")) return;
+            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없다"))) { alert("선택 가능한 공동해설자가 없습니다."); return; }
+            if(!confirm("운영일지를 저장하시겠습니까?")) return;
 
             const finalVisitors = isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value);
             const finalListeners = isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value);
@@ -301,7 +301,7 @@
                     })
                 });
                 if(res.ok) { 
-                    alert("저장되었다."); document.getElementById('log_area').style.display = 'none'; 
+                    alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; 
                     document.getElementById('log_visitors').value = 0; document.getElementById('log_listeners').value = 0; document.getElementById('log_count').value = 0; document.getElementById('log_remarks').value = "";
                 } else alert("저장 실패");
             } catch (e) {}
@@ -389,7 +389,7 @@
                 if (loc === '휴무') { activityStatus = "휴무"; totalRestDays++; } 
                 else {
                     let rawDiff = parseInt(eTime.split(':')[0]) - parseInt(sTime.split(':')[0]);
-                    if (rawDiff <= 0) { alert(`${dateStr}의 시간이 잘못되었다.`); isValid = false; }
+                    if (rawDiff <= 0) { alert(`${dateStr}의 시간이 잘못되었습니다.`); isValid = false; }
                     let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
                     activityStatus = `${sTime}~${eTime} (${diff}시간)`;
                     currentWeekWorkDays++;
@@ -403,11 +403,11 @@
             });
 
             if (!isValid) return;
-            if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장된다.\n이대로 제출하겠는가?`)) return;
-            if (weekWarningTriggered && !confirm(`경고: 일주일 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있다.\n이대로 제출하겠는가?`)) return;
+            if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장됩니다.\n이대로 제출하시겠습니까?`)) return;
+            if (weekWarningTriggered && !confirm(`경고: 일주일 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있습니다.\n이대로 제출하시겠습니까?`)) return;
 
-            let confirmMsg = `총 ${plans.length}일치의 활동계획을 제출하겠는가?`;
-            if (requiresApproval) confirmMsg += `\n※ 주의: 8시간 초과 근무가 포함되어 조장 승인이 추가로 필요하다.`;
+            let confirmMsg = `총 ${plans.length}일치의 활동계획을 제출하시겠습니까?`;
+            if (requiresApproval) confirmMsg += `\n※ 주의: 8시간 초과 근무가 포함되어 조장 승인이 추가로 필요합니다.`;
             if(!confirm(confirmMsg)) return;
 
             try {
@@ -415,8 +415,8 @@
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, plans: plans })
                 });
-                if(res.ok) { alert("일괄 제출 완료."); document.getElementById('plan_list_container').style.display = 'none'; } else alert("제출 실패.");
-            } catch (e) { alert("서버 오류"); }
+                if(res.ok) { alert("일괄 제출 완료되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; } else alert("제출에 실패했습니다.");
+            } catch (e) { alert("서버 오류가 발생했습니다."); }
         }
 
         // ----------------------- 3. 변경 신청 로직 -----------------------
@@ -434,7 +434,7 @@
                 if(res.ok) {
                     const data = await res.json();
                     if(data.guides.length > 0) select.innerHTML = data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('');
-                    else select.innerHTML = '<option value="">대타 가능한 동료가 없다.</option>';
+                    else select.innerHTML = '<option value="">대타 가능한 동료가 없습니다.</option>';
                 }
             } catch (e) { select.innerHTML = '<option value="">명단 불러오기 실패</option>'; }
         }
@@ -443,8 +443,8 @@
             const targetDate = document.getElementById('change_target_date').value;
             const changeType = document.getElementById('change_type').value;
             const remarks = document.getElementById('change_remarks').value;
-            if(!targetDate) { alert("변경할 날짜를 선택해라."); return; }
-            if(!remarks) { alert("변경 사유를 입력해라."); return; }
+            if(!targetDate) { alert("변경할 날짜를 선택해주세요."); return; }
+            if(!remarks) { alert("변경 사유를 입력해주세요."); return; }
 
             let changeDetail = ""; let targetGuide = "";
             if(changeType === '시간 변경') {
@@ -452,18 +452,18 @@
                 changeDetail = `${sTime}~${eTime} 로 변경 신청`;
             } else if(changeType === '해설사 변경(대타)') {
                 targetGuide = document.getElementById('change_target_guide').value;
-                if(!targetGuide) { alert("동료를 선택해라."); return; }
+                if(!targetGuide) { alert("동료를 선택해주세요."); return; }
                 changeDetail = `${targetGuide} 해설사에게 대타 요청`;
             } else { changeDetail = "계획 취소 및 휴무 처리 요청"; }
 
-            if(!confirm(`변경(승인 요청)하겠는가?`)) return;
+            if(!confirm(`승인 요청하시겠습니까?`)) return;
 
             try {
                 const res = await fetch(`${API_BASE}/request_plan_change`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: targetGuide })
                 });
-                if(res.ok) { alert("신청 완료."); document.getElementById('change_area').style.display = 'none'; } else alert("신청 실패");
+                if(res.ok) { alert("신청 완료되었습니다."); document.getElementById('change_area').style.display = 'none'; } else alert("신청에 실패했습니다.");
             } catch (e) {}
         }
 
@@ -516,7 +516,7 @@
         }
 
         async function processApp(sheet, row, status) {
-            if(!confirm(`해당 요청을 [${status}] 하시겠습니까?`)) return;
+            if(!confirm(`해당 요청을 [${status}] 처리하시겠습니까?`)) return;
             try {
                 const res = await fetch(`${API_BASE}/process_approval`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -527,7 +527,7 @@
         }
 
         function logout() {
-            if(confirm("로그아웃 하겠는가?")) { localStorage.clear(); location.href = "index.html"; }
+            if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; }
         }
     </script>
 </body>
