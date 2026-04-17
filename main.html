@@ -211,7 +211,7 @@
             if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하겠는가?`)) return;
 
             try {
-                const res = await fetch('https://bdgeopark.onrender.com/record', {
+                const res = await fetch('geopark-system-production.up.railway.app/record', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: action, location: loc, action_time: inputTime })
                 });
@@ -244,7 +244,7 @@
             const finalCount = isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value);
 
             try {
-                const res = await fetch('https://bdgeopark.onrender.com/log_operation', {
+                const res = await fetch('geopark-system-production.up.railway.app/log_operation', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         name: userName, island: userIsland, role: userRole, log_location: document.getElementById('log_location_select').value,
@@ -423,7 +423,7 @@
             if(!confirm(confirmMsg)) return;
 
             try {
-                const res = await fetch('https://bdgeopark.onrender.com/submit_plan_bulk', {
+                const res = await fetch('geopark-system-production.up.railway.app/submit_plan_bulk', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, plans: plans })
