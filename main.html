@@ -12,15 +12,12 @@
         .user-info .name { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
         .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
         .current-badge { background-color: #3498db; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
-        
         .hidden-section { display: none; background-color: white; padding: 20px; border-radius: 16px; margin-top: 10px; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
         .menu-card { background-color: white; padding: 20px; border-radius: 16px; margin-bottom: 12px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
         select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
         select:disabled { background-color: #EEEEEE; color: #999; }
-        
         .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .btn-act:active { transform: scale(0.98); }
         .btn-in { background-color: #FEE500; color: #191919; }
@@ -28,12 +25,9 @@
         .btn-out { background-color: #EAEAEA; color: #191919; }
         .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
         .btn-submit:disabled { background-color: #CCC; cursor: not-allowed; }
-        
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
         .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
-        
-        /* 활동계획서 전용 스타일 */
         .plan-row { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #E5E5E5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .plan-date-label { font-size: 1.05rem; font-weight: 800; color: #2c3e50; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid #FEE500; padding-bottom: 5px; }
         .flex-group { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
@@ -166,8 +160,8 @@
     <div class="logout" onclick="logout()">로그아웃</div>
 
     <script>
-        // ★★★ 여기에 본인의 레일웨이 주소를 입력하세요 (끝에 / 없이 적습니다) ★★★
-        const API_BASE = "geopark-system-production.up.railway.app"; 
+        // 정상적인 Railway 주소 적용
+        const API_BASE = "https://geopark-system-production.up.railway.app"; 
         
         const userName = localStorage.getItem("user_name");
         const userRole = localStorage.getItem("user_role");
@@ -245,7 +239,6 @@
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
-                // 메뉴명(글자)으로 찾아서 열고 닫기 (순서가 달라도 안전함)
                 document.getElementById('attendance_area').style.display = m.includes('출퇴근관리') ? 'block' : 'none';
                 document.getElementById('log_area').style.display = m.includes('운영일지 작성') ? 'block' : 'none';
                 document.getElementById('plan_area').style.display = m.includes('활동계획서 작성') ? 'block' : 'none';
@@ -254,7 +247,7 @@
                 
                 if(m.includes('출퇴근관리')) setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
-                if(m.includes('변경 승인')) loadPendingRequests(); // 조장용 결재함 열 때 리스트 불러오기
+                if(m.includes('변경 승인')) loadPendingRequests(); 
             };
             container.appendChild(d);
         });
