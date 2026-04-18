@@ -6,64 +6,78 @@
     <title>지질공원 통합관리 시스템</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <style>
-        /* 기본 화면 UI 스타일 */
-        body { font-family: 'Pretendard', sans-serif; background-color: #F5F6F8; margin: 0; padding: 20px; color: #191919; box-sizing: border-box; }
-        .header { background-color: white; padding: 25px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; border-left: 6px solid #FEE500; }
-        .profile-icon { width: 50px; height: 50px; background-color: #FEE500; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-right: 15px; }
-        .user-info .name { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-        .user-info .role { font-size: 0.85rem; color: #666; margin-top: 4px; }
-        .current-badge { background-color: #3498db; color: white; font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
-        .hidden-section { display: none; background-color: white; padding: 20px; border-radius: 16px; margin-top: 10px; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        .menu-card { background-color: white; padding: 20px; border-radius: 16px; margin-bottom: 12px; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
-        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
+        /* 기본 폰트 사이즈를 html 태그에 설정하여 비율로 커지게 만듦 */
+        html { font-size: 16px; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #F5F6F8; margin: 0; padding: 1.25rem; color: #191919; box-sizing: border-box; }
+        
+        .header { background-color: white; padding: 1.5rem 1.25rem; border-radius: 1.25rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #FEE500; }
+        .header-left { display: flex; align-items: center; }
+        .profile-icon { width: 3rem; height: 3rem; background-color: #FEE500; border-radius: 1rem; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-right: 1rem; }
+        .user-info .name { font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
+        .user-info .role { font-size: 0.85rem; color: #666; margin-top: 0.25rem; }
+        .current-badge { background-color: #3498db; color: white; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 0.6rem; font-weight: 600; }
+        
+        /* 글자 크기 조절 버튼 스타일 */
+        .font-controls { display: flex; gap: 0.5rem; }
+        .font-btn { background: #f8f9fa; border: 1px solid #ddd; padding: 0.5rem 0.8rem; border-radius: 0.5rem; font-weight: 800; color: #333; cursor: pointer; font-size: 1rem; }
+        .font-btn:active { background: #e9ecef; }
+
+        .hidden-section { display: none; background-color: white; padding: 1.25rem; border-radius: 1rem; margin-top: 0.6rem; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .menu-card { background-color: white; padding: 1.25rem; border-radius: 1rem; margin-bottom: 0.75rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; border: 1px solid #EAEAEA; box-shadow: 0 4px 10px rgba(0,0,0,0.02); font-size: 1.05rem; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; color: #333; }
+        select, input, textarea { width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 0.6rem; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
         select:disabled { background-color: #EEEEEE; color: #999; }
-        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
+        
+        .btn-act { width: 100%; padding: 1rem; margin-bottom: 0.5rem; border: none; border-radius: 0.75rem; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
         .btn-act:active { transform: scale(0.98); }
         .btn-in { background-color: #FEE500; color: #191919; }
         .btn-move { background-color: #3498db; color: white; }
         .btn-out { background-color: #EAEAEA; color: #191919; }
-        .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
+        .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 1rem; border: none; border-radius: 0.75rem; font-weight: 700; margin-top: 0.6rem; cursor: pointer; font-size: 1.05rem; }
         .btn-submit:disabled { background-color: #CCC; cursor: not-allowed; }
-        .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
-        .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
-        .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
-        .plan-row { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #E5E5E5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .plan-date-label { font-size: 1.05rem; font-weight: 800; color: #2c3e50; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid #FEE500; padding-bottom: 5px; }
-        .flex-group { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
-        .calc-hours { font-size: 0.85rem; font-weight: bold; color: #27ae60; }
+        
+        .time-text { font-size: 0.85rem; font-weight: 400; margin-top: 0.25rem; opacity: 0.8; }
+        .logout { text-align: center; margin-top: 2rem; font-size: 0.9rem; color: #999; text-decoration: underline; cursor: pointer; }
+        .time-input-wrap { background-color: #f8f9fa; padding: 0.75rem; border-radius: 0.6rem; margin-bottom: 1rem; border: 1px dashed #ccc; }
+        .plan-row { background: white; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; border: 1px solid #E5E5E5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .plan-date-label { font-size: 1.1rem; font-weight: 800; color: #2c3e50; margin-bottom: 0.6rem; display: flex; justify-content: space-between; border-bottom: 2px solid #FEE500; padding-bottom: 0.3rem; }
+        .flex-group { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;}
+        .calc-hours { font-size: 0.9rem; font-weight: bold; color: #27ae60; }
         .calc-hours.over { color: #e74c3c; }
-        .approval-header { display:flex; justify-content:space-between; align-items:center; background:white; padding:12px; border-radius:12px; border:1px solid #E5E5E5; margin-bottom:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .approval-card { display:flex; gap:12px; align-items:flex-start; background:#f9f9f9; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:10px; }
-        .chk-box { width: 20px !important; height: 20px !important; transform: scale(1.3); margin-top:5px; cursor:pointer; flex-shrink: 0; padding: 0; }
-        .app-content { flex: 1; word-break: keep-all; }
-        .app-tag { display:inline-block; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; margin-bottom:8px; }
+
+        .approval-header { display:flex; justify-content:space-between; align-items:center; background:white; padding:0.75rem; border-radius:0.75rem; border:1px solid #E5E5E5; margin-bottom:1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .approval-card { display:flex; gap:0.75rem; align-items:flex-start; background:#f9f9f9; border:1px solid #ddd; padding:1rem; border-radius:0.75rem; margin-bottom:0.6rem; }
+        .chk-box { width: 1.5rem !important; height: 1.5rem !important; cursor:pointer; flex-shrink: 0; padding: 0; margin-top:0.2rem; }
+        .app-content { flex: 1; word-break: keep-all; font-size: 1rem; }
+        .app-tag { display:inline-block; padding:0.2rem 0.5rem; border-radius:0.4rem; font-size:0.8rem; font-weight:bold; margin-bottom:0.5rem; }
         .tag-plan { background:#e1f5fe; color:#01579b; }
         .tag-change { background:#fff3e0; color:#e65100; }
-        .app-info { font-size:0.95rem; line-height:1.5; margin-bottom:8px; color: #333; }
-        .admin-island-card { background: white; border: 2px solid #2c3e50; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .admin-island-header { background: #2c3e50; color: white; padding: 12px 15px; font-size: 1.1rem; font-weight: 800; }
-        .admin-loc-group { padding: 15px; border-bottom: 1px solid #ecf0f1; }
+        .app-info { line-height:1.5; margin-bottom:0.5rem; color: #333; }
+        
+        .admin-island-card { background: white; border: 2px solid #2c3e50; border-radius: 0.75rem; margin-bottom: 1.25rem; overflow: hidden; }
+        .admin-island-header { background: #2c3e50; color: white; padding: 0.75rem 1rem; font-size: 1.1rem; font-weight: 800; }
+        .admin-loc-group { padding: 1rem; border-bottom: 1px solid #ecf0f1; }
         .admin-loc-group:last-child { border-bottom: none; }
-        .admin-loc-title { font-weight: 800; color: #2980b9; margin-bottom: 10px; font-size: 1.05rem; display:flex; align-items:center; gap:5px; }
-        .admin-guide-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
-        .admin-guide-name { font-weight: 800; font-size: 1rem; color: #333; margin-bottom: 8px; }
-        .admin-time-box { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; }
-        .admin-time-plan { background: #e1f5fe; padding: 6px 10px; border-radius: 6px; color: #01579b; }
-        .admin-time-act { background: #e8f5e9; padding: 6px 10px; border-radius: 6px; color: #1b5e20; }
-        .admin-time-none { background: #ffebee; padding: 6px 10px; border-radius: 6px; color: #b71c1c; }
-        .log-item-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .log-item-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
-        .log-item-stats { display: flex; gap: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .admin-loc-title { font-weight: 800; color: #2980b9; margin-bottom: 0.6rem; font-size: 1.1rem; }
+        .admin-guide-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 0.5rem; padding: 0.75rem; margin-bottom: 0.5rem; }
+        .admin-guide-name { font-weight: 800; color: #333; margin-bottom: 0.5rem; }
+        .admin-time-box { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; }
+        .admin-time-plan { background: #e1f5fe; padding: 0.4rem 0.6rem; border-radius: 0.4rem; color: #01579b; }
+        .admin-time-act { background: #e8f5e9; padding: 0.4rem 0.6rem; border-radius: 0.4rem; color: #1b5e20; }
+        .admin-time-none { background: #ffebee; padding: 0.4rem 0.6rem; border-radius: 0.4rem; color: #b71c1c; }
+        
+        .log-item-card { background: white; border: 1px solid #E5E5E5; padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.6rem; }
+        .log-item-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; margin-bottom: 0.5rem; }
+        .log-item-stats { display: flex; gap: 0.6rem; font-size: 0.9rem; background: #f8f9fa; padding: 0.6rem; border-radius: 0.5rem; margin-bottom: 0.5rem; }
         .log-item-stats div { flex: 1; text-align: center; }
-        .log-item-stats b { display: block; color: #b33939; font-size: 1rem; }
-        .stat-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
-        .stat-table th { background-color: #2c3e50; color: white; padding: 10px; border: 1px solid #ddd; }
-        .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
+        .log-item-stats b { display: block; color: #b33939; font-size: 1.1rem; }
+        
+        .stat-table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; font-size: 0.95rem; }
+        .stat-table th { background-color: #2c3e50; color: white; padding: 0.6rem; border: 1px solid #ddd; }
+        .stat-table td { padding: 0.6rem; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
 
-        /* --- [신규 추가] PDF 인쇄 전용 스타일 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -80,13 +94,19 @@
 <body>
 
     <div class="header">
-        <div class="profile-icon">👤</div>
-        <div class="user-info">
-            <div class="name">
-                <span id="name_display">로딩중...</span>
-                <span id="current_loc_badge" class="current-badge">미출근</span>
+        <div class="header-left">
+            <div class="profile-icon">👤</div>
+            <div class="user-info">
+                <div class="name">
+                    <span id="name_display">로딩중...</span>
+                    <span id="current_loc_badge" class="current-badge">미출근</span>
+                </div>
+                <div id="role_display" class="role">직책 / 소속</div>
             </div>
-            <div id="role_display" class="role">직책 / 소속</div>
+        </div>
+        <div class="font-controls">
+            <button class="font-btn" onclick="changeFontSize(-1)">가-</button>
+            <button class="font-btn" onclick="changeFontSize(1)">가+</button>
         </div>
     </div>
 
@@ -95,7 +115,7 @@
     <div id="attendance_area" class="hidden-section">
         <div class="form-group"><label>📍 기록할 안내소 선택</label><select id="location_select"></select></div>
         <div class="time-input-wrap">
-            <label style="font-size: 0.8rem; font-weight: 600; color:#555; display:block; margin-bottom:5px;">⏱ 기록할 시간 (직접 수정 가능)</label>
+            <label style="font-size: 0.9rem; font-weight: 600; color:#555; display:block; margin-bottom:5px;">⏱ 기록할 시간 (직접 수정 가능)</label>
             <input type="time" id="action_time_input">
         </div>
         <button class="btn-act btn-in" onclick="sendAction('출근')"><span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div></button>
@@ -131,7 +151,7 @@
         <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <label style="margin:0;">📊 조원 활동 현황</label>
-                <button onclick="loadDailyStatus()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
+                <button onclick="loadDailyStatus()" style="padding:5px 10px; font-size:0.9rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
             </div>
             <div id="status_container"><p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p></div>
         </div>
@@ -144,13 +164,13 @@
                 <select id="plan_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
                 <select id="plan_half" style="flex:1.5;"><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
             </div>
-            <button class="btn-act btn-move" style="margin-top:10px; padding:12px; font-size:1rem; border-radius:8px;" onclick="generatePlanForm()">📝 15일치 양식 펼치기</button>
+            <button class="btn-act btn-move" style="margin-top:10px; padding:12px; font-size:1.1rem; border-radius:8px;" onclick="generatePlanForm()">📝 15일치 양식 펼치기</button>
         </div>
         <div id="plan_list_container" style="display:none; margin-top:20px; border-top:2px dashed #CCC; padding-top:20px;">
             <div class="time-input-wrap">
-                <label style="font-size: 0.85rem; font-weight: 700; color:#333; margin-bottom:5px;">⚙️ 일괄 적용 설정</label>
+                <label style="font-size: 0.95rem; font-weight: 700; color:#333; margin-bottom:5px;">⚙️ 일괄 적용 설정</label>
                 <div class="flex-group"><select id="batch_loc" style="flex:1;"></select><select id="batch_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="batch_end" style="flex:1;"></select></div>
-                <button onclick="applyBatchSettings()" style="width:100%; margin-top:8px; padding:10px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">전체 일괄 적용하기</button>
+                <button onclick="applyBatchSettings()" style="width:100%; margin-top:8px; padding:10px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer; font-size:1.05rem;">전체 일괄 적용하기</button>
             </div>
             <div id="plan_rows"></div>
             <button class="btn-submit" onclick="submitBulkPlan()">🚀 15일치 스케줄 제출하기</button>
@@ -168,14 +188,14 @@
             </select>
         </div>
         <div id="change_ui_time" class="time-input-wrap">
-            <label style="font-size: 0.8rem; font-weight: 600;">새로운 시간 설정</label>
+            <label style="font-size: 0.9rem; font-weight: 600;">새로운 시간 설정</label>
             <div class="flex-group" style="margin-top: 5px;"><select id="change_time_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="change_time_end" style="flex:1;"></select></div>
         </div>
         <div id="change_ui_guide" class="time-input-wrap" style="display:none;">
-            <label style="font-size: 0.8rem; font-weight: 600;">대타를 요청할 동료 해설사</label>
+            <label style="font-size: 0.9rem; font-weight: 600;">대타를 요청할 동료 해설사</label>
             <select id="change_target_guide" style="margin-top: 5px;"><option value="">불러오는 중...</option></select>
         </div>
-        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;"><label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환합니다.</label></div>
+        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;"><label style="font-size: 0.9rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환합니다.</label></div>
         <div class="form-group"><label>📝 변경 사유</label><textarea id="change_remarks" rows="2" placeholder="변경 사유를 간략히 적어주세요"></textarea></div>
         <button class="btn-submit" onclick="submitPlanChange()">승인 요청하기</button>
     </div>
@@ -188,8 +208,8 @@
         <div class="form-group">
             <label>📁 조원 결재함 (승인 대기 목록)</label>
             <div id="approval_header" class="approval-header" style="display:none;">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold;"><input type="checkbox" id="chk_all" class="chk-box" style="width:20px !important;" onclick="toggleAllApprovals(this)"> 전체 선택</label>
-                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button><button class="btn-act btn-out" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('반려')">선택 반려</button></div>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold;"><input type="checkbox" id="chk_all" class="chk-box" onclick="toggleAllApprovals(this)"> 전체 선택</label>
+                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px 12px; font-size:1rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button><button class="btn-act btn-out" style="padding:8px 12px; font-size:1rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('반려')">선택 반려</button></div>
             </div>
             <div id="pending_container"><p style="text-align:center; color:#999; padding:20px;">대기 중인 요청을 불러오는 중...</p></div>
         </div>
@@ -227,7 +247,7 @@
                 <option value="2">하반기 (16~말일)</option>
             </select>
             <button class="btn-submit" style="margin-top:15px; background-color:#2c3e50; color:white; border-radius:8px; font-size:1.1rem; padding:15px;" onclick="generatePDF()">📄 PDF 변환 및 인쇄</button>
-            <p style="font-size:0.8rem; color:#666; text-align:center; margin-top:10px;">버튼을 누르면 인쇄 창이 뜹니다. 'PDF로 저장'을 선택하세요.</p>
+            <p style="font-size:0.9rem; color:#666; text-align:center; margin-top:10px;">버튼을 누르면 인쇄 창이 뜹니다. 'PDF로 저장'을 선택하세요.</p>
         </div>
     </div>
 
@@ -236,7 +256,7 @@
         <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <label style="margin:0;">📊 전 지역 출퇴근 종합 현황</label>
-                <button onclick="loadAdminAttendance()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
+                <button onclick="loadAdminAttendance()" style="padding:5px 10px; font-size:0.9rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
             </div>
             <div id="admin_attendance_container"><p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p></div>
         </div>
@@ -286,6 +306,18 @@
     <div id="print_area"></div>
 
     <script>
+        // --- [신규 추가] 글자 크기 조절 기능 ---
+        let baseFontSize = parseInt(localStorage.getItem("font_size")) || 16;
+        document.documentElement.style.fontSize = baseFontSize + 'px';
+        
+        function changeFontSize(step) {
+            baseFontSize += step * 2; // 2px 단위로 조절
+            if (baseFontSize < 12) baseFontSize = 12; // 최소 크기
+            if (baseFontSize > 24) baseFontSize = 24; // 최대 크기
+            document.documentElement.style.fontSize = baseFontSize + 'px';
+            localStorage.setItem("font_size", baseFontSize);
+        }
+
         const API_BASE = "https://geopark-system-production.up.railway.app"; 
         
         const userName = localStorage.getItem("user_name");
@@ -370,6 +402,17 @@
             document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
         }
 
+        // --- [수정] 방어 코드가 적용된 날짜 숫자 추출 함수 ---
+        function getDayNum(rawDate) {
+            if (!rawDate) return 0;
+            let dateStr = String(rawDate); // 무조건 글자로 변환해서 뻗는 현상 방지
+            let m = dateStr.match(/(\d+)일/);
+            if (m) return parseInt(m[1]);
+            let parts = dateStr.split('-');
+            if (parts.length >= 3) return parseInt(parts[2]);
+            return 0;
+        }
+
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
             '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)'],
@@ -420,6 +463,7 @@
                 }
                 if(m === '2. 해설사 활동 현황') loadAdminLogs(); 
                 if(m === '3. 활동계획서 조회') loadAdminPlans();
+                if(m === '4. 통계') loadStatistics();
             };
             container.appendChild(d);
         });
@@ -482,14 +526,14 @@
                 const res = await fetch(`${API_BASE}/get_daily_status?island=${encodeURIComponent(userIsland)}&target_date=${targetDate}`);
                 const data = await res.json();
                 let html = ''; let summary = data.log_summary;
-                html += `<div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;"><div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div></div></div>`;
+                html += `<div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;"><div style="font-size:1.05rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.9rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.2rem; color:#b33939;">${summary.total_visitors}명</div></div><div style="flex:1;"><div style="font-size:0.9rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.2rem; color:#b33939;">${summary.total_listeners}명</div></div><div style="flex:1;"><div style="font-size:0.9rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.2rem; color:#b33939;">${summary.total_count}회</div></div></div></div>`;
                 if(Object.keys(data.attendance).length === 0) { html += `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 기록된 활동이 없습니다.</p>`; } else {
                     for (const [loc, users] of Object.entries(data.attendance)) {
                         let headerColor = loc === '퇴근' ? '#95a5a6' : '#3498db';
-                        html += `<div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;"><div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:0.95rem;">📍 ${loc} (${users.length}명)</div><div style="padding:10px 15px;">`;
+                        html += `<div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;"><div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:1.05rem;">📍 ${loc} (${users.length}명)</div><div style="padding:10px 15px;">`;
                         users.forEach(u => { 
                             let outStr = u.out_time ? u.out_time : '<span style="color:#e74c3c;">미퇴근</span>';
-                            html += `<div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:10px;"><div style="font-weight:800; color:#333; margin-bottom:6px;">${u.name}</div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#555; background:#f8f9fa; padding:8px; border-radius:6px;"><span>🟢 출근: <b>${u.in_time}</b></span><span>🔴 퇴근: <b>${outStr}</b></span></div></div>`; 
+                            html += `<div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:10px;"><div style="font-weight:800; color:#333; margin-bottom:6px;">${u.name}</div><div style="display:flex; justify-content:space-between; font-size:0.95rem; color:#555; background:#f8f9fa; padding:8px; border-radius:6px;"><span>🟢 출근: <b>${u.in_time}</b></span><span>🔴 퇴근: <b>${outStr}</b></span></div></div>`; 
                         });
                         html += `</div></div>`;
                     }
@@ -586,8 +630,8 @@
                 const res = await fetch(`${API_BASE}/get_my_plans?name=${encodeURIComponent(userName)}`); const data = await res.json();
                 if (data.plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">기록이 없습니다.</p>'; return; }
                 let html = ''; data.plans.slice(-30).forEach(p => {
-                    let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
-                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
+                    let statusColor = String(p['상태']||'').includes('승인완료') ? '#27ae60' : (String(p['상태']||'').includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:1rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
             } catch (e) {}
@@ -605,26 +649,26 @@
                 let plans = data.plans;
 
                 plans = plans.filter(p => {
-                    let dayMatch = p['날짜'].match(/(\d+)일/); let day = dayMatch ? parseInt(dayMatch[1]) : 0;
+                    let day = getDayNum(p['날짜']);
                     if (half === '1' && (day < 1 || day > 15)) return false;
                     if (half === '2' && (day < 16)) return false;
-                    if (loc && !p['장소'].includes(loc)) return false;
-                    if (nameSearch && !p['이름'].includes(nameSearch)) return false;
+                    if (loc && !String(p['장소']||'').includes(loc)) return false;
+                    if (nameSearch && !String(p['이름']||'').includes(nameSearch)) return false;
                     return true;
                 });
 
                 if (plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>'; return; }
 
                 plans.sort((a, b) => {
-                    let aDay = a['날짜'].match(/(\d+)일/) ? parseInt(a['날짜'].match(/(\d+)일/)[1]) : 0;
-                    let bDay = b['날짜'].match(/(\d+)일/) ? parseInt(b['날짜'].match(/(\d+)일/)[1]) : 0;
-                    if(aDay !== bDay) return aDay - bDay; return a['이름'].localeCompare(b['이름']);
+                    let aDay = getDayNum(a['날짜']);
+                    let bDay = getDayNum(b['날짜']);
+                    if(aDay !== bDay) return aDay - bDay; return String(a['이름']||'').localeCompare(String(b['이름']||''));
                 });
 
                 let html = '';
                 plans.forEach(p => {
-                    let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
-                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
+                    let statusColor = String(p['상태']||'').includes('승인완료') ? '#27ae60' : (String(p['상태']||'').includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.1rem;">${p['날짜']} - ${p['이름']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.9rem;">${p['상태']}</span></div><div style="font-size:1rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
@@ -712,11 +756,11 @@
                 
                 html += `
                     <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
-                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
+                        <div style="font-size:1.05rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
                         <div style="display:flex; justify-content:space-between; text-align:center;">
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 탐방객</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.visitors}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 청취자</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.listeners}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 해설횟수</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.count}회</div></div>
+                            <div style="flex:1;"><div style="font-size:0.9rem; color:#388e3c;">총 탐방객</div><div style="font-weight:800; font-size:1.3rem; color:#1b5e20;">${summary.visitors}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.9rem; color:#388e3c;">총 청취자</div><div style="font-weight:800; font-size:1.3rem; color:#1b5e20;">${summary.listeners}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.9rem; color:#388e3c;">총 해설횟수</div><div style="font-weight:800; font-size:1.3rem; color:#1b5e20;">${summary.count}회</div></div>
                         </div>
                     </div>
                 `;
@@ -729,21 +773,21 @@
 
                 data.logs.forEach(log => {
                     let rLoc = log['안내소'] || log['장소'] || '장소 미상';
-                    let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.8rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
+                    let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.85rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
                     
                     html += `
                         <div class="log-item-card">
                             <div class="log-item-header">
-                                <span style="font-weight:800; color:#2c3e50;">🗓️ ${log['날짜']} - ${log['이름']} ${isCo}</span>
-                                <span style="font-size:0.85rem; color:#7f8c8d;">${log['시간'] || ''}</span>
+                                <span style="font-weight:800; color:#2c3e50; font-size:1.1rem;">🗓️ ${log['날짜']} - ${log['이름']} ${isCo}</span>
+                                <span style="font-size:0.9rem; color:#7f8c8d;">${log['시간'] || ''}</span>
                             </div>
-                            <div style="font-weight:bold; color:#2980b9; margin-bottom:10px;">📍 ${log['섬']} > ${rLoc}</div>
+                            <div style="font-weight:bold; color:#2980b9; margin-bottom:10px; font-size:1rem;">📍 ${log['섬']} > ${rLoc}</div>
                             <div class="log-item-stats">
                                 <div>탐방객 <b>${log['탐방객수'] || 0}</b></div>
                                 <div>청취자 <b>${log['청취자수'] || 0}</b></div>
                                 <div>해설 <b>${log['해설횟수'] || 0}</b></div>
                             </div>
-                            <div style="font-size:0.85rem; color:#555; background:#f1f2f6; padding:8px; border-radius:6px;">
+                            <div style="font-size:0.95rem; color:#555; background:#f1f2f6; padding:10px; border-radius:6px;">
                                 📝 특이사항: ${log['특이사항'] || '없음'}
                             </div>
                         </div>
@@ -767,34 +811,62 @@
                 let plans = data.plans;
 
                 plans = plans.filter(p => {
-                    let dayMatch = p['날짜'].match(/(\d+)일/); let day = dayMatch ? parseInt(dayMatch[1]) : 0;
+                    let day = getDayNum(p['날짜']);
                     if (half === '1' && (day < 1 || day > 15)) return false;
                     if (half === '2' && (day < 16)) return false;
-                    if (loc && !p['장소'].includes(loc)) return false;
-                    if (nameSearch && !p['이름'].includes(nameSearch)) return false;
+                    if (loc && !String(p['장소']||'').includes(loc)) return false;
+                    if (nameSearch && !String(p['이름']||'').includes(nameSearch)) return false;
                     return true;
                 });
 
                 if (plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>'; return; }
 
                 plans.sort((a, b) => {
-                    let aDay = a['날짜'].match(/(\d+)일/) ? parseInt(a['날짜'].match(/(\d+)일/)[1]) : 0;
-                    let bDay = b['날짜'].match(/(\d+)일/) ? parseInt(b['날짜'].match(/(\d+)일/)[1]) : 0;
+                    let aDay = getDayNum(a['날짜']);
+                    let bDay = getDayNum(b['날짜']);
                     if(aDay !== bDay) return aDay - bDay; 
-                    if(a['섬'] !== b['섬']) return a['섬'].localeCompare(b['섬']);
-                    return a['이름'].localeCompare(b['이름']);
+                    if(String(a['섬']||'') !== String(b['섬']||'')) return String(a['섬']||'').localeCompare(String(b['섬']||''));
+                    return String(a['이름']||'').localeCompare(String(b['이름']||''));
                 });
 
                 let html = '';
                 plans.forEach(p => {
-                    let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
-                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']} <span style="font-size:0.85rem; color:#7f8c8d;">(${p['섬']})</span></strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
+                    let statusColor = String(p['상태']||'').includes('승인완료') ? '#27ae60' : (String(p['상태']||'').includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.1rem;">${p['날짜']} - ${p['이름']} <span style="font-size:0.9rem; color:#7f8c8d;">(${p['섬']})</span></strong><span style="color:${statusColor}; font-weight:bold; font-size:0.9rem;">${p['상태']}</span></div><div style="font-size:1rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
         }
 
-        // --- [신규 추가] PDF 인쇄 로직 ---
+        async function loadStatistics() {
+            const container = document.getElementById('stat_container');
+            const year = document.getElementById('stat_year').value;
+            const month = document.getElementById('stat_month').value;
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">통계 데이터를 계산하는 중입니다...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_statistics?year=${year}&month=${month}`);
+                const data = await res.json();
+                
+                if (data.total.count === 0 && data.total.visitors === 0) {
+                    container.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${year}년 ${month}월의 운영일지 데이터가 없습니다.</p>`;
+                    return;
+                }
+
+                let html = '';
+                html += `<div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #bbdefb;"><div style="font-size:1.2rem; font-weight:800; color:#1565c0; margin-bottom:10px; text-align:center;">🏆 ${year}년 ${month}월 전체 실적</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.9rem; color:#1976d2;">총 탐방객</div><div style="font-weight:800; font-size:1.4rem; color:#0d47a1;">${data.total.visitors.toLocaleString()}명</div></div><div style="flex:1;"><div style="font-size:0.9rem; color:#1976d2;">총 청취자</div><div style="font-weight:800; font-size:1.4rem; color:#0d47a1;">${data.total.listeners.toLocaleString()}명</div></div><div style="flex:1;"><div style="font-size:0.9rem; color:#1976d2;">해설 횟수</div><div style="font-weight:800; font-size:1.4rem; color:#0d47a1;">${data.total.count.toLocaleString()}회</div></div></div></div>`;
+                html += `<div style="font-weight:800; font-size:1.1rem; margin-bottom:10px; color:#2c3e50;">🏝️ 권역(섬)별 실적</div><table class="stat-table"><thead><tr><th>권역</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
+                for (const [island, stats] of Object.entries(data.island_stats)) { html += `<tr><td class="t-left" style="font-size:1.05rem;">${island}</td><td style="font-size:1.05rem;">${stats.visitors.toLocaleString()}</td><td style="font-size:1.05rem;">${stats.listeners.toLocaleString()}</td><td style="font-size:1.05rem;">${stats.count.toLocaleString()}</td></tr>`; }
+                html += `</tbody></table>`;
+                html += `<div style="font-weight:800; font-size:1.1rem; margin-top:25px; margin-bottom:10px; color:#2c3e50;">🧑‍🏫 해설사별 개인 실적</div><table class="stat-table"><thead><tr><th>이름 (소속)</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
+                const sortedGuides = Object.entries(data.guide_stats).sort((a, b) => b[1].count - a[1].count);
+                for (const [name, stats] of sortedGuides) { html += `<tr><td class="t-left" style="font-size:1.05rem;">${name}<br><span style="font-weight:normal; font-size:0.85rem; color:#7f8c8d;">${stats.island}</span></td><td style="font-size:1.05rem;">${stats.visitors.toLocaleString()}</td><td style="font-size:1.05rem;">${stats.listeners.toLocaleString()}</td><td style="font-size:1.05rem;"><b>${stats.count.toLocaleString()}</b></td></tr>`; }
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">통계 산출 중 오류가 발생했습니다.</p>'; }
+        }
+
         async function generatePDF() {
             const type = document.getElementById('rep_type').value;
             const year = document.getElementById('rep_year').value;
@@ -807,62 +879,45 @@
 
             try {
                 const res = await fetch(`${API_BASE}/get_report_data?island=${encodeURIComponent(userIsland)}&year=${year}&month=${month}`);
+                if (!res.ok) throw new Error("서버 응답 오류");
                 const data = await res.json();
                 
-                let html = '';
-                let title = '';
-                let printArea = document.getElementById('print_area');
+                let html = ''; let title = ''; let printArea = document.getElementById('print_area');
 
                 if(type === 'plan') {
                     title = `${year}년 ${month}월 ${userIsland} 활동계획서`;
                     let p = data.plans;
-                    if(half === '1') p = p.filter(x => parseInt(x['날짜'].match(/(\d+)일/)[1]) <= 15);
-                    else p = p.filter(x => parseInt(x['날짜'].match(/(\d+)일/)[1]) > 15);
-                    
+                    p = p.filter(x => { let d = getDayNum(x['날짜']); return half === '1' ? (d >= 1 && d <= 15) : (d > 15); });
                     if(p.length === 0) { alert("해당 기간의 계획서 데이터가 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
-                    
                     html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>이름</th><th>장소</th><th>활동여부(시간)</th><th>상태</th></tr></thead><tbody>`;
-                    p.sort((a, b) => parseInt(a['날짜'].match(/(\d+)일/)[1]) - parseInt(b['날짜'].match(/(\d+)일/)[1]));
-                    p.forEach(r => { html += `<tr><td>${r['날짜']}</td><td>${r['이름']}</td><td>${r['장소']}</td><td>${r['활동여부']}</td><td>${r['상태']}</td></tr>`; });
+                    p.sort((a, b) => getDayNum(a['날짜']) - getDayNum(b['날짜']));
+                    p.forEach(r => { html += `<tr><td>${r['날짜']||''}</td><td>${r['이름']||''}</td><td>${r['장소']||''}</td><td>${r['활동여부']||''}</td><td>${r['상태']||''}</td></tr>`; });
                     html += `</tbody></table>`;
                 } 
                 else if(type === 'result') {
                     title = `${year}년 ${month}월 ${userIsland} 활동결과보고서`;
                     let r = data.records; let l = data.logs;
-                    if(half === '1') {
-                        r = r.filter(x => parseInt(x['날짜'].split('-')[2]) <= 15);
-                        l = l.filter(x => parseInt(x['날짜'].split('-')[2]) <= 15);
-                    } else {
-                        r = r.filter(x => parseInt(x['날짜'].split('-')[2]) > 15);
-                        l = l.filter(x => parseInt(x['날짜'].split('-')[2]) > 15);
-                    }
-                    
+                    r = r.filter(x => { let d = getDayNum(x['날짜']); return half === '1' ? (d >= 1 && d <= 15) : (d > 15); });
                     if(r.length === 0) { alert("해당 기간의 활동 기록이 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
-
                     html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>이름</th><th>장소</th><th>출퇴근 시간</th><th>탐방객</th><th>청취자</th><th>해설</th></tr></thead><tbody>`;
-                    r.sort((a, b) => a['날짜'].localeCompare(b['날짜']));
+                    r.sort((a, b) => String(a['날짜']||'').localeCompare(String(b['날짜']||'')));
                     r.forEach(rec => {
                         let myLog = l.find(x => x['날짜'] === rec['날짜'] && x['이름'] === rec['이름']);
-                        let v = myLog ? myLog['탐방객수'] : '-';
-                        let lis = myLog ? myLog['청취자수'] : '-';
-                        let cnt = myLog ? myLog['해설횟수'] : '-';
-                        html += `<tr><td>${rec['날짜']}</td><td>${rec['이름']}</td><td>${rec['장소']}</td><td>${rec['출근시간']} ~ ${rec['퇴근시간']||'미퇴근'}</td><td>${v}</td><td>${lis}</td><td>${cnt}</td></tr>`;
+                        let v = myLog ? myLog['탐방객수'] : '-'; let lis = myLog ? myLog['청취자수'] : '-'; let cnt = myLog ? myLog['해설횟수'] : '-';
+                        html += `<tr><td>${rec['날짜']||''}</td><td>${rec['이름']||''}</td><td>${rec['장소']||''}</td><td>${rec['출근시간']||''} ~ ${rec['퇴근시간']||'미퇴근'}</td><td>${v}</td><td>${lis}</td><td>${cnt}</td></tr>`;
                     });
                     html += `</tbody></table>`;
                 }
                 else if(type === 'log') {
                     title = `${year}년 ${month}월 ${userIsland} 안내소 운영일지`;
                     let l = data.logs;
-                    if(half === '1') l = l.filter(x => parseInt(x['날짜'].split('-')[2]) <= 15);
-                    else l = l.filter(x => parseInt(x['날짜'].split('-')[2]) > 15);
-
+                    l = l.filter(x => { let d = getDayNum(x['날짜']); return half === '1' ? (d >= 1 && d <= 15) : (d > 15); });
                     if(l.length === 0) { alert("해당 기간의 운영일지 기록이 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
-
                     html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>안내소</th><th>이름</th><th>시간</th><th>탐방객</th><th>청취자</th><th>특이사항</th></tr></thead><tbody>`;
-                    l.sort((a, b) => a['날짜'].localeCompare(b['날짜']));
+                    l.sort((a, b) => String(a['날짜']||'').localeCompare(String(b['날짜']||'')));
                     l.forEach(log => {
                         let loc = log['안내소'] || log['장소'] || '';
-                        html += `<tr><td>${log['날짜']}</td><td>${loc}</td><td>${log['이름']}</td><td>${log['시간']}</td><td>${log['탐방객수']}</td><td>${log['청취자수']}</td><td>${log['특이사항']}</td></tr>`;
+                        html += `<tr><td>${log['날짜']||''}</td><td>${loc}</td><td>${log['이름']||''}</td><td>${log['시간'] || ''}</td><td>${log['탐방객수']||'0'}</td><td>${log['청취자수']||'0'}</td><td>${log['특이사항']||''}</td></tr>`;
                     });
                     html += `</tbody></table>`;
                 }
@@ -871,11 +926,10 @@
                 btn.innerText = "📄 PDF 변환 및 인쇄";
                 btn.disabled = false;
                 
-                // 브라우저 인쇄 대화상자 호출
                 window.print();
                 
             } catch(e) {
-                alert("보고서 생성 중 오류가 발생했습니다.");
+                alert("보고서 생성 중 오류가 발생했습니다. (데이터 형식을 확인해주세요)");
                 btn.innerText = "📄 PDF 변환 및 인쇄";
                 btn.disabled = false;
             }
