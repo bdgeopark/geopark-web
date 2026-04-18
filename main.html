@@ -6,6 +6,7 @@
     <title>지질공원 통합관리 시스템</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <style>
+        /* 기본 화면 UI 스타일 */
         body { font-family: 'Pretendard', sans-serif; background-color: #F5F6F8; margin: 0; padding: 20px; color: #191919; box-sizing: border-box; }
         .header { background-color: white; padding: 25px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; border-left: 6px solid #FEE500; }
         .profile-icon { width: 50px; height: 50px; background-color: #FEE500; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-right: 15px; }
@@ -33,7 +34,6 @@
         .flex-group { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
         .calc-hours { font-size: 0.85rem; font-weight: bold; color: #27ae60; }
         .calc-hours.over { color: #e74c3c; }
-
         .approval-header { display:flex; justify-content:space-between; align-items:center; background:white; padding:12px; border-radius:12px; border:1px solid #E5E5E5; margin-bottom:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .approval-card { display:flex; gap:12px; align-items:flex-start; background:#f9f9f9; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:10px; }
         .chk-box { width: 20px !important; height: 20px !important; transform: scale(1.3); margin-top:5px; cursor:pointer; flex-shrink: 0; padding: 0; }
@@ -42,7 +42,6 @@
         .tag-plan { background:#e1f5fe; color:#01579b; }
         .tag-change { background:#fff3e0; color:#e65100; }
         .app-info { font-size:0.95rem; line-height:1.5; margin-bottom:8px; color: #333; }
-        
         .admin-island-card { background: white; border: 2px solid #2c3e50; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .admin-island-header { background: #2c3e50; color: white; padding: 12px 15px; font-size: 1.1rem; font-weight: 800; }
         .admin-loc-group { padding: 15px; border-bottom: 1px solid #ecf0f1; }
@@ -54,18 +53,28 @@
         .admin-time-plan { background: #e1f5fe; padding: 6px 10px; border-radius: 6px; color: #01579b; }
         .admin-time-act { background: #e8f5e9; padding: 6px 10px; border-radius: 6px; color: #1b5e20; }
         .admin-time-none { background: #ffebee; padding: 6px 10px; border-radius: 6px; color: #b71c1c; }
-        
         .log-item-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .log-item-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
         .log-item-stats { display: flex; gap: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
         .log-item-stats div { flex: 1; text-align: center; }
         .log-item-stats b { display: block; color: #b33939; font-size: 1rem; }
-
-        /* 통계 전용 테이블 스타일 */
         .stat-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
         .stat-table th { background-color: #2c3e50; color: white; padding: 10px; border: 1px solid #ddd; }
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
+
+        /* --- [신규 추가] PDF 인쇄 전용 스타일 --- */
+        #print_area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print_area, #print_area * { visibility: visible; }
+            #print_area { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; }
+            @page { size: A4 portrait; margin: 1.5cm; }
+            .print-title { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; color: black; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 30px; }
+            .print-table th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; border: 1px solid #000; padding: 8px; color: black; }
+            .print-table td { border: 1px solid #000; padding: 8px; text-align: center; color: black; }
+        }
     </style>
 </head>
 <body>
@@ -199,6 +208,29 @@
         <div id="team_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
     </div>
 
+    <div id="report_area" class="hidden-section">
+        <div class="form-group">
+            <label>📑 출력할 보고서 선택</label>
+            <select id="rep_type" style="margin-bottom:10px;">
+                <option value="plan">활동계획서</option>
+                <option value="result">활동결과보고서</option>
+                <option value="log">안내소 운영일지</option>
+            </select>
+            <div class="flex-group">
+                <select id="rep_year" style="flex:1;">
+                    <option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option>
+                </select>
+                <select id="rep_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
+            </div>
+            <select id="rep_half" style="margin-top:8px;">
+                <option value="1">전반기 (1~15일)</option>
+                <option value="2">하반기 (16~말일)</option>
+            </select>
+            <button class="btn-submit" style="margin-top:15px; background-color:#2c3e50; color:white; border-radius:8px; font-size:1.1rem; padding:15px;" onclick="generatePDF()">📄 PDF 변환 및 인쇄</button>
+            <p style="font-size:0.8rem; color:#666; text-align:center; margin-top:10px;">버튼을 누르면 인쇄 창이 뜹니다. 'PDF로 저장'을 선택하세요.</p>
+        </div>
+    </div>
+
     <div id="admin_attendance_area" class="hidden-section">
         <div class="form-group"><label>📅 조회 날짜 선택</label><input type="date" id="admin_date_input" onchange="loadAdminAttendance()"></div>
         <div class="form-group">
@@ -241,23 +273,17 @@
         <div class="form-group">
             <label>📊 통계 기준월 선택</label>
             <div class="flex-group">
-                <select id="stat_year" style="flex:1;">
-                    <option value="2025">2025년</option>
-                    <option value="2026" selected>2026년</option>
-                    <option value="2027">2027년</option>
-                </select>
-                <select id="stat_month" style="flex:1;">
-                    <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-                </select>
+                <select id="stat_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
+                <select id="stat_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
             </div>
             <button class="btn-submit" style="margin-top:5px; background-color:#2c3e50; color:white; border-radius:8px;" onclick="loadStatistics()">통계 산출하기</button>
         </div>
-        <div id="stat_container">
-            <p style="text-align:center; color:#999; padding:20px;">연도와 월을 선택하고 버튼을 눌러주세요.</p>
-        </div>
+        <div id="stat_container"><p style="text-align:center; color:#999; padding:20px;">연도와 월을 선택하고 버튼을 눌러주세요.</p></div>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
+
+    <div id="print_area"></div>
 
     <script>
         const API_BASE = "https://geopark-system-production.up.railway.app"; 
@@ -303,6 +329,7 @@
         if(document.getElementById('tp_month')) document.getElementById('tp_month').value = currentMonth;
         if(document.getElementById('ap_month')) document.getElementById('ap_month').value = currentMonth;
         if(document.getElementById('stat_month')) document.getElementById('stat_month').value = currentMonth;
+        if(document.getElementById('rep_month')) document.getElementById('rep_month').value = currentMonth;
 
         if(document.getElementById('al_start_date')) {
             const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
@@ -345,7 +372,7 @@
 
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
-            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회'],
+            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)'],
             '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계']
         };
 
@@ -362,6 +389,7 @@
                 document.getElementById('my_plan_area').style.display = m.includes('나의 활동계획 조회') ? 'block' : 'none';
                 document.getElementById('status_area').style.display = m.includes('현황 조회') && !m.includes('나의') && userRole !== '관리자' ? 'block' : 'none';
                 document.getElementById('team_plan_area').style.display = m.includes('조원 활동계획 조회') ? 'block' : 'none';
+                document.getElementById('report_area').style.display = m.includes('보고서 출력') ? 'block' : 'none';
                 
                 document.getElementById('admin_attendance_area').style.display = m === '1. 해설사 출퇴근 현황' ? 'block' : 'none';
                 document.getElementById('admin_log_area').style.display = m === '2. 해설사 활동 현황' ? 'block' : 'none';
@@ -392,7 +420,6 @@
                 }
                 if(m === '2. 해설사 활동 현황') loadAdminLogs(); 
                 if(m === '3. 활동계획서 조회') loadAdminPlans();
-                if(m === '4. 통계') loadStatistics();
             };
             container.appendChild(d);
         });
@@ -767,59 +794,91 @@
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
         }
 
-        // --- [신규 추가] 관리자 전용: 통계 데이터 로직 ---
-        async function loadStatistics() {
-            const container = document.getElementById('stat_container');
-            const year = document.getElementById('stat_year').value;
-            const month = document.getElementById('stat_month').value;
-
-            container.innerHTML = '<p style="text-align:center; color:#999;">통계 데이터를 계산하는 중입니다...</p>';
+        // --- [신규 추가] PDF 인쇄 로직 ---
+        async function generatePDF() {
+            const type = document.getElementById('rep_type').value;
+            const year = document.getElementById('rep_year').value;
+            const month = document.getElementById('rep_month').value;
+            const half = document.getElementById('rep_half').value;
             
+            const btn = document.querySelector('#report_area .btn-submit');
+            btn.innerText = "데이터를 불러오는 중...";
+            btn.disabled = true;
+
             try {
-                const res = await fetch(`${API_BASE}/get_statistics?year=${year}&month=${month}`);
+                const res = await fetch(`${API_BASE}/get_report_data?island=${encodeURIComponent(userIsland)}&year=${year}&month=${month}`);
                 const data = await res.json();
                 
-                if (data.total.count === 0 && data.total.visitors === 0) {
-                    container.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${year}년 ${month}월의 운영일지 데이터가 없습니다.</p>`;
-                    return;
-                }
-
                 let html = '';
+                let title = '';
+                let printArea = document.getElementById('print_area');
 
-                // 1. 전체 실적
-                html += `
-                    <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #bbdefb;">
-                        <div style="font-size:1.1rem; font-weight:800; color:#1565c0; margin-bottom:10px; text-align:center;">🏆 ${year}년 ${month}월 전체 실적</div>
-                        <div style="display:flex; justify-content:space-between; text-align:center;">
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 탐방객</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.visitors.toLocaleString()}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 청취자</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.listeners.toLocaleString()}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">해설 횟수</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.count.toLocaleString()}회</div></div>
-                        </div>
-                    </div>
-                `;
+                if(type === 'plan') {
+                    title = `${year}년 ${month}월 ${userIsland} 활동계획서`;
+                    let p = data.plans;
+                    if(half === '1') p = p.filter(x => parseInt(x['날짜'].match(/(\d+)일/)[1]) <= 15);
+                    else p = p.filter(x => parseInt(x['날짜'].match(/(\d+)일/)[1]) > 15);
+                    
+                    if(p.length === 0) { alert("해당 기간의 계획서 데이터가 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
+                    
+                    html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>이름</th><th>장소</th><th>활동여부(시간)</th><th>상태</th></tr></thead><tbody>`;
+                    p.sort((a, b) => parseInt(a['날짜'].match(/(\d+)일/)[1]) - parseInt(b['날짜'].match(/(\d+)일/)[1]));
+                    p.forEach(r => { html += `<tr><td>${r['날짜']}</td><td>${r['이름']}</td><td>${r['장소']}</td><td>${r['활동여부']}</td><td>${r['상태']}</td></tr>`; });
+                    html += `</tbody></table>`;
+                } 
+                else if(type === 'result') {
+                    title = `${year}년 ${month}월 ${userIsland} 활동결과보고서`;
+                    let r = data.records; let l = data.logs;
+                    if(half === '1') {
+                        r = r.filter(x => parseInt(x['날짜'].split('-')[2]) <= 15);
+                        l = l.filter(x => parseInt(x['날짜'].split('-')[2]) <= 15);
+                    } else {
+                        r = r.filter(x => parseInt(x['날짜'].split('-')[2]) > 15);
+                        l = l.filter(x => parseInt(x['날짜'].split('-')[2]) > 15);
+                    }
+                    
+                    if(r.length === 0) { alert("해당 기간의 활동 기록이 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
 
-                // 2. 섬별 통계 (테이블)
-                html += `<div style="font-weight:800; font-size:1.05rem; margin-bottom:10px; color:#2c3e50;">🏝️ 권역(섬)별 실적</div>`;
-                html += `<table class="stat-table"><thead><tr><th>권역</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
-                for (const [island, stats] of Object.entries(data.island_stats)) {
-                    html += `<tr><td class="t-left">${island}</td><td>${stats.visitors.toLocaleString()}</td><td>${stats.listeners.toLocaleString()}</td><td>${stats.count.toLocaleString()}</td></tr>`;
+                    html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>이름</th><th>장소</th><th>출퇴근 시간</th><th>탐방객</th><th>청취자</th><th>해설</th></tr></thead><tbody>`;
+                    r.sort((a, b) => a['날짜'].localeCompare(b['날짜']));
+                    r.forEach(rec => {
+                        let myLog = l.find(x => x['날짜'] === rec['날짜'] && x['이름'] === rec['이름']);
+                        let v = myLog ? myLog['탐방객수'] : '-';
+                        let lis = myLog ? myLog['청취자수'] : '-';
+                        let cnt = myLog ? myLog['해설횟수'] : '-';
+                        html += `<tr><td>${rec['날짜']}</td><td>${rec['이름']}</td><td>${rec['장소']}</td><td>${rec['출근시간']} ~ ${rec['퇴근시간']||'미퇴근'}</td><td>${v}</td><td>${lis}</td><td>${cnt}</td></tr>`;
+                    });
+                    html += `</tbody></table>`;
                 }
-                html += `</tbody></table>`;
+                else if(type === 'log') {
+                    title = `${year}년 ${month}월 ${userIsland} 안내소 운영일지`;
+                    let l = data.logs;
+                    if(half === '1') l = l.filter(x => parseInt(x['날짜'].split('-')[2]) <= 15);
+                    else l = l.filter(x => parseInt(x['날짜'].split('-')[2]) > 15);
 
-                // 3. 해설사별 통계 (테이블, 해설횟수 순으로 정렬)
-                html += `<div style="font-weight:800; font-size:1.05rem; margin-top:25px; margin-bottom:10px; color:#2c3e50;">🧑‍🏫 해설사별 개인 실적</div>`;
-                html += `<table class="stat-table"><thead><tr><th>이름 (소속)</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
-                
-                // 해설횟수가 많은 순서대로 정렬
-                const sortedGuides = Object.entries(data.guide_stats).sort((a, b) => b[1].count - a[1].count);
-                
-                for (const [name, stats] of sortedGuides) {
-                    html += `<tr><td class="t-left">${name}<br><span style="font-weight:normal; font-size:0.75rem; color:#7f8c8d;">${stats.island}</span></td><td>${stats.visitors.toLocaleString()}</td><td>${stats.listeners.toLocaleString()}</td><td><b>${stats.count.toLocaleString()}</b></td></tr>`;
+                    if(l.length === 0) { alert("해당 기간의 운영일지 기록이 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
+
+                    html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>안내소</th><th>이름</th><th>시간</th><th>탐방객</th><th>청취자</th><th>특이사항</th></tr></thead><tbody>`;
+                    l.sort((a, b) => a['날짜'].localeCompare(b['날짜']));
+                    l.forEach(log => {
+                        let loc = log['안내소'] || log['장소'] || '';
+                        html += `<tr><td>${log['날짜']}</td><td>${loc}</td><td>${log['이름']}</td><td>${log['시간']}</td><td>${log['탐방객수']}</td><td>${log['청취자수']}</td><td>${log['특이사항']}</td></tr>`;
+                    });
+                    html += `</tbody></table>`;
                 }
-                html += `</tbody></table>`;
 
-                container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">통계 산출 중 오류가 발생했습니다.</p>'; }
+                printArea.innerHTML = html;
+                btn.innerText = "📄 PDF 변환 및 인쇄";
+                btn.disabled = false;
+                
+                // 브라우저 인쇄 대화상자 호출
+                window.print();
+                
+            } catch(e) {
+                alert("보고서 생성 중 오류가 발생했습니다.");
+                btn.innerText = "📄 PDF 변환 및 인쇄";
+                btn.disabled = false;
+            }
         }
 
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
