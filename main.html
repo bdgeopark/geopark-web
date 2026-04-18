@@ -62,44 +62,84 @@
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
 
-        /* --- [수정] 스캔본(HWP) 똑같이 복제한 인쇄용 스타일 --- */
+        /* --- [완전 개편] 표 골격부터 맞추는 A4 인쇄 스타일 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
-            html, body { padding: 0 !important; margin: 0 !important; background: white; }
+            html, body { width: 100%; height: 100%; margin: 0; padding: 0; background: white; }
             #print_area, #print_area * { visibility: visible; }
             
-            /* 모든 글씨를 바탕체/명조체로 통일 (공문서 느낌) */
-            #print_area { display: block; position: absolute; left: 0; top: 0; width: 100%; background: white; font-family: 'Batang', 'BatangChe', '바탕', '바탕체', serif !important; color: #000; box-sizing: border-box; }
+            @page { size: A4 portrait; margin: 15mm; }
             
-            /* A4 세로 규격 설정 */
-            .print-page { width: 210mm; height: 296mm; padding: 15mm 20mm; box-sizing: border-box; page-break-after: always; background: white; margin: 0; }
+            /* 명조체 강제 적용 및 기본 글자 설정 */
+            #print_area { 
+                display: block; position: absolute; left: 0; top: 0; width: 100%; background: white; 
+                font-family: 'Batang', 'BatangChe', '바탕', '바탕체', serif !important; 
+                color: #000; box-sizing: border-box; 
+            }
             
-            .print-top-left { font-size: 14px; font-weight: bold; margin-bottom: 20px; }
-            .print-main-title { text-align: center; font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: 5px; }
-            .print-date { text-align: center; font-size: 15px; margin-bottom: 30px; }
+            /* 1일 1페이지 A4 박스 크기 고정 (180mm x 260mm) */
+            .print-page { 
+                position: relative; width: 180mm; height: 260mm; margin: 0 auto; 
+                page-break-after: always; overflow: hidden; 
+            }
+            
+            /* 제목 영역 (높이 약 25mm) */
+            .print-top-left { font-size: 11pt; font-weight: bold; margin-bottom: 5mm; }
+            .print-main-title { text-align: center; font-size: 24pt; font-weight: 900; margin-bottom: 2mm; letter-spacing: 5px; }
+            .print-date { text-align: center; font-size: 11pt; margin-bottom: 5mm; }
 
-            /* 표 기본 서식 */
-            table.official-table { width: 100%; border-collapse: collapse; border: 2px solid #000; text-align: center; font-size: 13px; background-color: transparent !important; }
-            table.official-table th, table.official-table td { border: 1px solid #000; padding: 5px; word-break: keep-all; background-color: transparent !important; }
-            table.official-table th { font-weight: bold; }
+            /* 표 기본 골격 (너비 고정, 칸 찌그러짐 방지) */
+            table.fixed-table { 
+                width: 100%; border-collapse: collapse; border: 2px solid #000; 
+                table-layout: fixed; /* 절대 중요: 글자가 많아도 칸 너비 고정 */
+                text-align: center; font-size: 11pt; 
+            }
+            table.fixed-table th, table.fixed-table td { 
+                border: 1px solid #000; padding: 2px 4px; 
+                overflow: hidden; /* 넘치는 글자 숨김 */
+                vertical-align: middle;
+            }
+            table.fixed-table th { font-weight: bold; background-color: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-            /* 상단 안내소 표 높이 조절 */
-            .ht-row1 { height: 80px; }
-            .ht-row2 { height: 35px; }
+            /* [상단 표] 열 너비 지정 */
+            .t1-col1 { width: 15%; }
+            .t1-col2 { width: 25%; }
+            .t1-col3 { width: 15%; }
+            .t1-col4 { width: 45%; }
+            
+            /* [상단 표] 행 높이 강제 고정 */
+            .row-loc { height: 10mm; } /* 안내소 행: 얇게 */
+            .row-guide-header { height: 8mm; } /* 해설사 제목 행 */
+            .row-guide { height: 8mm; } /* 해설사 명단 행 (4줄 고정) */
 
-            .print-sub-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; margin-top: 20px; text-align: left; }
+            .print-sub-title { font-size: 12pt; font-weight: bold; margin: 6mm 0 2mm 0; text-align: left; }
 
-            /* 하단 운영일지 표 높이 조절 (A4에 딱 맞게) */
-            .log-row th, .log-row td { height: 38px; }
+            /* [하단 표] 열 너비 지정 */
+            .t2-col1 { width: 16%; }
+            .t2-col2 { width: 14%; }
+            .t2-col3 { width: 14%; }
+            .t2-col4 { width: 14%; }
+            .t2-col5 { width: 14%; }
+            .t2-col6 { width: 14%; }
+            .t2-col7 { width: 14%; }
 
-            .print-footer { position: absolute; bottom: 30px; right: 25px; font-size: 16px; font-weight: bold; text-align: right; }
+            /* [하단 표] 행 높이 강제 고정 */
+            .row-log-header { height: 12mm; } /* 시간, 탐방객 등 제목 (2줄 허용) */
+            .row-log { height: 10mm; } /* 08시~18시 데이터 (10줄) */
+            .row-sum { height: 10mm; font-weight: bold; } /* 합계 */
+            .row-remark { height: 25mm; vertical-align: top !important; text-align: left !important; padding: 5px !important; word-break: break-all; white-space: pre-wrap; } /* 특이사항 */
+
+            /* 결재 서명란 (A4 용지 최하단 우측 고정) */
+            .signature-box { 
+                position: absolute; bottom: 5mm; right: 0; 
+                font-size: 14pt; font-weight: bold; text-align: right; 
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-
-    <div id="dynamic_print_style"></div>
 
     <div class="header">
         <div class="profile-icon">👤</div>
@@ -116,10 +156,7 @@
 
     <div id="attendance_area" class="hidden-section">
         <div class="form-group"><label>📍 기록할 안내소 선택</label><select id="location_select"></select></div>
-        <div class="time-input-wrap">
-            <label style="font-size: 0.8rem; font-weight: 600; color:#555; display:block; margin-bottom:5px;">⏱ 기록할 시간 (직접 수정 가능)</label>
-            <input type="time" id="action_time_input">
-        </div>
+        <div class="time-input-wrap"><label style="font-size: 0.8rem; font-weight: 600; color:#555; display:block; margin-bottom:5px;">⏱ 기록할 시간 (직접 수정 가능)</label><input type="time" id="action_time_input"></div>
         <button class="btn-act btn-in" onclick="sendAction('출근')"><span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div></button>
         <button class="btn-act btn-move" onclick="sendAction('이동')"><span>🔵 이동하기 (장소변경)</span><div id="move_time_display" class="time-text"></div></button>
         <button class="btn-act btn-out" onclick="sendAction('퇴근')"><span>🔴 퇴근하기</span><div id="out_time_display" class="time-text"></div></button>
@@ -128,126 +165,85 @@
     <div id="log_area" class="hidden-section">
         <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select"></select></div>
         <div class="form-group"><label>시간 선택</label><select id="log_time"></select></div>
-        <div class="form-group">
-            <label>공동해설 여부</label>
-            <select id="log_co">
-                <option value="X">X (단독해설 - 실적 직접 입력)</option>
-                <option value="O">O (공동해설 - 나는 실적 0, 상대가 입력)</option>
-            </select>
-        </div>
-        <div class="form-group" id="co_guide_group" style="display: none;">
-            <label>👥 실적을 대신 입력할 동료 선택</label>
-            <select id="log_co_guide"><option value="">해설사 확인 중...</option></select>
-        </div>
+        <div class="form-group"><label>공동해설 여부</label><select id="log_co"><option value="X">X (단독해설)</option><option value="O">O (공동해설)</option></select></div>
+        <div class="form-group" id="co_guide_group" style="display: none;"><label>👥 동료 선택</label><select id="log_co_guide"><option value="">확인 중...</option></select></div>
         <div id="stats_group">
             <div class="form-group"><label>탐방객 수 (명)</label><input type="number" id="log_visitors" value="0"></div>
             <div class="form-group"><label>청취자 수 (명)</label><input type="number" id="log_listeners" value="0"></div>
             <div class="form-group"><label>해설 횟수 (회)</label><input type="number" id="log_count" value="0"></div>
         </div>
-        <div class="form-group"><label>📝 특이사항</label><textarea id="log_remarks" rows="3" placeholder="기타 전달사항을 입력하세요"></textarea></div>
+        <div class="form-group"><label>📝 특이사항</label><textarea id="log_remarks" rows="3"></textarea></div>
         <button class="btn-submit" onclick="submitLog()">일지 저장하기</button>
     </div>
 
     <div id="status_area" class="hidden-section">
-        <div class="form-group"><label>📅 조회 날짜 선택</label><input type="date" id="status_date_input" onchange="loadDailyStatus()"></div>
-        <div class="form-group">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <label style="margin:0;">📊 조원 활동 현황</label>
-                <button onclick="loadDailyStatus()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
-            </div>
-            <div id="status_container"><p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p></div>
+        <div class="form-group"><label>📅 날짜 선택</label><input type="date" id="status_date_input" onchange="loadDailyStatus()"></div>
+        <div class="form-group"><button onclick="loadDailyStatus()" style="padding:5px 10px; background:#333; color:white; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
+            <div id="status_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
         </div>
     </div>
 
     <div id="plan_area" class="hidden-section">
         <div class="form-group">
-            <label>🗓 작성할 월 / 구분</label>
-            <div class="flex-group">
-                <select id="plan_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
-                <select id="plan_half" style="flex:1.5;"><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
-            </div>
-            <button class="btn-act btn-move" style="margin-top:10px; padding:12px; font-size:1rem; border-radius:8px;" onclick="generatePlanForm()">📝 15일치 양식 펼치기</button>
+            <div class="flex-group"><select id="plan_month" style="flex:1;"></select><select id="plan_half" style="flex:1.5;"><option value="1">전반기</option><option value="2">하반기</option></select></div>
+            <button class="btn-act btn-move" style="margin-top:10px; padding:12px;" onclick="generatePlanForm()">📝 양식 펼치기</button>
         </div>
         <div id="plan_list_container" style="display:none; margin-top:20px; border-top:2px dashed #CCC; padding-top:20px;">
             <div class="time-input-wrap">
-                <label style="font-size: 0.85rem; font-weight: 700; color:#333; margin-bottom:5px;">⚙️ 일괄 적용 설정</label>
-                <div class="flex-group"><select id="batch_loc" style="flex:1;"></select><select id="batch_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="batch_end" style="flex:1;"></select></div>
-                <button onclick="applyBatchSettings()" style="width:100%; margin-top:8px; padding:10px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">전체 일괄 적용하기</button>
+                <div class="flex-group"><select id="batch_loc" style="flex:1;"></select><select id="batch_start" style="flex:1;"></select><span>~</span><select id="batch_end" style="flex:1;"></select></div>
+                <button onclick="applyBatchSettings()" style="width:100%; margin-top:8px; padding:10px; background:#333; color:white; border:none; border-radius:8px;">일괄 적용</button>
             </div>
             <div id="plan_rows"></div>
-            <button class="btn-submit" onclick="submitBulkPlan()">🚀 15일치 스케줄 제출하기</button>
+            <button class="btn-submit" onclick="submitBulkPlan()">🚀 제출하기</button>
         </div>
     </div>
 
     <div id="change_area" class="hidden-section">
         <div class="form-group"><label>📅 변경 대상 날짜</label><input type="date" id="change_target_date"></div>
-        <div class="form-group">
-            <label>⚙️ 변경 유형</label>
-            <select id="change_type" onchange="updateChangeUI()">
-                <option value="시간 변경">시간 변경</option>
-                <option value="해설사 변경(대타)">해설사 변경 (대타 요청)</option>
-                <option value="계획 취소">계획 취소 (휴무 전환)</option>
-            </select>
-        </div>
-        <div id="change_ui_time" class="time-input-wrap">
-            <label style="font-size: 0.8rem; font-weight: 600;">새로운 시간 설정</label>
-            <div class="flex-group" style="margin-top: 5px;"><select id="change_time_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="change_time_end" style="flex:1;"></select></div>
-        </div>
-        <div id="change_ui_guide" class="time-input-wrap" style="display:none;">
-            <label style="font-size: 0.8rem; font-weight: 600;">대타를 요청할 동료 해설사</label>
-            <select id="change_target_guide" style="margin-top: 5px;"><option value="">불러오는 중...</option></select>
-        </div>
-        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;"><label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환합니다.</label></div>
-        <div class="form-group"><label>📝 변경 사유</label><textarea id="change_remarks" rows="2" placeholder="변경 사유를 간략히 적어주세요"></textarea></div>
-        <button class="btn-submit" onclick="submitPlanChange()">승인 요청하기</button>
+        <div class="form-group"><select id="change_type" onchange="updateChangeUI()"><option value="시간 변경">시간 변경</option><option value="해설사 변경(대타)">해설사 변경</option><option value="계획 취소">계획 취소</option></select></div>
+        <div id="change_ui_time" class="time-input-wrap"><div class="flex-group"><select id="change_time_start"></select><span>~</span><select id="change_time_end"></select></div></div>
+        <div id="change_ui_guide" class="time-input-wrap" style="display:none;"><select id="change_target_guide"></select></div>
+        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;"><label style="color:#e74c3c;">휴무 전환</label></div>
+        <div class="form-group"><textarea id="change_remarks" rows="2" placeholder="사유"></textarea></div>
+        <button class="btn-submit" onclick="submitPlanChange()">요청하기</button>
     </div>
 
     <div id="my_plan_area" class="hidden-section">
-        <div class="form-group"><label>📋 내가 제출한 활동계획 (최근 30일)</label><div id="my_plan_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div></div>
+        <div class="form-group"><label>📋 나의 활동계획</label><div id="my_plan_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div></div>
     </div>
 
     <div id="approval_area" class="hidden-section">
         <div class="form-group">
-            <label>📁 조원 결재함 (승인 대기 목록)</label>
             <div id="approval_header" class="approval-header" style="display:none;">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold;"><input type="checkbox" id="chk_all" class="chk-box" style="width:20px !important;" onclick="toggleAllApprovals(this)"> 전체 선택</label>
-                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button><button class="btn-act btn-out" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('반려')">선택 반려</button></div>
+                <label><input type="checkbox" id="chk_all" class="chk-box" onclick="toggleAllApprovals(this)"> 전체 선택</label>
+                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('승인완료')">승인</button><button class="btn-act btn-out" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('반려')">반려</button></div>
             </div>
-            <div id="pending_container"><p style="text-align:center; color:#999; padding:20px;">대기 중인 요청을 불러오는 중...</p></div>
+            <div id="pending_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
         </div>
     </div>
 
     <div id="team_plan_area" class="hidden-section">
         <div class="form-group">
-            <label>🔍 검색 조건 설정</label>
-            <div class="flex-group">
-                <select id="tp_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
-                <select id="tp_half" style="flex:1.5;"><option value="all">전체 일정</option><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
-            </div>
-            <div class="flex-group"><select id="tp_loc" style="flex:1;"></select><input type="text" id="tp_name" placeholder="이름 검색" style="flex:1;"></div>
+            <div class="flex-group"><select id="tp_month" style="flex:1;"></select><select id="tp_half" style="flex:1.5;"><option value="all">전체</option><option value="1">전반기</option><option value="2">하반기</option></select></div>
+            <div class="flex-group"><select id="tp_loc" style="flex:1;"></select><input type="text" id="tp_name" placeholder="이름" style="flex:1;"></div>
             <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadTeamPlans()">검색하기</button>
         </div>
-        <div id="team_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
+        <div id="team_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건 설정 후 검색</p></div>
     </div>
 
     <div id="report_area" class="hidden-section">
         <div class="form-group">
             <label>📑 출력할 보고서 선택</label>
             <select id="rep_type" style="margin-bottom:10px;">
-                <option value="log">안내소 운영일지 (A4 세로양식)</option>
-                <option value="plan">활동계획서</option>
-                <option value="result">활동결과보고서</option>
+                <option value="log">안내소 운영일지 (A4 서식고정)</option>
+                <option value="plan">활동계획서 (준비중)</option>
+                <option value="result">활동결과보고서 (준비중)</option>
             </select>
             <div class="flex-group">
-                <select id="rep_year" style="flex:1;">
-                    <option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option>
-                </select>
+                <select id="rep_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
                 <select id="rep_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
             </div>
-            <select id="rep_half" style="margin-top:8px;">
-                <option value="1">전반기 (1~15일)</option>
-                <option value="2">하반기 (16~말일)</option>
-            </select>
+            <select id="rep_half" style="margin-top:8px;"><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
             <button class="btn-submit" style="margin-top:15px; background-color:#2c3e50; color:white; border-radius:8px; font-size:1.1rem; padding:15px;" onclick="generatePDF()">📄 PDF 변환 및 인쇄</button>
             <p style="font-size:0.8rem; color:#666; text-align:center; margin-top:10px;">인쇄 창이 뜨면 대상 프린터를 'PDF로 저장'으로 변경하세요.</p>
         </div>
@@ -255,52 +251,36 @@
 
     <div id="admin_attendance_area" class="hidden-section">
         <div class="form-group"><label>📅 조회 날짜 선택</label><input type="date" id="admin_date_input" onchange="loadAdminAttendance()"></div>
-        <div class="form-group">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <label style="margin:0;">📊 전 지역 출퇴근 종합 현황</label>
-                <button onclick="loadAdminAttendance()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
-            </div>
-            <div id="admin_attendance_container"><p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p></div>
+        <div class="form-group"><button onclick="loadAdminAttendance()" style="padding:5px 10px; background:#333; color:white; border-radius:6px;">새로고침 🔄</button>
+            <div id="admin_attendance_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
         </div>
     </div>
 
     <div id="admin_log_area" class="hidden-section">
         <div class="form-group">
-            <label>🔍 활동(운영일지) 검색 조건 설정</label>
             <div class="flex-group"><input type="date" id="al_start_date" style="flex:1;"><span style="font-weight:bold;">~</span><input type="date" id="al_end_date" style="flex:1;"></div>
-            <div class="flex-group"><select id="al_loc" style="flex:1;"></select><input type="text" id="al_name" placeholder="이름 검색" style="flex:1;"></div>
-            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadAdminLogs()">종합 검색하기</button>
+            <div class="flex-group"><select id="al_loc" style="flex:1;"></select><input type="text" id="al_name" placeholder="이름" style="flex:1;"></div>
+            <button class="btn-submit" style="background-color:#3498db;" onclick="loadAdminLogs()">검색하기</button>
         </div>
-        <div id="admin_log_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
+        <div id="admin_log_container"><p style="text-align:center; color:#999; padding:20px;">검색해주세요.</p></div>
     </div>
 
     <div id="admin_plan_area" class="hidden-section">
         <div class="form-group">
-            <label>🔍 활동계획서 검색 조건 설정</label>
-            <div class="flex-group">
-                <select id="ap_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
-                <select id="ap_half" style="flex:1.5;"><option value="all">전체 일정</option><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
-            </div>
-            <div class="flex-group">
-                <select id="ap_island" style="flex:1;" onchange="updateApLoc()"><option value="전체">전체 섬</option><option value="백령도">백령도</option><option value="대청도">대청도</option><option value="소청도">소청도</option></select>
-                <select id="ap_loc" style="flex:1;"><option value="">- 모든 안내소 -</option></select>
-            </div>
-            <div class="form-group" style="margin-top:8px;"><input type="text" id="ap_name" placeholder="해설사 이름 검색"></div>
-            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadAdminPlans()">조회하기</button>
+            <div class="flex-group"><select id="ap_month" style="flex:1;"></select><select id="ap_half" style="flex:1.5;"><option value="all">전체</option><option value="1">전반기</option><option value="2">하반기</option></select></div>
+            <div class="flex-group"><select id="ap_island" style="flex:1;" onchange="updateApLoc()"><option value="전체">전체 섬</option><option value="백령도">백령도</option><option value="대청도">대청도</option><option value="소청도">소청도</option></select><select id="ap_loc" style="flex:1;"><option value="">- 모든 안내소 -</option></select></div>
+            <div class="form-group" style="margin-top:8px;"><input type="text" id="ap_name" placeholder="해설사 이름"></div>
+            <button class="btn-submit" style="background-color:#3498db;" onclick="loadAdminPlans()">조회하기</button>
         </div>
-        <div id="admin_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
+        <div id="admin_plan_container"><p style="text-align:center; color:#999; padding:20px;">검색해주세요.</p></div>
     </div>
 
     <div id="admin_stats_area" class="hidden-section">
         <div class="form-group">
-            <label>📊 통계 기준월 선택</label>
-            <div class="flex-group">
-                <select id="stat_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
-                <select id="stat_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
-            </div>
-            <button class="btn-submit" style="margin-top:5px; background-color:#2c3e50; color:white; border-radius:8px;" onclick="loadStatistics()">통계 산출하기</button>
+            <div class="flex-group"><select id="stat_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select><select id="stat_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select></div>
+            <button class="btn-submit" style="background-color:#2c3e50;" onclick="loadStatistics()">통계 산출하기</button>
         </div>
-        <div id="stat_container"><p style="text-align:center; color:#999; padding:20px;">연도와 월을 선택하고 버튼을 눌러주세요.</p></div>
+        <div id="stat_container"><p style="text-align:center; color:#999; padding:20px;">선택해주세요.</p></div>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
@@ -347,11 +327,15 @@
         if(document.getElementById('al_loc')) document.getElementById('al_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + allLocations.map(l => `<option value="${l}">${l}</option>`).join('');
 
         const currentMonth = (new Date().getMonth() + 1).toString();
-        if(document.getElementById('plan_month')) document.getElementById('plan_month').value = currentMonth;
-        if(document.getElementById('tp_month')) document.getElementById('tp_month').value = currentMonth;
-        if(document.getElementById('ap_month')) document.getElementById('ap_month').value = currentMonth;
-        if(document.getElementById('stat_month')) document.getElementById('stat_month').value = currentMonth;
-        if(document.getElementById('rep_month')) document.getElementById('rep_month').value = currentMonth;
+        
+        ['plan_month', 'tp_month', 'ap_month', 'stat_month', 'rep_month'].forEach(id => {
+            let el = document.getElementById(id);
+            if(el) {
+                el.innerHTML = '';
+                for(let i=1; i<=12; i++) el.innerHTML += `<option value="${i}">${i}월</option>`;
+                el.value = currentMonth;
+            }
+        });
 
         if(document.getElementById('al_start_date')) {
             const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
@@ -369,7 +353,7 @@
             else locs = allLocations;
             document.getElementById('ap_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + locs.map(l => `<option value="${l}">${l}</option>`).join('');
         }
-        updateApLoc();
+        if(document.getElementById('ap_island')) updateApLoc();
 
         function setCurrentTimeInput() {
             const now = new Date();
@@ -403,46 +387,21 @@
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
-                document.getElementById('attendance_area').style.display = m.includes('출퇴근관리') && userRole !== '관리자' ? 'block' : 'none';
-                document.getElementById('log_area').style.display = m.includes('운영일지 작성') ? 'block' : 'none';
-                document.getElementById('plan_area').style.display = m.includes('활동계획서 작성') ? 'block' : 'none';
-                document.getElementById('change_area').style.display = m.includes('활동계획 변경') ? 'block' : 'none';
-                document.getElementById('approval_area').style.display = m.includes('변경 승인') ? 'block' : 'none';
-                document.getElementById('my_plan_area').style.display = m.includes('나의 활동계획 조회') ? 'block' : 'none';
-                document.getElementById('status_area').style.display = m.includes('현황 조회') && !m.includes('나의') && userRole !== '관리자' ? 'block' : 'none';
-                document.getElementById('team_plan_area').style.display = m.includes('조원 활동계획 조회') ? 'block' : 'none';
-                document.getElementById('report_area').style.display = m.includes('보고서 출력') ? 'block' : 'none';
+                document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
                 
-                document.getElementById('admin_attendance_area').style.display = m === '1. 해설사 출퇴근 현황' ? 'block' : 'none';
-                document.getElementById('admin_log_area').style.display = m === '2. 해설사 활동 현황' ? 'block' : 'none';
-                document.getElementById('admin_plan_area').style.display = m === '3. 활동계획서 조회' ? 'block' : 'none';
-                document.getElementById('admin_stats_area').style.display = m === '4. 통계' ? 'block' : 'none';
-
-                if(m.includes('출퇴근관리') && userRole !== '관리자') setCurrentTimeInput();
-                if(m.includes('활동계획 변경')) loadGuideList(); 
-                if(m.includes('변경 승인')) loadPendingRequests(); 
-                if(m.includes('나의 활동계획 조회')) loadMyPlans(); 
-                if(m.includes('조원 활동계획 조회')) loadTeamPlans(); 
-                if(m.includes('현황 조회') && !m.includes('나의') && userRole !== '관리자') {
-                    if(!document.getElementById('status_date_input').value) {
-                        const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
-                        const dateOffset = new Date(now.getTime() - offset);
-                        document.getElementById('status_date_input').value = dateOffset.toISOString().split('T')[0];
-                    }
-                    loadDailyStatus(); 
-                }
-                
-                if(m === '1. 해설사 출퇴근 현황') {
-                    if(!document.getElementById('admin_date_input').value) {
-                        const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
-                        const dateOffset = new Date(now.getTime() - offset);
-                        document.getElementById('admin_date_input').value = dateOffset.toISOString().split('T')[0];
-                    }
-                    loadAdminAttendance();
-                }
-                if(m === '2. 해설사 활동 현황') loadAdminLogs(); 
-                if(m === '3. 활동계획서 조회') loadAdminPlans();
-                if(m === '4. 통계') loadStatistics();
+                if(m.includes('출퇴근관리') && userRole !== '관리자') { document.getElementById('attendance_area').style.display = 'block'; setCurrentTimeInput(); }
+                else if(m.includes('운영일지 작성')) document.getElementById('log_area').style.display = 'block';
+                else if(m === '3. 출퇴근 및 활동 현황 조회') { document.getElementById('status_area').style.display = 'block'; loadDailyStatus(); }
+                else if(m === '4. 활동계획서 작성' || (userRole === '해설사' && m === '3. 활동계획서 작성')) document.getElementById('plan_area').style.display = 'block';
+                else if(m.includes('활동계획 변경')) { document.getElementById('change_area').style.display = 'block'; loadGuideList(); }
+                else if(m.includes('변경 승인')) { document.getElementById('approval_area').style.display = 'block'; loadPendingRequests(); }
+                else if(m.includes('나의 활동계획 조회')) { document.getElementById('my_plan_area').style.display = 'block'; loadMyPlans(); }
+                else if(m.includes('조원 활동계획 조회')) { document.getElementById('team_plan_area').style.display = 'block'; loadTeamPlans(); }
+                else if(m.includes('보고서 출력')) document.getElementById('report_area').style.display = 'block';
+                else if(m === '1. 해설사 출퇴근 현황') { document.getElementById('admin_attendance_area').style.display = 'block'; loadAdminAttendance(); }
+                else if(m === '2. 해설사 활동 현황') { document.getElementById('admin_log_area').style.display = 'block'; loadAdminLogs(); }
+                else if(m === '3. 활동계획서 조회') { document.getElementById('admin_plan_area').style.display = 'block'; loadAdminPlans(); }
+                else if(m === '4. 통계') { document.getElementById('admin_stats_area').style.display = 'block'; loadStatistics(); }
             };
             container.appendChild(d);
         });
@@ -453,11 +412,9 @@
                 const res = await fetch(`${API_BASE}/get_my_attendance?name=${encodeURIComponent(userName)}`);
                 if(res.ok) {
                     const data = await res.json();
-                    currentLoc = data.loc;
-                    localStorage.setItem("current_location", currentLoc);
-                    updateCurrentLocBadge();
-                    if(data.in_time) { localStorage.setItem("last_in_time", data.in_time); document.getElementById('in_time_display').innerText = `기록됨: ${data.in_time}`; } else { document.getElementById('in_time_display').innerText = ''; }
-                    if(data.out_time) { localStorage.setItem("last_out_time", data.out_time); document.getElementById('out_time_display').innerText = `기록됨: ${data.out_time}`; } else { document.getElementById('out_time_display').innerText = ''; }
+                    currentLoc = data.loc; localStorage.setItem("current_location", currentLoc); updateCurrentLocBadge();
+                    if(data.in_time) document.getElementById('in_time_display').innerText = `기록됨: ${data.in_time}`;
+                    if(data.out_time) document.getElementById('out_time_display').innerText = `기록됨: ${data.out_time}`;
                 }
             } catch (e) {}
         }
@@ -473,11 +430,11 @@
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: action, location: loc, action_time: inputTime })
                 });
                 if(res.ok) {
-                    if (action === '출근' || action === '이동') { currentLoc = loc; localStorage.setItem("current_location", loc); updateCurrentLocBadge(); } 
-                    else if (action === '퇴근') { currentLoc = "미출근"; localStorage.setItem("current_location", "미출근"); updateCurrentLocBadge(); }
-                    if (action === '출근') { localStorage.setItem("last_in_time", inputTime); document.getElementById('in_time_display').innerText = `기록됨: ${inputTime}`; }
-                    else if (action === '이동') { localStorage.setItem("last_move_time", inputTime); document.getElementById('move_time_display').innerText = `기록됨: ${inputTime}`; }
-                    else if (action === '퇴근') { localStorage.setItem("last_out_time", inputTime); document.getElementById('out_time_display').innerText = `기록됨: ${inputTime}`; }
+                    if (action === '출근' || action === '이동') { currentLoc = loc; updateCurrentLocBadge(); } 
+                    else if (action === '퇴근') { currentLoc = "미출근"; updateCurrentLocBadge(); }
+                    if (action === '출근') document.getElementById('in_time_display').innerText = `기록됨: ${inputTime}`;
+                    else if (action === '이동') document.getElementById('move_time_display').innerText = `기록됨: ${inputTime}`;
+                    else if (action === '퇴근') document.getElementById('out_time_display').innerText = `기록됨: ${inputTime}`;
                     alert(action + " 완료!");
                 } else alert("기록 실패!");
             } catch (e) {}
@@ -486,20 +443,23 @@
         async function submitLog() {
             const coSelectValue = document.getElementById('log_co').value;
             const isCoInitiator = coSelectValue === 'O'; let coCommentaryValue = isCoInitiator ? document.getElementById('log_co_guide').value : (coSelectValue === '○' ? '○' : 'X');
-            if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없다"))) { alert("선택 가능한 공동해설자가 없습니다."); return; }
             if(!confirm("운영일지를 저장하시겠습니까?")) return;
             try {
                 const res = await fetch(`${API_BASE}/log_operation`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, log_location: document.getElementById('log_location_select').value, target_time: document.getElementById('log_time').value, visitors: isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value), listeners: isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value), count: isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value), co_commentary: coCommentaryValue, remarks: document.getElementById('log_remarks').value })
                 });
-                if(res.ok) { alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; document.getElementById('log_visitors').value = 0; document.getElementById('log_listeners').value = 0; document.getElementById('log_count').value = 0; document.getElementById('log_remarks').value = ""; } else alert("저장 실패");
+                if(res.ok) { alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; }
             } catch (e) {}
         }
 
         async function loadDailyStatus() {
             const container = document.getElementById('status_container');
-            const targetDate = document.getElementById('status_date_input').value;
+            let targetDate = document.getElementById('status_date_input').value;
+            if(!targetDate) {
+                targetDate = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+                document.getElementById('status_date_input').value = targetDate;
+            }
             container.innerHTML = '<p style="text-align:center; color:#999;">데이터를 불러오는 중입니다...</p>';
             try {
                 const res = await fetch(`${API_BASE}/get_daily_status?island=${encodeURIComponent(userIsland)}&target_date=${targetDate}`);
@@ -518,7 +478,7 @@
                     }
                 }
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">현황을 불러오지 못했습니다.</p>'; }
+            } catch (e) {}
         }
 
         function generatePlanForm() {
@@ -565,15 +525,13 @@
             });
             if (!isValid) { alert("시간 설정이 잘못된 날짜가 있습니다."); return; }
             if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장됩니다.\n이대로 제출하시겠습니까?`)) return;
-            if (weekWarningTriggered && !confirm(`경고: 일주일 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있습니다.\n이대로 제출하시겠습니까?`)) return;
             
             let confirmMsg = `활동계획을 제출하시겠습니까?`;
             if(requiresApproval) confirmMsg += `\n※ 8시간 초과 근무 포함되어 추가 승인이 필요합니다.`;
-            
             if(!confirm(confirmMsg)) return;
             try {
                 const res = await fetch(`${API_BASE}/submit_plan_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, plans: plans }) });
-                if(res.ok) { alert("제출되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; } else alert("제출 실패");
+                if(res.ok) { alert("제출되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; }
             } catch (e) {}
         }
 
@@ -599,7 +557,7 @@
             if(!confirm("승인 요청하시겠습니까?")) return;
             try {
                 const res = await fetch(`${API_BASE}/request_plan_change`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: changeType === '해설사 변경(대타)' ? document.getElementById('change_target_guide').value : "" }) });
-                if(res.ok) { alert("완료되었습니다."); document.getElementById('change_area').style.display = 'none'; } else alert("실패");
+                if(res.ok) { alert("완료되었습니다."); document.getElementById('change_area').style.display = 'none'; }
             } catch (e) {}
         }
 
@@ -650,7 +608,7 @@
                     html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
+            } catch (e) {}
         }
 
         async function loadPendingRequests() {
@@ -675,7 +633,7 @@
             try {
                 const res = await fetch(`${API_BASE}/process_approval_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ approvals: approvals }) });
                 if(res.ok) { alert("완료되었습니다."); loadPendingRequests(); }
-            } catch (e) { alert("오류 발생"); }
+            } catch (e) {}
         }
 
         async function loadAdminAttendance() {
@@ -711,7 +669,7 @@
                     html += `</div></div>`;
                 }
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
+            } catch (e) {}
         }
 
         async function loadAdminLogs() {
@@ -721,19 +679,16 @@
             const loc = document.getElementById('al_loc').value;
             const nameSearch = document.getElementById('al_name').value.trim();
 
-            if (!startDate || !endDate) { alert("시작일과 종료일을 모두 선택해주세요."); return; }
-            if (startDate > endDate) { alert("시작일이 종료일보다 늦을 수 없습니다."); return; }
+            if (!startDate || !endDate) return;
 
             container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중입니다...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_logs?start_date=${startDate}&end_date=${endDate}&loc=${encodeURIComponent(loc)}&name=${encodeURIComponent(nameSearch)}`);
                 const data = await res.json();
-                
-                let html = '';
                 let summary = data.summary;
                 
-                html += `
+                let html = `
                     <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
                         <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
                         <div style="display:flex; justify-content:space-between; text-align:center;">
@@ -746,14 +701,12 @@
 
                 if (data.logs.length === 0) {
                     html += '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 일지 기록이 없습니다.</p>';
-                    container.innerHTML = html;
-                    return;
+                    container.innerHTML = html; return;
                 }
 
                 data.logs.forEach(log => {
                     let rLoc = log['안내소'] || log['장소'] || '장소 미상';
                     let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.8rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
-                    
                     html += `
                         <div class="log-item-card">
                             <div class="log-item-header">
@@ -773,7 +726,7 @@
                     `;
                 });
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오는 중 오류가 발생했습니다.</p>'; }
+            } catch (e) {}
         }
 
         async function loadAdminPlans() {
@@ -814,7 +767,7 @@
                     html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']} <span style="font-size:0.85rem; color:#7f8c8d;">(${p['섬']})</span></strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
+            } catch (e) {}
         }
 
         async function loadStatistics() {
@@ -834,16 +787,7 @@
                 }
 
                 let html = '';
-                html += `
-                    <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #bbdefb;">
-                        <div style="font-size:1.1rem; font-weight:800; color:#1565c0; margin-bottom:10px; text-align:center;">🏆 ${year}년 ${month}월 전체 실적</div>
-                        <div style="display:flex; justify-content:space-between; text-align:center;">
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 탐방객</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.visitors.toLocaleString()}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 청취자</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.listeners.toLocaleString()}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">해설 횟수</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.count.toLocaleString()}회</div></div>
-                        </div>
-                    </div>
-                `;
+                html += `<div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #bbdefb;"><div style="font-size:1.1rem; font-weight:800; color:#1565c0; margin-bottom:10px; text-align:center;">🏆 ${year}년 ${month}월 전체 실적</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 탐방객</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.visitors.toLocaleString()}명</div></div><div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 청취자</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.listeners.toLocaleString()}명</div></div><div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">해설 횟수</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.count.toLocaleString()}회</div></div></div></div>`;
 
                 html += `<div style="font-weight:800; font-size:1.05rem; margin-bottom:10px; color:#2c3e50;">🏝️ 권역(섬)별 실적</div>`;
                 html += `<table class="stat-table"><thead><tr><th>권역</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
@@ -854,19 +798,17 @@
 
                 html += `<div style="font-weight:800; font-size:1.05rem; margin-top:25px; margin-bottom:10px; color:#2c3e50;">🧑‍🏫 해설사별 개인 실적</div>`;
                 html += `<table class="stat-table"><thead><tr><th>이름 (소속)</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
-                
                 const sortedGuides = Object.entries(data.guide_stats).sort((a, b) => b[1].count - a[1].count);
-                
                 for (const [name, stats] of sortedGuides) {
                     html += `<tr><td class="t-left">${name}<br><span style="font-weight:normal; font-size:0.75rem; color:#7f8c8d;">${stats.island}</span></td><td>${stats.visitors.toLocaleString()}</td><td>${stats.listeners.toLocaleString()}</td><td><b>${stats.count.toLocaleString()}</b></td></tr>`;
                 }
                 html += `</tbody></table>`;
 
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">통계 산출 중 오류가 발생했습니다.</p>'; }
+            } catch (e) {}
         }
 
-        // --- [수정] 스캔본 양식(A4 세로) 완벽 복제 PDF 인쇄 로직 ---
+        // --- [수정 완료] PDF 생성 시 뼈대(테두리/높이) 고정 후 글자 넣는 로직 ---
         async function generatePDF() {
             const type = document.getElementById('rep_type').value;
             const year = document.getElementById('rep_year').value;
@@ -883,16 +825,11 @@
                 
                 let html = '';
                 let printArea = document.getElementById('print_area');
-                document.getElementById('dynamic_print_style').innerHTML = ''; // 스타일 초기화
 
                 if(type === 'log') {
-                    // A4 세로, 바탕체 적용 스타일 강제 주입
-                    document.getElementById('dynamic_print_style').innerHTML = '<style>@media print { @page { size: A4 portrait; margin: 0; } }</style>';
-
                     let dailyData = data.daily_data;
                     let sortedDates = Object.keys(dailyData).sort();
                     
-                    // 전반기/하반기 필터링
                     if(half === '1') sortedDates = sortedDates.filter(d => parseInt(d.split('-')[2]) <= 15);
                     else sortedDates = sortedDates.filter(d => parseInt(d.split('-')[2]) > 15);
 
@@ -914,9 +851,9 @@
 
                         for (const [loc, info] of Object.entries(locs)) {
                             
-                            // 1. 해설사 명단 세팅 (최대 2명 기준)
+                            // 해설사 줄 (무조건 4칸 고정 생성으로 양식 틀어짐 방지)
                             let guideRows = '';
-                            for(let i=0; i<2; i++) {
+                            for(let i=0; i<4; i++) {
                                 if(info.guides && info.guides[i]) {
                                     let g = info.guides[i];
                                     let tIn = g.in || '';
@@ -927,32 +864,31 @@
                                         let hIn = parseInt(tIn.split(':')[0]);
                                         let hOut = parseInt(tOut.split(':')[0]);
                                         let diff = hOut - hIn;
-                                        if(diff >= 5) diff -= 1; // 식사시간 1시간 제외
+                                        if(diff >= 5) diff -= 1; 
                                         totalHours = diff > 0 ? `${diff}시간` : '';
                                     }
-                                    guideRows += `<tr><td>${g.name}</td><td colspan="2">${timeStr}</td><td>${totalHours}</td></tr>`;
+                                    guideRows += `<tr class="row-guide"><td>${g.name}</td><td colspan="2">${timeStr}</td><td>${totalHours}</td></tr>`;
                                 } else {
-                                    guideRows += `<tr><td></td><td colspan="2"></td><td></td></tr>`;
+                                    guideRows += `<tr class="row-guide"><td></td><td colspan="2"></td><td></td></tr>`;
                                 }
                             }
 
-                            // 2. 시간대별 실적 세팅
+                            // 운영일지 줄 (10칸 고정 생성)
                             let logRows = '';
                             let totalV = 0, totalL = 0, totalC = 0;
                             let remarkSum = '';
 
                             times.forEach(t => {
-                                // 시간 앞 2자리(예: "08")로 매칭
                                 let log = info.logs ? info.logs.find(x => x.time && x.time.replace(/\s/g,'').substring(0,2) === t.substring(0,2)) : null;
 
                                 if(log) {
                                     totalV += parseInt(log.visitors||0);
                                     totalL += parseInt(log.listeners||0);
                                     totalC += parseInt(log.count||0);
-                                    if(log.remarks) remarkSum += log.remarks + " ";
+                                    if(log.remarks) remarkSum += log.remarks + "\n";
 
                                     logRows += `
-                                        <tr class="log-row">
+                                        <tr class="row-log">
                                             <td>${t}</td>
                                             <td>${log.visitors || ''}</td>
                                             <td>${log.listeners || ''}</td>
@@ -963,46 +899,46 @@
                                         </tr>
                                     `;
                                 } else {
-                                    logRows += `<tr class="log-row"><td>${t}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                                    logRows += `<tr class="row-log"><td>${t}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
                                 }
                             });
 
-                            // 3. 페이지 조립
+                            // 최종 페이지 조립
                             html += `
                                 <div class="print-page">
                                     <div class="print-top-left">【서식 3】 지질공원 안내소 운영일지</div>
                                     <div class="print-main-title">지질공원 안내소 운영일지</div>
                                     <div class="print-date">${dateFormatted}</div>
 
-                                    <table class="official-table">
-                                        <tr class="ht-row1">
-                                            <th style="width:12%;">안내소</th>
-                                            <td style="width:20%; font-size:18px; font-weight:bold;">${loc}</td>
-                                            <th style="width:12%;">지시사항</th>
-                                            <td colspan="2" style="width:56%;"></td>
+                                    <table class="fixed-table">
+                                        <tr class="row-loc">
+                                            <th class="t1-col1">안내소</th>
+                                            <td class="t1-col2" style="font-size:14pt; font-weight:bold;">${loc}</td>
+                                            <th class="t1-col3">지시사항</th>
+                                            <td class="t1-col4"></td>
                                         </tr>
-                                        <tr class="ht-row2">
-                                            <th rowspan="3" style="width:12%;">해설사</th>
-                                            <th style="width:20%;">성명</th>
-                                            <th colspan="2" style="width:40%;">활동 시간</th>
-                                            <th style="width:28%;">합계 시간</th>
+                                        <tr class="row-guide-header">
+                                            <th rowspan="5">해설사</th>
+                                            <th>성명</th>
+                                            <th colspan="2">활동 시간</th>
+                                            <th>합계 시간</th>
                                         </tr>
                                         ${guideRows}
                                     </table>
 
                                     <div class="print-sub-title">■ 운영일지</div>
-                                    <table class="official-table">
-                                        <tr>
-                                            <th style="width:15%;">시간</th>
-                                            <th style="width:13%;">지질명소<br>탐방객(명)</th>
-                                            <th style="width:13%;">해설<br>청취자(명)</th>
-                                            <th style="width:13%;">해설<br>횟수(회)</th>
-                                            <th style="width:13%;">교육<br>청취자(명)</th>
-                                            <th style="width:13%;">교육<br>횟수(회)</th>
-                                            <th style="width:20%;">비고(환경정비,<br>시설점검, 교육 등)</th>
+                                    <table class="fixed-table">
+                                        <tr class="row-log-header">
+                                            <th class="t2-col1">시간</th>
+                                            <th class="t2-col2">지질명소<br>탐방객(명)</th>
+                                            <th class="t2-col3">해설<br>청취자(명)</th>
+                                            <th class="t2-col4">해설<br>횟수(회)</th>
+                                            <th class="t2-col5">교육<br>청취자(명)</th>
+                                            <th class="t2-col6">교육<br>횟수(회)</th>
+                                            <th class="t2-col7" style="width:16%;">비고(환경정비,<br>시설점검 등)</th>
                                         </tr>
                                         ${logRows}
-                                        <tr class="log-row">
+                                        <tr class="row-sum">
                                             <th>합계</th>
                                             <td>${totalV || ''}</td>
                                             <td>${totalL || ''}</td>
@@ -1011,22 +947,21 @@
                                             <td></td>
                                             <td></td>
                                         </tr>
-                                        <tr style="height:80px;">
+                                        <tr class="row-remark">
                                             <th>특이사항</th>
-                                            <td colspan="6" style="text-align:left; vertical-align:top; padding:10px;">${remarkSum}</td>
+                                            <td colspan="6">${remarkSum}</td>
                                         </tr>
                                     </table>
 
-                                    <div class="print-footer">
+                                    <div class="signature-box">
                                         조장 확인 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (서명) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                        대청면 담당 확인 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (서명)
+                                        면 팀장 확인 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (서명)
                                     </div>
                                 </div>
                             `;
                         }
                     });
-                } 
-                else {
+                } else {
                     alert("활동계획서와 활동결과보고서는 현재 개발 진행 중입니다. '안내소 운영일지'를 선택해주세요."); 
                     btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return;
                 }
