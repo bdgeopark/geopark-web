@@ -42,15 +42,19 @@
         .tag-plan { background:#e1f5fe; color:#01579b; }
         .tag-change { background:#fff3e0; color:#e65100; }
         .app-info { font-size:0.95rem; line-height:1.5; margin-bottom:8px; color: #333; }
-        .status-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .status-info .s-name { font-size: 1.05rem; font-weight: 800; color: #191919; margin-bottom: 4px; }
-        .status-info .s-time { font-size: 0.8rem; color: #666; }
-        .status-badge { padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; text-align: center; }
-        .badge-working { background-color: #e3f2fd; color: #1976d2; }
-        .badge-off { background-color: #f5f5f5; color: #7f8c8d; }
-        .log-badge { font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-left: 8px; font-weight: normal; }
-        .log-yes { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .log-no { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        
+        /* 관리자 전용 대시보드 스타일 */
+        .admin-island-card { background: white; border: 2px solid #2c3e50; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .admin-island-header { background: #2c3e50; color: white; padding: 12px 15px; font-size: 1.1rem; font-weight: 800; }
+        .admin-loc-group { padding: 15px; border-bottom: 1px solid #ecf0f1; }
+        .admin-loc-group:last-child { border-bottom: none; }
+        .admin-loc-title { font-weight: 800; color: #2980b9; margin-bottom: 10px; font-size: 1.05rem; display:flex; align-items:center; gap:5px; }
+        .admin-guide-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+        .admin-guide-name { font-weight: 800; font-size: 1rem; color: #333; margin-bottom: 8px; }
+        .admin-time-box { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; }
+        .admin-time-plan { background: #e1f5fe; padding: 6px 10px; border-radius: 6px; color: #01579b; }
+        .admin-time-act { background: #e8f5e9; padding: 6px 10px; border-radius: 6px; color: #1b5e20; }
+        .admin-time-none { background: #ffebee; padding: 6px 10px; border-radius: 6px; color: #b71c1c; }
     </style>
 </head>
 <body>
@@ -175,23 +179,28 @@
         <div class="form-group">
             <label>🔍 검색 조건 설정</label>
             <div class="flex-group">
-                <select id="tp_month" style="flex:1;">
-                    <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-                </select>
-                <select id="tp_half" style="flex:1.5;">
-                    <option value="all">전체 일정</option>
-                    <option value="1">전반기 (1~15일)</option>
-                    <option value="2">하반기 (16~말일)</option>
-                </select>
+                <select id="tp_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
+                <select id="tp_half" style="flex:1.5;"><option value="all">전체 일정</option><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
             </div>
-            <div class="flex-group">
-                <select id="tp_loc" style="flex:1;"></select>
-                <input type="text" id="tp_name" placeholder="이름 검색" style="flex:1;">
-            </div>
+            <div class="flex-group"><select id="tp_loc" style="flex:1;"></select><input type="text" id="tp_name" placeholder="이름 검색" style="flex:1;"></div>
             <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadTeamPlans()">검색하기</button>
         </div>
-        <div id="team_plan_container">
-            <p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p>
+        <div id="team_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
+    </div>
+
+    <div id="admin_attendance_area" class="hidden-section">
+        <div class="form-group">
+            <label>📅 조회 날짜 선택</label>
+            <input type="date" id="admin_date_input" onchange="loadAdminAttendance()">
+        </div>
+        <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <label style="margin:0;">📊 전 지역 출퇴근 종합 현황</label>
+                <button onclick="loadAdminAttendance()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
+            </div>
+            <div id="admin_attendance_container">
+                <p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p>
+            </div>
         </div>
     </div>
 
@@ -207,9 +216,10 @@
 
         if (!userName) location.href = "index.html";
         document.getElementById('name_display').innerText = userName + " 님";
-        document.getElementById('role_display').innerText = `[${userRole}] ${userIsland}`;
+        document.getElementById('role_display').innerText = `[${userRole}] ${userIsland || '관리자'}`;
         
         function updateCurrentLocBadge() {
+            if(userRole === '관리자') { document.getElementById('current_loc_badge').style.display = 'none'; return; }
             const badge = document.getElementById('current_loc_badge');
             badge.innerText = currentLoc;
             badge.style.backgroundColor = currentLoc === "미출근" ? "#95a5a6" : "#3498db";
@@ -221,21 +231,21 @@
         const batchLocSelect = document.getElementById('batch_loc');
         
         let myLocations = [];
-        if (userIsland.includes('백령')) myLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
-        else if (userIsland.includes('대청')) myLocations = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
-        else if (userIsland.includes('소청')) myLocations = ['탑동', '분바위'];
+        if (userIsland && userIsland.includes('백령')) myLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
+        else if (userIsland && userIsland.includes('대청')) myLocations = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
+        else if (userIsland && userIsland.includes('소청')) myLocations = ['탑동', '분바위'];
         else myLocations = ['거점센터'];
         
         let locOptionsHtml = `<option value="휴무">-휴무-</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
-        myLocations.forEach(loc => { locSelect.add(new Option(loc, loc)); logLocSelect.add(new Option(loc, loc)); });
-        batchLocSelect.innerHTML = locOptionsHtml;
+        if(locSelect) { myLocations.forEach(loc => { locSelect.add(new Option(loc, loc)); logLocSelect.add(new Option(loc, loc)); }); }
+        if(batchLocSelect) batchLocSelect.innerHTML = locOptionsHtml;
 
         let tpLocOptionsHtml = `<option value="">- 모든 안내소 -</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
-        document.getElementById('tp_loc').innerHTML = tpLocOptionsHtml;
+        if(document.getElementById('tp_loc')) document.getElementById('tp_loc').innerHTML = tpLocOptionsHtml;
 
         const currentMonth = (new Date().getMonth() + 1).toString();
-        document.getElementById('plan_month').value = currentMonth;
-        document.getElementById('tp_month').value = currentMonth;
+        if(document.getElementById('plan_month')) document.getElementById('plan_month').value = currentMonth;
+        if(document.getElementById('tp_month')) document.getElementById('tp_month').value = currentMonth;
 
         function setCurrentTimeInput() {
             const now = new Date();
@@ -243,16 +253,20 @@
         }
 
         const logTime = document.getElementById('log_time');
-        for(let i=6; i<=19; i++) {
-            let start = i < 10 ? '0'+i : i; let end = (i+1) < 10 ? '0'+(i+1) : (i+1);
-            logTime.add(new Option(`${start}:00 ~ ${end}:00`, `${start}:00 ~ ${end}:00`));
+        if(logTime) {
+            for(let i=6; i<=19; i++) {
+                let start = i < 10 ? '0'+i : i; let end = (i+1) < 10 ? '0'+(i+1) : (i+1);
+                logTime.add(new Option(`${start}:00 ~ ${end}:00`, `${start}:00 ~ ${end}:00`));
+            }
         }
 
         let timeOptionsHtml = '';
         for(let i=6; i<=20; i++) { let h = i < 10 ? '0'+i : i; timeOptionsHtml += `<option value="${h}:00">${h}:00</option>`; }
-        document.getElementById('batch_start').innerHTML = timeOptionsHtml; document.getElementById('batch_end').innerHTML = timeOptionsHtml;
-        document.getElementById('batch_start').value = "08:00"; document.getElementById('batch_end').value = "17:00";
-        document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
+        if(document.getElementById('batch_start')) {
+            document.getElementById('batch_start').innerHTML = timeOptionsHtml; document.getElementById('batch_end').innerHTML = timeOptionsHtml;
+            document.getElementById('batch_start').value = "08:00"; document.getElementById('batch_end').value = "17:00";
+            document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
+        }
 
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
@@ -265,21 +279,22 @@
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
-                document.getElementById('attendance_area').style.display = m.includes('출퇴근관리') ? 'block' : 'none';
+                document.getElementById('attendance_area').style.display = m.includes('출퇴근관리') && userRole !== '관리자' ? 'block' : 'none';
                 document.getElementById('log_area').style.display = m.includes('운영일지 작성') ? 'block' : 'none';
                 document.getElementById('plan_area').style.display = m.includes('활동계획서 작성') ? 'block' : 'none';
                 document.getElementById('change_area').style.display = m.includes('활동계획 변경') ? 'block' : 'none';
                 document.getElementById('approval_area').style.display = m.includes('변경 승인') ? 'block' : 'none';
                 document.getElementById('my_plan_area').style.display = m.includes('나의 활동계획 조회') ? 'block' : 'none';
-                document.getElementById('status_area').style.display = m.includes('현황 조회') && !m.includes('나의') ? 'block' : 'none';
+                document.getElementById('status_area').style.display = m.includes('현황 조회') && !m.includes('나의') && userRole !== '관리자' ? 'block' : 'none';
                 document.getElementById('team_plan_area').style.display = m.includes('조원 활동계획 조회') ? 'block' : 'none';
+                document.getElementById('admin_attendance_area').style.display = m === '1. 해설사 출퇴근 현황' ? 'block' : 'none';
 
-                if(m.includes('출퇴근관리')) setCurrentTimeInput();
+                if(m.includes('출퇴근관리') && userRole !== '관리자') setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
                 if(m.includes('변경 승인')) loadPendingRequests(); 
                 if(m.includes('나의 활동계획 조회')) loadMyPlans(); 
                 if(m.includes('조원 활동계획 조회')) loadTeamPlans(); 
-                if(m.includes('현황 조회') && !m.includes('나의')) {
+                if(m.includes('현황 조회') && !m.includes('나의') && userRole !== '관리자') {
                     if(!document.getElementById('status_date_input').value) {
                         const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
                         const dateOffset = new Date(now.getTime() - offset);
@@ -287,12 +302,23 @@
                     }
                     loadDailyStatus(); 
                 }
+                
+                // 관리자 메뉴 액션
+                if(m === '1. 해설사 출퇴근 현황') {
+                    if(!document.getElementById('admin_date_input').value) {
+                        const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
+                        const dateOffset = new Date(now.getTime() - offset);
+                        document.getElementById('admin_date_input').value = dateOffset.toISOString().split('T')[0];
+                    }
+                    loadAdminAttendance();
+                }
             };
             container.appendChild(d);
         });
 
         // --- 앱 켜질 때 서버와 상태 동기화 ---
         async function syncMyStatus() {
+            if(userRole === '관리자') return;
             try {
                 const res = await fetch(`${API_BASE}/get_my_attendance?name=${encodeURIComponent(userName)}`);
                 if(res.ok) {
@@ -304,15 +330,11 @@
                     if(data.in_time) {
                         localStorage.setItem("last_in_time", data.in_time);
                         document.getElementById('in_time_display').innerText = `기록됨: ${data.in_time}`;
-                    } else {
-                        document.getElementById('in_time_display').innerText = '';
-                    }
+                    } else { document.getElementById('in_time_display').innerText = ''; }
                     if(data.out_time) {
                         localStorage.setItem("last_out_time", data.out_time);
                         document.getElementById('out_time_display').innerText = `기록됨: ${data.out_time}`;
-                    } else {
-                        document.getElementById('out_time_display').innerText = '';
-                    }
+                    } else { document.getElementById('out_time_display').innerText = ''; }
                 }
             } catch (e) {}
         }
@@ -473,57 +495,36 @@
 
         async function loadTeamPlans() {
             const container = document.getElementById('team_plan_container');
-            const month = document.getElementById('tp_month').value;
-            const half = document.getElementById('tp_half').value;
-            const loc = document.getElementById('tp_loc').value;
-            const nameSearch = document.getElementById('tp_name').value.trim();
+            const month = document.getElementById('tp_month').value; const half = document.getElementById('tp_half').value;
+            const loc = document.getElementById('tp_loc').value; const nameSearch = document.getElementById('tp_name').value.trim();
 
             container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중입니다...</p>';
             try {
                 const res = await fetch(`${API_BASE}/get_island_plans?island=${encodeURIComponent(userIsland)}&month=${month}`);
                 const data = await res.json();
-                
                 let plans = data.plans;
 
                 plans = plans.filter(p => {
-                    let dayMatch = p['날짜'].match(/(\d+)일/);
-                    let day = dayMatch ? parseInt(dayMatch[1]) : 0;
-                    
+                    let dayMatch = p['날짜'].match(/(\d+)일/); let day = dayMatch ? parseInt(dayMatch[1]) : 0;
                     if (half === '1' && (day < 1 || day > 15)) return false;
                     if (half === '2' && (day < 16)) return false;
                     if (loc && !p['장소'].includes(loc)) return false;
                     if (nameSearch && !p['이름'].includes(nameSearch)) return false;
-
                     return true;
                 });
 
-                if (plans.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>';
-                    return;
-                }
+                if (plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>'; return; }
 
                 plans.sort((a, b) => {
                     let aDay = a['날짜'].match(/(\d+)일/) ? parseInt(a['날짜'].match(/(\d+)일/)[1]) : 0;
                     let bDay = b['날짜'].match(/(\d+)일/) ? parseInt(b['날짜'].match(/(\d+)일/)[1]) : 0;
-                    if(aDay !== bDay) return aDay - bDay;
-                    return a['이름'].localeCompare(b['이름']);
+                    if(aDay !== bDay) return aDay - bDay; return a['이름'].localeCompare(b['이름']);
                 });
 
                 let html = '';
                 plans.forEach(p => {
                     let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
-                    html += `
-                        <div class="approval-card" style="display:block;">
-                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
-                                <strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']}</strong>
-                                <span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span>
-                            </div>
-                            <div style="font-size:0.95rem; line-height:1.5; color:#333;">
-                                장소: <b>${p['장소']}</b><br>
-                                시간: ${p['활동여부']}
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
@@ -554,9 +555,68 @@
             } catch (e) { alert("오류 발생"); }
         }
 
+        // --- [신규 추가] 관리자: 전체 섬 출퇴근 종합 현황 로직 ---
+        async function loadAdminAttendance() {
+            const container = document.getElementById('admin_attendance_container');
+            const targetDate = document.getElementById('admin_date_input').value;
+            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중입니다...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_admin_attendance?target_date=${targetDate}`);
+                const data = await res.json();
+                
+                if(Object.keys(data.data).length === 0) {
+                    container.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 등록된 계획이나 기록이 없습니다.</p>`;
+                    return;
+                }
+                
+                let html = '';
+                // 데이터를 섬별 -> 안내소별 -> 해설사별로 렌더링
+                for (const [island, locs] of Object.entries(data.data)) {
+                    html += `
+                        <div class="admin-island-card">
+                            <div class="admin-island-header">🏝️ ${island}</div>
+                            <div style="padding:15px; background:white;">
+                    `;
+                    
+                    for (const [loc, users] of Object.entries(locs)) {
+                        html += `
+                            <div class="admin-loc-group">
+                                <div class="admin-loc-title">📍 ${loc}</div>
+                        `;
+                        
+                        for (const [name, info] of Object.entries(users)) {
+                            let planText = info.plan ? info.plan : '<span style="color:#999;">계획 없음</span>';
+                            let inText = info.in ? info.in : '<span style="color:#e74c3c;">미출근</span>';
+                            let outText = info.out ? info.out : (info.in ? '<span style="color:#f39c12;">미퇴근</span>' : '');
+                            
+                            let actualText = info.in ? `출근 ${inText} | 퇴근 ${outText}` : '<span style="color:#e74c3c;">출근 기록 없음</span>';
+                            if (info.plan === '휴무') actualText = info.in ? `출근 ${inText} | 퇴근 ${outText} (휴무자 출근)` : '휴무';
+
+                            let actualClass = info.in ? 'admin-time-act' : 'admin-time-none';
+
+                            html += `
+                                <div class="admin-guide-row">
+                                    <div class="admin-guide-name">${name} 해설사</div>
+                                    <div class="admin-time-box">
+                                        <div class="admin-time-plan">🗓️ <b>계획:</b> ${planText}</div>
+                                        <div class="${actualClass}">✅ <b>실제:</b> ${actualText}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        html += `</div>`;
+                    }
+                    html += `</div></div>`;
+                }
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
+        }
+
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
 
-        // 실행 시 동기화
         syncMyStatus();
     </script>
 </body>
