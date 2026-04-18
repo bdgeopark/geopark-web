@@ -28,7 +28,6 @@
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
         .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
-        
         .plan-row { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #E5E5E5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .plan-date-label { font-size: 1.05rem; font-weight: 800; color: #2c3e50; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid #FEE500; padding-bottom: 5px; }
         .flex-group { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
@@ -43,17 +42,6 @@
         .tag-plan { background:#e1f5fe; color:#01579b; }
         .tag-change { background:#fff3e0; color:#e65100; }
         .app-info { font-size:0.95rem; line-height:1.5; margin-bottom:8px; color: #333; }
-
-        /* [추가] 현황 조회 전용 스타일 */
-        .status-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .status-info .s-name { font-size: 1.05rem; font-weight: 800; color: #191919; margin-bottom: 4px; }
-        .status-info .s-time { font-size: 0.8rem; color: #666; }
-        .status-badge { padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; text-align: center; }
-        .badge-working { background-color: #e3f2fd; color: #1976d2; }
-        .badge-off { background-color: #f5f5f5; color: #7f8c8d; }
-        .log-badge { font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-left: 8px; font-weight: normal; }
-        .log-yes { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .log-no { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
     </style>
 </head>
 <body>
@@ -107,9 +95,13 @@
 
     <div id="status_area" class="hidden-section">
         <div class="form-group">
+            <label>📅 조회 날짜 선택</label>
+            <input type="date" id="status_date_input" onchange="loadDailyStatus()">
+        </div>
+        <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <label style="margin:0;">📊 오늘 조원 활동 현황</label>
-                <button onclick="loadTodayStatus()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
+                <label style="margin:0;">📊 조원 활동 현황</label>
+                <button onclick="loadDailyStatus()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
             </div>
             <div id="status_container">
                 <p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p>
@@ -292,7 +284,15 @@
                 if(m.includes('활동계획 변경')) loadGuideList(); 
                 if(m.includes('변경 승인')) loadPendingRequests(); 
                 if(m.includes('나의 활동계획 조회')) loadMyPlans(); 
-                if(m.includes('현황 조회') && !m.includes('나의')) loadTodayStatus(); 
+                if(m.includes('현황 조회') && !m.includes('나의')) {
+                    if(!document.getElementById('status_date_input').value) {
+                        const now = new Date();
+                        const offset = now.getTimezoneOffset() * 60000;
+                        const dateOffset = new Date(now.getTime() - offset);
+                        document.getElementById('status_date_input').value = dateOffset.toISOString().split('T')[0];
+                    }
+                    loadDailyStatus(); 
+                }
             };
             container.appendChild(d);
         });
@@ -352,52 +352,51 @@
             } catch (e) {}
         }
 
-        // ----------------------- [추가] 조원 활동 현황 로직 -----------------------
-   // ----------------------- [조장 전용] 조원 활동 현황 로직 -----------------------
-        async function loadTodayStatus() {
+        // ----------------------- 조원 활동 현황 로직 (날짜 검색) -----------------------
+        async function loadDailyStatus() {
             const container = document.getElementById('status_container');
+            const targetDate = document.getElementById('status_date_input').value;
+            
             container.innerHTML = '<p style="text-align:center; color:#999;">데이터를 불러오는 중입니다...</p>';
+            
             try {
-                const res = await fetch(`${API_BASE}/get_today_status?island=${encodeURIComponent(userIsland)}`);
+                const res = await fetch(`${API_BASE}/get_daily_status?island=${encodeURIComponent(userIsland)}&target_date=${targetDate}`);
                 const data = await res.json();
                 
                 let html = '';
                 
-                // 1. 오늘 운영일지 실적 총합 카드
                 let summary = data.log_summary;
                 html += `
-                    <div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
-                        <div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 오늘 우리 섬 실적 총합 (일지 ${summary.total_logs}건)</div>
+                    <div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;">
+                        <div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div>
                         <div style="display:flex; justify-content:space-between; text-align:center;">
-                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400; margin-bottom:3px;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400; margin-bottom:3px;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400; margin-bottom:3px;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div>
+                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div>
                         </div>
                     </div>
                 `;
                 
-                // 2. 장소별 출퇴근 현황
                 let attendance = data.attendance;
                 if(Object.keys(attendance).length === 0) {
-                    html += '<p style="text-align:center; color:#999; padding:20px;">오늘 출근 기록이 없습니다.</p>';
+                    html += `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 기록된 활동이 없습니다.</p>`;
                 } else {
                     for (const [loc, users] of Object.entries(attendance)) {
                         let isOff = (loc === '퇴근');
                         let headerColor = isOff ? '#95a5a6' : '#3498db';
-                        let bgClass = isOff ? 'background:#f5f5f5;' : 'background:white;';
                         
                         html += `
-                            <div style="${bgClass} border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.02);">
+                            <div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;">
                                 <div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:0.95rem;">
-                                    📍 ${loc} <span style="font-weight:normal; font-size:0.8rem; margin-left:5px;">(${users.length}명)</span>
+                                    📍 ${loc} (${users.length}명)
                                 </div>
                                 <div style="padding:5px 15px;">
                         `;
                         users.forEach(u => {
                             html += `
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:8px; border-bottom:1px dashed #eee; padding-bottom:8px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; border-bottom:1px dashed #eee; padding-bottom:8px;">
                                     <span style="font-weight:800; color:#333;">${u.name}</span>
-                                    <span style="color:#666; font-size:0.85rem;">마지막 기록: ${u.time}</span>
+                                    <span style="color:#666; font-size:0.85rem;">시간: ${u.time}</span>
                                 </div>
                             `;
                         });
@@ -522,7 +521,6 @@
             } catch (e) { alert("서버 오류가 발생했습니다."); }
         }
 
-        // ----------------------- 변경 신청 로직 -----------------------
         function updateChangeUI() {
             const type = document.getElementById('change_type').value;
             document.getElementById('change_ui_time').style.display = type === '시간 변경' ? 'block' : 'none';
@@ -570,7 +568,6 @@
             } catch (e) {}
         }
 
-        // --- 본인 활동계획 불러오기 ---
         async function loadMyPlans() {
             const container = document.getElementById('my_plan_container');
             container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중...</p>';
@@ -605,7 +602,7 @@
             }
         }
 
-        // ----------------------- [조장 전용] 승인 로직 (일괄 처리) -----------------------
+        // ----------------------- [조장 전용] 승인 로직 -----------------------
         async function loadPendingRequests() {
             const container = document.getElementById('pending_container');
             const header = document.getElementById('approval_header');
