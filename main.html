@@ -43,7 +43,6 @@
         .tag-change { background:#fff3e0; color:#e65100; }
         .app-info { font-size:0.95rem; line-height:1.5; margin-bottom:8px; color: #333; }
         
-        /* 관리자 전용 대시보드 스타일 */
         .admin-island-card { background: white; border: 2px solid #2c3e50; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .admin-island-header { background: #2c3e50; color: white; padding: 12px 15px; font-size: 1.1rem; font-weight: 800; }
         .admin-loc-group { padding: 15px; border-bottom: 1px solid #ecf0f1; }
@@ -55,6 +54,13 @@
         .admin-time-plan { background: #e1f5fe; padding: 6px 10px; border-radius: 6px; color: #01579b; }
         .admin-time-act { background: #e8f5e9; padding: 6px 10px; border-radius: 6px; color: #1b5e20; }
         .admin-time-none { background: #ffebee; padding: 6px 10px; border-radius: 6px; color: #b71c1c; }
+        
+        /* 관리자 활동현황 전용 스타일 */
+        .log-item-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .log-item-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
+        .log-item-stats { display: flex; gap: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .log-item-stats div { flex: 1; text-align: center; }
+        .log-item-stats b { display: block; color: #b33939; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -198,9 +204,26 @@
                 <label style="margin:0;">📊 전 지역 출퇴근 종합 현황</label>
                 <button onclick="loadAdminAttendance()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
             </div>
-            <div id="admin_attendance_container">
-                <p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p>
+            <div id="admin_attendance_container"><p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p></div>
+        </div>
+    </div>
+
+    <div id="admin_log_area" class="hidden-section">
+        <div class="form-group">
+            <label>🔍 활동(운영일지) 검색 조건 설정</label>
+            <div class="flex-group">
+                <input type="date" id="al_start_date" style="flex:1;">
+                <span style="font-weight:bold;">~</span>
+                <input type="date" id="al_end_date" style="flex:1;">
             </div>
+            <div class="flex-group">
+                <select id="al_loc" style="flex:1;"></select>
+                <input type="text" id="al_name" placeholder="이름 검색" style="flex:1;">
+            </div>
+            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadAdminLogs()">종합 검색하기</button>
+        </div>
+        <div id="admin_log_container">
+            <p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p>
         </div>
     </div>
 
@@ -236,16 +259,27 @@
         else if (userIsland && userIsland.includes('소청')) myLocations = ['탑동', '분바위'];
         else myLocations = ['거점센터'];
         
+        let allLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항', '선진동', '서풍받이', '농여해변', '옥죽동 해안사구', '탑동', '분바위', '거점센터'];
+
         let locOptionsHtml = `<option value="휴무">-휴무-</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
         if(locSelect) { myLocations.forEach(loc => { locSelect.add(new Option(loc, loc)); logLocSelect.add(new Option(loc, loc)); }); }
         if(batchLocSelect) batchLocSelect.innerHTML = locOptionsHtml;
 
-        let tpLocOptionsHtml = `<option value="">- 모든 안내소 -</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
-        if(document.getElementById('tp_loc')) document.getElementById('tp_loc').innerHTML = tpLocOptionsHtml;
+        // 조장/관리자 검색용 안내소 목록 셋팅
+        if(document.getElementById('tp_loc')) document.getElementById('tp_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
+        if(document.getElementById('al_loc')) document.getElementById('al_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + allLocations.map(l => `<option value="${l}">${l}</option>`).join('');
 
         const currentMonth = (new Date().getMonth() + 1).toString();
         if(document.getElementById('plan_month')) document.getElementById('plan_month').value = currentMonth;
         if(document.getElementById('tp_month')) document.getElementById('tp_month').value = currentMonth;
+
+        // 관리자 활동현황 기본 날짜 세팅 (오늘~오늘)
+        if(document.getElementById('al_start_date')) {
+            const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
+            const dateOffset = new Date(now.getTime() - offset).toISOString().split('T')[0];
+            document.getElementById('al_start_date').value = dateOffset;
+            document.getElementById('al_end_date').value = dateOffset;
+        }
 
         function setCurrentTimeInput() {
             const now = new Date();
@@ -287,7 +321,9 @@
                 document.getElementById('my_plan_area').style.display = m.includes('나의 활동계획 조회') ? 'block' : 'none';
                 document.getElementById('status_area').style.display = m.includes('현황 조회') && !m.includes('나의') && userRole !== '관리자' ? 'block' : 'none';
                 document.getElementById('team_plan_area').style.display = m.includes('조원 활동계획 조회') ? 'block' : 'none';
+                
                 document.getElementById('admin_attendance_area').style.display = m === '1. 해설사 출퇴근 현황' ? 'block' : 'none';
+                document.getElementById('admin_log_area').style.display = m === '2. 해설사 활동 현황' ? 'block' : 'none';
 
                 if(m.includes('출퇴근관리') && userRole !== '관리자') setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
@@ -303,7 +339,6 @@
                     loadDailyStatus(); 
                 }
                 
-                // 관리자 메뉴 액션
                 if(m === '1. 해설사 출퇴근 현황') {
                     if(!document.getElementById('admin_date_input').value) {
                         const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
@@ -312,11 +347,14 @@
                     }
                     loadAdminAttendance();
                 }
+                
+                if(m === '2. 해설사 활동 현황') {
+                    loadAdminLogs(); // 메뉴 켤때 바로 한번 검색해서 보여줌
+                }
             };
             container.appendChild(d);
         });
 
-        // --- 앱 켜질 때 서버와 상태 동기화 ---
         async function syncMyStatus() {
             if(userRole === '관리자') return;
             try {
@@ -327,14 +365,8 @@
                     localStorage.setItem("current_location", currentLoc);
                     updateCurrentLocBadge();
                     
-                    if(data.in_time) {
-                        localStorage.setItem("last_in_time", data.in_time);
-                        document.getElementById('in_time_display').innerText = `기록됨: ${data.in_time}`;
-                    } else { document.getElementById('in_time_display').innerText = ''; }
-                    if(data.out_time) {
-                        localStorage.setItem("last_out_time", data.out_time);
-                        document.getElementById('out_time_display').innerText = `기록됨: ${data.out_time}`;
-                    } else { document.getElementById('out_time_display').innerText = ''; }
+                    if(data.in_time) { localStorage.setItem("last_in_time", data.in_time); document.getElementById('in_time_display').innerText = `기록됨: ${data.in_time}`; } else { document.getElementById('in_time_display').innerText = ''; }
+                    if(data.out_time) { localStorage.setItem("last_out_time", data.out_time); document.getElementById('out_time_display').innerText = `기록됨: ${data.out_time}`; } else { document.getElementById('out_time_display').innerText = ''; }
                 }
             } catch (e) {}
         }
@@ -555,7 +587,6 @@
             } catch (e) { alert("오류 발생"); }
         }
 
-        // --- [신규 추가] 관리자: 전체 섬 출퇴근 종합 현황 로직 ---
         async function loadAdminAttendance() {
             const container = document.getElementById('admin_attendance_container');
             const targetDate = document.getElementById('admin_date_input').value;
@@ -571,47 +602,99 @@
                 }
                 
                 let html = '';
-                // 데이터를 섬별 -> 안내소별 -> 해설사별로 렌더링
                 for (const [island, locs] of Object.entries(data.data)) {
-                    html += `
-                        <div class="admin-island-card">
-                            <div class="admin-island-header">🏝️ ${island}</div>
-                            <div style="padding:15px; background:white;">
-                    `;
-                    
+                    html += `<div class="admin-island-card"><div class="admin-island-header">🏝️ ${island}</div><div style="padding:15px; background:white;">`;
                     for (const [loc, users] of Object.entries(locs)) {
-                        html += `
-                            <div class="admin-loc-group">
-                                <div class="admin-loc-title">📍 ${loc}</div>
-                        `;
-                        
+                        html += `<div class="admin-loc-group"><div class="admin-loc-title">📍 ${loc}</div>`;
                         for (const [name, info] of Object.entries(users)) {
                             let planText = info.plan ? info.plan : '<span style="color:#999;">계획 없음</span>';
                             let inText = info.in ? info.in : '<span style="color:#e74c3c;">미출근</span>';
                             let outText = info.out ? info.out : (info.in ? '<span style="color:#f39c12;">미퇴근</span>' : '');
-                            
                             let actualText = info.in ? `출근 ${inText} | 퇴근 ${outText}` : '<span style="color:#e74c3c;">출근 기록 없음</span>';
                             if (info.plan === '휴무') actualText = info.in ? `출근 ${inText} | 퇴근 ${outText} (휴무자 출근)` : '휴무';
-
                             let actualClass = info.in ? 'admin-time-act' : 'admin-time-none';
-
-                            html += `
-                                <div class="admin-guide-row">
-                                    <div class="admin-guide-name">${name} 해설사</div>
-                                    <div class="admin-time-box">
-                                        <div class="admin-time-plan">🗓️ <b>계획:</b> ${planText}</div>
-                                        <div class="${actualClass}">✅ <b>실제:</b> ${actualText}</div>
-                                    </div>
-                                </div>
-                            `;
+                            html += `<div class="admin-guide-row"><div class="admin-guide-name">${name} 해설사</div><div class="admin-time-box"><div class="admin-time-plan">🗓️ <b>계획:</b> ${planText}</div><div class="${actualClass}">✅ <b>실제:</b> ${actualText}</div></div></div>`;
                         }
                         html += `</div>`;
                     }
                     html += `</div></div>`;
                 }
                 container.innerHTML = html;
+            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
+        }
+
+        // --- [신규 추가] 관리자 전용: 활동 현황(운영일지) 로직 ---
+        async function loadAdminLogs() {
+            const container = document.getElementById('admin_log_container');
+            const startDate = document.getElementById('al_start_date').value;
+            const endDate = document.getElementById('al_end_date').value;
+            const loc = document.getElementById('al_loc').value;
+            const nameSearch = document.getElementById('al_name').value.trim();
+
+            if (!startDate || !endDate) {
+                alert("시작일과 종료일을 모두 선택해주세요.");
+                return;
+            }
+            if (startDate > endDate) {
+                alert("시작일이 종료일보다 늦을 수 없습니다.");
+                return;
+            }
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중입니다...</p>';
+            
+            try {
+                // 시작일, 종료일, 장소, 이름을 파라미터로 전송
+                const res = await fetch(`${API_BASE}/get_admin_logs?start_date=${startDate}&end_date=${endDate}&loc=${encodeURIComponent(loc)}&name=${encodeURIComponent(nameSearch)}`);
+                const data = await res.json();
+                
+                let html = '';
+                let summary = data.summary;
+                
+                // 총합 요약 카드 렌더링
+                html += `
+                    <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
+                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
+                        <div style="display:flex; justify-content:space-between; text-align:center;">
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 탐방객</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.visitors}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 청취자</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.listeners}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 해설횟수</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.count}회</div></div>
+                        </div>
+                    </div>
+                `;
+
+                if (data.logs.length === 0) {
+                    html += '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 일지 기록이 없습니다.</p>';
+                    container.innerHTML = html;
+                    return;
+                }
+
+                // 개별 일지 내역 렌더링
+                data.logs.forEach(log => {
+                    let rLoc = log['안내소'] || log['장소'] || '장소 미상';
+                    let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.8rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
+                    
+                    html += `
+                        <div class="log-item-card">
+                            <div class="log-item-header">
+                                <span style="font-weight:800; color:#2c3e50;">🗓️ ${log['날짜']} - ${log['이름']} ${isCo}</span>
+                                <span style="font-size:0.85rem; color:#7f8c8d;">${log['시간'] || ''}</span>
+                            </div>
+                            <div style="font-weight:bold; color:#2980b9; margin-bottom:10px;">📍 ${log['섬']} > ${rLoc}</div>
+                            <div class="log-item-stats">
+                                <div>탐방객 <b>${log['탐방객수'] || 0}</b></div>
+                                <div>청취자 <b>${log['청취자수'] || 0}</b></div>
+                                <div>해설 <b>${log['해설횟수'] || 0}</b></div>
+                            </div>
+                            <div style="font-size:0.85rem; color:#555; background:#f1f2f6; padding:8px; border-radius:6px;">
+                                📝 특이사항: ${log['특이사항'] || '없음'}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
             } catch (e) {
-                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오는 중 오류가 발생했습니다.</p>';
             }
         }
 
