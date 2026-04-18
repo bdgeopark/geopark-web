@@ -42,6 +42,15 @@
         .tag-plan { background:#e1f5fe; color:#01579b; }
         .tag-change { background:#fff3e0; color:#e65100; }
         .app-info { font-size:0.95rem; line-height:1.5; margin-bottom:8px; color: #333; }
+        .status-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .status-info .s-name { font-size: 1.05rem; font-weight: 800; color: #191919; margin-bottom: 4px; }
+        .status-info .s-time { font-size: 0.8rem; color: #666; }
+        .status-badge { padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; text-align: center; }
+        .badge-working { background-color: #e3f2fd; color: #1976d2; }
+        .badge-off { background-color: #f5f5f5; color: #7f8c8d; }
+        .log-badge { font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; margin-left: 8px; font-weight: normal; }
+        .log-yes { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .log-no { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
     </style>
 </head>
 <body>
@@ -94,18 +103,13 @@
     </div>
 
     <div id="status_area" class="hidden-section">
-        <div class="form-group">
-            <label>📅 조회 날짜 선택</label>
-            <input type="date" id="status_date_input" onchange="loadDailyStatus()">
-        </div>
+        <div class="form-group"><label>📅 조회 날짜 선택</label><input type="date" id="status_date_input" onchange="loadDailyStatus()"></div>
         <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <label style="margin:0;">📊 조원 활동 현황</label>
                 <button onclick="loadDailyStatus()" style="padding:5px 10px; font-size:0.8rem; background:#333; color:white; border:none; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
             </div>
-            <div id="status_container">
-                <p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p>
-            </div>
+            <div id="status_container"><p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p></div>
         </div>
     </div>
 
@@ -113,21 +117,15 @@
         <div class="form-group">
             <label>🗓 작성할 월 / 구분</label>
             <div class="flex-group">
-                <select id="plan_month" style="flex:1;">
-                    <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-                </select>
-                <select id="plan_half" style="flex:1.5;">
-                    <option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option>
-                </select>
+                <select id="plan_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
+                <select id="plan_half" style="flex:1.5;"><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
             </div>
             <button class="btn-act btn-move" style="margin-top:10px; padding:12px; font-size:1rem; border-radius:8px;" onclick="generatePlanForm()">📝 15일치 양식 펼치기</button>
         </div>
         <div id="plan_list_container" style="display:none; margin-top:20px; border-top:2px dashed #CCC; padding-top:20px;">
             <div class="time-input-wrap">
                 <label style="font-size: 0.85rem; font-weight: 700; color:#333; margin-bottom:5px;">⚙️ 일괄 적용 설정</label>
-                <div class="flex-group">
-                    <select id="batch_loc" style="flex:1;"></select><select id="batch_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="batch_end" style="flex:1;"></select>
-                </div>
+                <div class="flex-group"><select id="batch_loc" style="flex:1;"></select><select id="batch_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="batch_end" style="flex:1;"></select></div>
                 <button onclick="applyBatchSettings()" style="width:100%; margin-top:8px; padding:10px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">전체 일괄 적용하기</button>
             </div>
             <div id="plan_rows"></div>
@@ -147,47 +145,29 @@
         </div>
         <div id="change_ui_time" class="time-input-wrap">
             <label style="font-size: 0.8rem; font-weight: 600;">새로운 시간 설정</label>
-            <div class="flex-group" style="margin-top: 5px;">
-                <select id="change_time_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="change_time_end" style="flex:1;"></select>
-            </div>
+            <div class="flex-group" style="margin-top: 5px;"><select id="change_time_start" style="flex:1;"></select><span style="font-weight:bold;">~</span><select id="change_time_end" style="flex:1;"></select></div>
         </div>
         <div id="change_ui_guide" class="time-input-wrap" style="display:none;">
             <label style="font-size: 0.8rem; font-weight: 600;">대타를 요청할 동료 해설사</label>
             <select id="change_target_guide" style="margin-top: 5px;"><option value="">불러오는 중...</option></select>
         </div>
-        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;">
-            <label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환합니다.</label>
-        </div>
+        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;"><label style="font-size: 0.8rem; font-weight: 600; color:#e74c3c;">해당 일자 계획을 취소하고 휴무로 전환합니다.</label></div>
         <div class="form-group"><label>📝 변경 사유</label><textarea id="change_remarks" rows="2" placeholder="변경 사유를 간략히 적어주세요"></textarea></div>
         <button class="btn-submit" onclick="submitPlanChange()">승인 요청하기</button>
     </div>
 
     <div id="my_plan_area" class="hidden-section">
-        <div class="form-group">
-            <label>📋 내가 제출한 활동계획 (최근 30일)</label>
-            <div id="my_plan_container">
-                <p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p>
-            </div>
-        </div>
+        <div class="form-group"><label>📋 내가 제출한 활동계획 (최근 30일)</label><div id="my_plan_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div></div>
     </div>
 
     <div id="approval_area" class="hidden-section">
         <div class="form-group">
             <label>📁 조원 결재함 (승인 대기 목록)</label>
-            
             <div id="approval_header" class="approval-header" style="display:none;">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold;">
-                    <input type="checkbox" id="chk_all" class="chk-box" style="width:20px !important;" onclick="toggleAllApprovals(this)"> 전체 선택
-                </label>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn-act btn-in" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button>
-                    <button class="btn-act btn-out" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('반려')">선택 반려</button>
-                </div>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; font-weight:bold;"><input type="checkbox" id="chk_all" class="chk-box" style="width:20px !important;" onclick="toggleAllApprovals(this)"> 전체 선택</label>
+                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button><button class="btn-act btn-out" style="padding:8px 12px; font-size:0.9rem; border-radius:6px; font-weight:bold; margin:0;" onclick="processBulkApp('반려')">선택 반려</button></div>
             </div>
-
-            <div id="pending_container">
-                <p style="text-align:center; color:#999; padding:20px;">대기 중인 요청을 불러오는 중...</p>
-            </div>
+            <div id="pending_container"><p style="text-align:center; color:#999; padding:20px;">대기 중인 요청을 불러오는 중...</p></div>
         </div>
     </div>
 
@@ -227,11 +207,7 @@
         else myLocations = ['거점센터'];
         
         let locOptionsHtml = `<option value="휴무">-휴무-</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
-
-        myLocations.forEach(loc => {
-            locSelect.add(new Option(loc, loc));
-            logLocSelect.add(new Option(loc, loc));
-        });
+        myLocations.forEach(loc => { locSelect.add(new Option(loc, loc)); logLocSelect.add(new Option(loc, loc)); });
         batchLocSelect.innerHTML = locOptionsHtml;
 
         document.getElementById('plan_month').value = (new Date().getMonth() + 1).toString();
@@ -243,23 +219,15 @@
 
         const logTime = document.getElementById('log_time');
         for(let i=6; i<=19; i++) {
-            let start = i < 10 ? '0'+i : i;
-            let end = (i+1) < 10 ? '0'+(i+1) : (i+1);
+            let start = i < 10 ? '0'+i : i; let end = (i+1) < 10 ? '0'+(i+1) : (i+1);
             logTime.add(new Option(`${start}:00 ~ ${end}:00`, `${start}:00 ~ ${end}:00`));
         }
 
         let timeOptionsHtml = '';
-        for(let i=6; i<=20; i++) {
-            let h = i < 10 ? '0'+i : i;
-            timeOptionsHtml += `<option value="${h}:00">${h}:00</option>`;
-        }
-        document.getElementById('batch_start').innerHTML = timeOptionsHtml;
-        document.getElementById('batch_end').innerHTML = timeOptionsHtml;
-        document.getElementById('batch_start').value = "08:00";
-        document.getElementById('batch_end').value = "17:00";
-        
-        document.getElementById('change_time_start').innerHTML = timeOptionsHtml;
-        document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
+        for(let i=6; i<=20; i++) { let h = i < 10 ? '0'+i : i; timeOptionsHtml += `<option value="${h}:00">${h}:00</option>`; }
+        document.getElementById('batch_start').innerHTML = timeOptionsHtml; document.getElementById('batch_end').innerHTML = timeOptionsHtml;
+        document.getElementById('batch_start').value = "08:00"; document.getElementById('batch_end').value = "17:00";
+        document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
 
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
@@ -279,15 +247,13 @@
                 document.getElementById('approval_area').style.display = m.includes('변경 승인') ? 'block' : 'none';
                 document.getElementById('my_plan_area').style.display = m.includes('나의 활동계획 조회') ? 'block' : 'none';
                 document.getElementById('status_area').style.display = m.includes('현황 조회') && !m.includes('나의') ? 'block' : 'none';
-                
                 if(m.includes('출퇴근관리')) setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
                 if(m.includes('변경 승인')) loadPendingRequests(); 
                 if(m.includes('나의 활동계획 조회')) loadMyPlans(); 
                 if(m.includes('현황 조회') && !m.includes('나의')) {
                     if(!document.getElementById('status_date_input').value) {
-                        const now = new Date();
-                        const offset = now.getTimezoneOffset() * 60000;
+                        const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
                         const dateOffset = new Date(now.getTime() - offset);
                         document.getElementById('status_date_input').value = dateOffset.toISOString().split('T')[0];
                     }
@@ -297,13 +263,11 @@
             container.appendChild(d);
         });
 
-        // ----------------------- 1. 출퇴근 & 일지 로직 -----------------------
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
             const inputTime = document.getElementById('action_time_input').value; 
             if(!inputTime) return;
             if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
-
             try {
                 const res = await fetch(`${API_BASE}/record`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -322,203 +286,98 @@
 
         async function submitLog() {
             const coSelectValue = document.getElementById('log_co').value;
-            const isCoInitiator = coSelectValue === 'O'; 
-            const isDesignated = coSelectValue === '○'; 
-            let coCommentaryValue = "";
-            if (isCoInitiator) coCommentaryValue = document.getElementById('log_co_guide').value;
-            else if (isDesignated) coCommentaryValue = "○";
-            else coCommentaryValue = "X";
-
+            const isCoInitiator = coSelectValue === 'O'; let coCommentaryValue = isCoInitiator ? document.getElementById('log_co_guide').value : (coSelectValue === '○' ? '○' : 'X');
             if (isCoInitiator && (!coCommentaryValue || coCommentaryValue.includes("없다"))) { alert("선택 가능한 공동해설자가 없습니다."); return; }
             if(!confirm("운영일지를 저장하시겠습니까?")) return;
-
-            const finalVisitors = isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value);
-            const finalListeners = isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value);
-            const finalCount = isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value);
-
             try {
                 const res = await fetch(`${API_BASE}/log_operation`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        name: userName, island: userIsland, role: userRole, log_location: document.getElementById('log_location_select').value,
-                        target_time: document.getElementById('log_time').value, visitors: finalVisitors, listeners: finalListeners, count: finalCount,
-                        co_commentary: coCommentaryValue, remarks: document.getElementById('log_remarks').value
-                    })
+                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, log_location: document.getElementById('log_location_select').value, target_time: document.getElementById('log_time').value, visitors: isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value), listeners: isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value), count: isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value), co_commentary: coCommentaryValue, remarks: document.getElementById('log_remarks').value })
                 });
-                if(res.ok) { 
-                    alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; 
-                    document.getElementById('log_visitors').value = 0; document.getElementById('log_listeners').value = 0; document.getElementById('log_count').value = 0; document.getElementById('log_remarks').value = "";
-                } else alert("저장 실패");
+                if(res.ok) { alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; document.getElementById('log_visitors').value = 0; document.getElementById('log_listeners').value = 0; document.getElementById('log_count').value = 0; document.getElementById('log_remarks').value = ""; } else alert("저장 실패");
             } catch (e) {}
         }
 
-        // ----------------------- 조원 활동 현황 로직 (날짜 검색) -----------------------
         async function loadDailyStatus() {
             const container = document.getElementById('status_container');
             const targetDate = document.getElementById('status_date_input').value;
-            
             container.innerHTML = '<p style="text-align:center; color:#999;">데이터를 불러오는 중입니다...</p>';
-            
             try {
                 const res = await fetch(`${API_BASE}/get_daily_status?island=${encodeURIComponent(userIsland)}&target_date=${targetDate}`);
                 const data = await res.json();
-                
-                let html = '';
-                
-                let summary = data.log_summary;
-                html += `
-                    <div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;">
-                        <div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div>
-                        <div style="display:flex; justify-content:space-between; text-align:center;">
-                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div>
-                            <div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div>
-                        </div>
-                    </div>
-                `;
-                
-                let attendance = data.attendance;
-                if(Object.keys(attendance).length === 0) {
-                    html += `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 기록된 활동이 없습니다.</p>`;
-                } else {
-                    for (const [loc, users] of Object.entries(attendance)) {
-                        let isOff = (loc === '퇴근');
-                        let headerColor = isOff ? '#95a5a6' : '#3498db';
-                        
-                        html += `
-                            <div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;">
-                                <div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:0.95rem;">
-                                    📍 ${loc} (${users.length}명)
-                                </div>
-                                <div style="padding:5px 15px;">
-                        `;
-                        users.forEach(u => {
-                            html += `
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; border-bottom:1px dashed #eee; padding-bottom:8px;">
-                                    <span style="font-weight:800; color:#333;">${u.name}</span>
-                                    <span style="color:#666; font-size:0.85rem;">시간: ${u.time}</span>
-                                </div>
-                            `;
-                        });
+                let html = ''; let summary = data.log_summary;
+                html += `<div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;"><div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div></div></div>`;
+                if(Object.keys(data.attendance).length === 0) { html += `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 기록된 활동이 없습니다.</p>`; } else {
+                    for (const [loc, users] of Object.entries(data.attendance)) {
+                        let headerColor = loc === '퇴근' ? '#95a5a6' : '#3498db';
+                        html += `<div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;"><div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:0.95rem;">📍 ${loc} (${users.length}명)</div><div style="padding:5px 15px;">`;
+                        users.forEach(u => { html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; border-bottom:1px dashed #eee; padding-bottom:8px;"><span style="font-weight:800; color:#333;">${u.name}</span><span style="color:#666; font-size:0.85rem;">시간: ${u.time}</span></div>`; });
                         html += `</div></div>`;
                     }
                 }
                 container.innerHTML = html;
-            } catch (e) {
-                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">현황을 불러오지 못했습니다.</p>';
-            }
+            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">현황을 불러오지 못했습니다.</p>'; }
         }
 
-        // ----------------------- 15일 계획 로직 -----------------------
         function generatePlanForm() {
-            const month = parseInt(document.getElementById('plan_month').value);
-            const half = parseInt(document.getElementById('plan_half').value);
-            const year = new Date().getFullYear();
-            let startDay = half === 1 ? 1 : 16;
-            let endDay = half === 1 ? 15 : new Date(year, month, 0).getDate(); 
-            const container = document.getElementById('plan_rows');
-            container.innerHTML = '';
-            const days = ['일', '월', '화', '수', '목', '금', '토'];
-            
+            const month = parseInt(document.getElementById('plan_month').value); const half = parseInt(document.getElementById('plan_half').value); const year = new Date().getFullYear();
+            let startDay = half === 1 ? 1 : 16; let endDay = half === 1 ? 15 : new Date(year, month, 0).getDate(); 
+            const container = document.getElementById('plan_rows'); container.innerHTML = ''; const days = ['일', '월', '화', '수', '목', '금', '토'];
             for(let i = startDay; i <= endDay; i++) {
-                let d = new Date(year, month-1, i);
-                let dayIdx = d.getDay();
-                let dateStr = `${month}월 ${i}일(${days[dayIdx]})`;
-                let isWeekend = dayIdx === 0 || dayIdx === 6 ? 'color:#e74c3c;' : '';
-
-                let html = `
-                    <div class="plan-row" data-date="${year}-${month}-${i}" data-day="${dayIdx}">
-                        <div class="plan-date-label"><span style="${isWeekend}">${dateStr}</span><span class="calc-hours">0시간</span></div>
-                        <div class="flex-group">
-                            <select class="p-loc" style="flex:1;" onchange="handleRowChange(this)">${locOptionsHtml}</select>
-                            <select class="p-start" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select><span>~</span><select class="p-end" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select>
-                        </div>
-                        <input type="text" class="p-remarks" placeholder="비고 (선택사항)">
-                    </div>
-                `;
-                container.innerHTML += html;
+                let d = new Date(year, month-1, i); let dayIdx = d.getDay(); let dateStr = `${month}월 ${i}일(${days[dayIdx]})`; let isWeekend = dayIdx === 0 || dayIdx === 6 ? 'color:#e74c3c;' : '';
+                container.innerHTML += `<div class="plan-row" data-date="${year}-${month}-${i}" data-day="${dayIdx}"><div class="plan-date-label"><span style="${isWeekend}">${dateStr}</span><span class="calc-hours">0시간</span></div><div class="flex-group"><select class="p-loc" style="flex:1;" onchange="handleRowChange(this)">${locOptionsHtml}</select><select class="p-start" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select><span>~</span><select class="p-end" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select></div><input type="text" class="p-remarks" placeholder="비고 (선택사항)"></div>`;
             }
-            document.getElementById('plan_list_container').style.display = 'block';
-            applyBatchSettings(); 
+            document.getElementById('plan_list_container').style.display = 'block'; applyBatchSettings(); 
         }
 
         function applyBatchSettings() {
-            const loc = document.getElementById('batch_loc').value;
-            const start = document.getElementById('batch_start').value;
-            const end = document.getElementById('batch_end').value;
-            document.querySelectorAll('.plan-row').forEach(row => {
-                row.querySelector('.p-loc').value = loc; row.querySelector('.p-start').value = start; row.querySelector('.p-end').value = end;
-                calcRowHours(row);
-            });
+            const loc = document.getElementById('batch_loc').value; const start = document.getElementById('batch_start').value; const end = document.getElementById('batch_end').value;
+            document.querySelectorAll('.plan-row').forEach(row => { row.querySelector('.p-loc').value = loc; row.querySelector('.p-start').value = start; row.querySelector('.p-end').value = end; calcRowHours(row); });
         }
-
         function handleRowChange(elem) { calcRowHours(elem.closest('.plan-row')); }
-
         function calcRowHours(row) {
-            const loc = row.querySelector('.p-loc').value;
-            const start = row.querySelector('.p-start').value;
-            const end = row.querySelector('.p-end').value;
-            const hoursSpan = row.querySelector('.calc-hours');
-
-            if (loc === '휴무') {
-                hoursSpan.innerText = "휴무"; hoursSpan.className = "calc-hours";
-                row.querySelector('.p-start').disabled = true; row.querySelector('.p-end').disabled = true; return;
-            }
+            const loc = row.querySelector('.p-loc').value; const start = row.querySelector('.p-start').value; const end = row.querySelector('.p-end').value; const hoursSpan = row.querySelector('.calc-hours');
+            if (loc === '휴무') { hoursSpan.innerText = "휴무"; hoursSpan.className = "calc-hours"; row.querySelector('.p-start').disabled = true; row.querySelector('.p-end').disabled = true; return; }
             row.querySelector('.p-start').disabled = false; row.querySelector('.p-end').disabled = false;
-
-            let sHour = parseInt(start.split(':')[0]); let eHour = parseInt(end.split(':')[0]);
-            let rawDiff = eHour - sHour;
-            let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
-
-            if (rawDiff <= 0) { hoursSpan.innerText = "시간 오류"; hoursSpan.className = "calc-hours over"; } 
-            else {
-                hoursSpan.innerText = `${diff}시간 (식사제외)`;
-                if (diff > 8) hoursSpan.className = "calc-hours over"; else hoursSpan.className = "calc-hours";
-            }
+            let sHour = parseInt(start.split(':')[0]); let eHour = parseInt(end.split(':')[0]); let diff = (eHour - sHour) >= 5 ? (eHour - sHour) - 1 : (eHour - sHour);
+            if ((eHour-sHour) <= 0) { hoursSpan.innerText = "시간 오류"; hoursSpan.className = "calc-hours over"; } else { hoursSpan.innerText = `${diff}시간 (식사제외)`; hoursSpan.className = diff > 8 ? "calc-hours over" : "calc-hours"; }
         }
 
         async function submitBulkPlan() {
-            let plans = []; let totalRestDays = 0; let isValid = true; let requiresApproval = false; let currentWeekWorkDays = 0; let weekWarningTriggered = false;
-
+            let plans = []; let isValid = true; let totalRestDays = 0; let currentWeekWorkDays = 0; let weekWarningTriggered = false; let requiresApproval = false;
             document.querySelectorAll('.plan-row').forEach(row => {
-                let dateStr = row.querySelector('.plan-date-label span').innerText;
                 let dayIdx = parseInt(row.getAttribute('data-day'));
-                let loc = row.querySelector('.p-loc').value; let sTime = row.querySelector('.p-start').value; let eTime = row.querySelector('.p-end').value; let remarks = row.querySelector('.p-remarks').value;
+                let loc = row.querySelector('.p-loc').value; let sTime = row.querySelector('.p-start').value; let eTime = row.querySelector('.p-end').value;
+                let rawDiff = parseInt(eTime.split(':')[0]) - parseInt(sTime.split(':')[0]);
                 
                 if (dayIdx === 0) currentWeekWorkDays = 0;
-                let activityStatus = ""; let statusStr = "대기중";
-
-                if (loc === '휴무') { activityStatus = "휴무"; totalRestDays++; } 
-                else {
-                    let rawDiff = parseInt(eTime.split(':')[0]) - parseInt(sTime.split(':')[0]);
-                    if (rawDiff <= 0) { alert(`${dateStr}의 시간이 잘못되었습니다.`); isValid = false; }
-                    let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
-                    activityStatus = `${sTime}~${eTime} (${diff}시간)`;
+                
+                if (loc !== '휴무') {
+                    if(rawDiff <= 0) isValid = false; 
                     currentWeekWorkDays++;
-                    if (diff > 8) { statusStr = "초과승인대기"; requiresApproval = true; }
+                    if ((rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) requiresApproval = true;
+                } else {
+                    totalRestDays++;
                 }
-
+                
                 if (dayIdx === 6 || row === document.querySelectorAll('.plan-row')[document.querySelectorAll('.plan-row').length - 1]) {
                     if (currentWeekWorkDays >= 7) weekWarningTriggered = true;
                 }
-                plans.push({ plan_date: dateStr, location: loc === '휴무' ? '-' : loc, activity_status: activityStatus, remarks: remarks, status: statusStr });
+                // 기본 상태값을 '승인대기'로 적용
+                plans.push({ plan_date: row.querySelector('.plan-date-label span').innerText, location: loc === '휴무' ? '-' : loc, activity_status: loc === '휴무' ? '휴무' : `${sTime}~${eTime} (${rawDiff >= 5 ? rawDiff-1 : rawDiff}시간)`, remarks: row.querySelector('.p-remarks').value, status: (loc !== '휴무' && (rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) ? "초과승인대기" : "승인대기" });
             });
-
-            if (!isValid) return;
+            if (!isValid) { alert("시간 설정이 잘못된 날짜가 있습니다."); return; }
             if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장됩니다.\n이대로 제출하시겠습니까?`)) return;
             if (weekWarningTriggered && !confirm(`경고: 일주일 중 최소 1일의 휴무 없이 7일 연속으로 계획된 주가 포함되어 있습니다.\n이대로 제출하시겠습니까?`)) return;
-
-            let confirmMsg = `총 ${plans.length}일치의 활동계획을 제출하시겠습니까?`;
-            if (requiresApproval) confirmMsg += `\n※ 주의: 8시간 초과 근무가 포함되어 조장 승인이 추가로 필요합니다.`;
+            
+            let confirmMsg = `활동계획을 제출하시겠습니까?`;
+            if(requiresApproval) confirmMsg += `\n※ 8시간 초과 근무 포함되어 추가 승인이 필요합니다.`;
+            
             if(!confirm(confirmMsg)) return;
-
             try {
-                const res = await fetch(`${API_BASE}/submit_plan_bulk`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: userName, island: userIsland, plans: plans })
-                });
-                if(res.ok) { alert("일괄 제출 완료되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; } else alert("제출에 실패했습니다.");
-            } catch (e) { alert("서버 오류가 발생했습니다."); }
+                const res = await fetch(`${API_BASE}/submit_plan_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, plans: plans }) });
+                if(res.ok) { alert("제출되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; } else alert("제출 실패");
+            } catch (e) {}
         }
 
         function updateChangeUI() {
@@ -532,170 +391,61 @@
             const select = document.getElementById('change_target_guide');
             try {
                 const res = await fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=${encodeURIComponent(userName)}`);
-                if(res.ok) {
-                    const data = await res.json();
-                    if(data.guides.length > 0) select.innerHTML = data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('');
-                    else select.innerHTML = '<option value="">대타 가능한 동료가 없습니다.</option>';
-                }
-            } catch (e) { select.innerHTML = '<option value="">명단 불러오기 실패</option>'; }
+                if(res.ok) { const data = await res.json(); select.innerHTML = data.guides.length > 0 ? data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('') : '<option value="">동료가 없습니다.</option>'; }
+            } catch (e) {}
         }
 
         async function submitPlanChange() {
-            const targetDate = document.getElementById('change_target_date').value;
-            const changeType = document.getElementById('change_type').value;
-            const remarks = document.getElementById('change_remarks').value;
-            if(!targetDate) { alert("변경할 날짜를 선택해주세요."); return; }
-            if(!remarks) { alert("변경 사유를 입력해주세요."); return; }
-
-            let changeDetail = ""; let targetGuide = "";
-            if(changeType === '시간 변경') {
-                const sTime = document.getElementById('change_time_start').value; const eTime = document.getElementById('change_time_end').value;
-                changeDetail = `${sTime}~${eTime} 로 변경 신청`;
-            } else if(changeType === '해설사 변경(대타)') {
-                targetGuide = document.getElementById('change_target_guide').value;
-                if(!targetGuide) { alert("동료를 선택해주세요."); return; }
-                changeDetail = `${targetGuide} 해설사에게 대타 요청`;
-            } else { changeDetail = "계획 취소 및 휴무 처리 요청"; }
-
-            if(!confirm(`승인 요청하시겠습니까?`)) return;
-
+            const targetDate = document.getElementById('change_target_date').value; const changeType = document.getElementById('change_type').value; const remarks = document.getElementById('change_remarks').value;
+            if(!targetDate || !remarks) { alert("날짜와 사유를 입력해주세요."); return; }
+            let changeDetail = changeType === '시간 변경' ? `${document.getElementById('change_time_start').value}~${document.getElementById('change_time_end').value} 로 변경` : (changeType === '해설사 변경(대타)' ? `${document.getElementById('change_target_guide').value} 대타 요청` : "휴무 처리 요청");
+            if(!confirm("승인 요청하시겠습니까?")) return;
             try {
-                const res = await fetch(`${API_BASE}/request_plan_change`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: userName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: targetGuide })
-                });
-                if(res.ok) { alert("신청 완료되었습니다."); document.getElementById('change_area').style.display = 'none'; } else alert("신청에 실패했습니다.");
+                const res = await fetch(`${API_BASE}/request_plan_change`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: changeType === '해설사 변경(대타)' ? document.getElementById('change_target_guide').value : "" }) });
+                if(res.ok) { alert("완료되었습니다."); document.getElementById('change_area').style.display = 'none'; } else alert("실패");
             } catch (e) {}
         }
 
         async function loadMyPlans() {
-            const container = document.getElementById('my_plan_container');
-            container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중...</p>';
+            const container = document.getElementById('my_plan_container'); container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중...</p>';
             try {
-                const res = await fetch(`${API_BASE}/get_my_plans?name=${encodeURIComponent(userName)}`);
-                const data = await res.json();
-                
-                if (data.plans.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">제출한 활동계획이 없습니다.</p>';
-                    return;
-                }
-                
-                let html = '';
-                data.plans.slice(-30).forEach(p => {
+                const res = await fetch(`${API_BASE}/get_my_plans?name=${encodeURIComponent(userName)}`); const data = await res.json();
+                if (data.plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">기록이 없습니다.</p>'; return; }
+                let html = ''; data.plans.slice(-30).forEach(p => {
                     let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
-                    html += `
-                        <div class="approval-card" style="display:block;">
-                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
-                                <strong style="font-size:1.05rem;">${p['날짜']}</strong>
-                                <span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span>
-                            </div>
-                            <div style="font-size:0.95rem; line-height:1.5; color:#333;">
-                                장소: <b>${p['장소']}</b><br>
-                                시간: ${p['활동여부']}
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
-            } catch (e) {
-                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
-            }
+            } catch (e) {}
         }
 
-        // ----------------------- [조장 전용] 승인 로직 -----------------------
         async function loadPendingRequests() {
-            const container = document.getElementById('pending_container');
-            const header = document.getElementById('approval_header');
-            
-            container.innerHTML = '<p style="text-align:center; color:#999;">목록을 불러오고 있습니다...</p>';
-            header.style.display = 'none';
-            document.getElementById('chk_all').checked = false;
-            
+            const container = document.getElementById('pending_container'); const header = document.getElementById('approval_header');
+            container.innerHTML = '<p style="text-align:center; color:#999;">불러오는 중...</p>'; header.style.display = 'none'; document.getElementById('chk_all').checked = false;
             try {
-                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`);
-                const data = await res.json();
-                
-                if(data.plans.length === 0 && data.changes.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">승인 대기 중인 내역이 없습니다. 😊</p>';
-                    return;
-                }
-
-                header.style.display = 'flex'; 
-                let html = '';
-                
-                data.plans.forEach(p => {
-                    let valObj = JSON.stringify({sheet_name: '활동계획서(NEW)', row_index: p.row_index});
-                    html += `
-                        <div class="approval-card">
-                            <input type="checkbox" class="chk-box item-chk" value='${valObj}'>
-                            <div class="app-content">
-                                <span class="app-tag tag-plan">신규 계획</span>
-                                <div class="app-info">
-                                    <b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}<br>장소: ${p['장소']} (${p['활동여부']})
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                data.changes.forEach(c => {
-                    let valObj = JSON.stringify({sheet_name: '활동계획_변경신청', row_index: c.row_index});
-                    html += `
-                        <div class="approval-card">
-                            <input type="checkbox" class="chk-box item-chk" value='${valObj}'>
-                            <div class="app-content">
-                                <span class="app-tag tag-change">변경/취소 요청</span>
-                                <div class="app-info">
-                                    <b>${c['신청자']}</b> 해설사<br>대상일: ${c['변경대상일']}<br>내용: ${c['변경유형']} - ${c['상세내용']}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`); const data = await res.json();
+                if(data.plans.length === 0 && data.changes.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">대기 내역이 없습니다.</p>'; return; }
+                header.style.display = 'flex'; let html = '';
+                // 구 시스템 탭 이름 반영: 활동계획
+                data.plans.forEach(p => { html += `<div class="approval-card"><input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획", row_index: p.row_index})}'> <div class="app-content"><span class="app-tag tag-plan">신규 계획</span><div class="app-info"><b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}<br>장소: ${p['장소']} (${p['활동여부']})</div></div></div>`; });
+                data.changes.forEach(c => { html += `<div class="approval-card"><input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획_변경신청", row_index: c.row_index})}'> <div class="app-content"><span class="app-tag tag-change">변경/취소</span><div class="app-info"><b>${c['신청자']}</b> 해설사<br>날짜: ${c['변경대상일']}<br>내용: ${c['변경유형']} - ${c['상세내용']}</div></div></div>`; });
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터 로드 실패</p>'; }
+            } catch (e) {}
         }
 
-        function toggleAllApprovals(source) {
-            checkboxes = document.querySelectorAll('.item-chk');
-            for(var i=0, n=checkboxes.length; i<n; i++) {
-                checkboxes[i].checked = source.checked;
-            }
-        }
+        function toggleAllApprovals(source) { document.querySelectorAll('.item-chk').forEach(chk => chk.checked = source.checked); }
 
         async function processBulkApp(status) {
-            const checkedBoxes = document.querySelectorAll('.item-chk:checked');
-            if(checkedBoxes.length === 0) {
-                alert("선택된 항목이 없습니다.");
-                return;
-            }
-
-            if(!confirm(`선택한 ${checkedBoxes.length}개의 요청을 일괄 [${status}] 처리하시겠습니까?`)) return;
-            
-            let approvals = [];
-            checkedBoxes.forEach(box => {
-                let data = JSON.parse(box.value);
-                data.status = status;
-                approvals.push(data);
-            });
-
+            const boxes = document.querySelectorAll('.item-chk:checked'); if(boxes.length === 0) { alert("항목을 선택해주세요."); return; }
+            if(!confirm(`${boxes.length}건을 [${status}] 하시겠습니까?`)) return;
+            let approvals = []; boxes.forEach(box => { let d = JSON.parse(box.value); d.status = status; approvals.push(d); });
             try {
-                const res = await fetch(`${API_BASE}/process_approval_bulk`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ approvals: approvals })
-                });
-                if(res.ok) { 
-                    alert(`${status} 처리되었습니다.`); 
-                    loadPendingRequests(); 
-                } else {
-                    alert("처리 중 서버 오류가 발생했습니다.");
-                }
-            } catch (e) { alert("서버 연결에 실패했습니다."); }
+                const res = await fetch(`${API_BASE}/process_approval_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ approvals: approvals }) });
+                if(res.ok) { alert("완료되었습니다."); loadPendingRequests(); }
+            } catch (e) { alert("오류 발생"); }
         }
 
-        function logout() {
-            if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; }
-        }
+        function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
     </script>
 </body>
 </html>
