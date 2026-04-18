@@ -60,6 +60,12 @@
         .log-item-stats { display: flex; gap: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
         .log-item-stats div { flex: 1; text-align: center; }
         .log-item-stats b { display: block; color: #b33939; font-size: 1rem; }
+
+        /* 통계 전용 테이블 스타일 */
+        .stat-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
+        .stat-table th { background-color: #2c3e50; color: white; padding: 10px; border: 1px solid #ddd; }
+        .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
+        .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
     </style>
 </head>
 <body>
@@ -222,17 +228,33 @@
                 <select id="ap_half" style="flex:1.5;"><option value="all">전체 일정</option><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
             </div>
             <div class="flex-group">
-                <select id="ap_island" style="flex:1;" onchange="updateApLoc()">
-                    <option value="전체">전체 섬</option><option value="백령도">백령도</option><option value="대청도">대청도</option><option value="소청도">소청도</option>
-                </select>
+                <select id="ap_island" style="flex:1;" onchange="updateApLoc()"><option value="전체">전체 섬</option><option value="백령도">백령도</option><option value="대청도">대청도</option><option value="소청도">소청도</option></select>
                 <select id="ap_loc" style="flex:1;"><option value="">- 모든 안내소 -</option></select>
             </div>
-            <div class="form-group" style="margin-top:8px;">
-                <input type="text" id="ap_name" placeholder="해설사 이름 검색">
-            </div>
+            <div class="form-group" style="margin-top:8px;"><input type="text" id="ap_name" placeholder="해설사 이름 검색"></div>
             <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadAdminPlans()">조회하기</button>
         </div>
         <div id="admin_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
+    </div>
+
+    <div id="admin_stats_area" class="hidden-section">
+        <div class="form-group">
+            <label>📊 통계 기준월 선택</label>
+            <div class="flex-group">
+                <select id="stat_year" style="flex:1;">
+                    <option value="2025">2025년</option>
+                    <option value="2026" selected>2026년</option>
+                    <option value="2027">2027년</option>
+                </select>
+                <select id="stat_month" style="flex:1;">
+                    <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                </select>
+            </div>
+            <button class="btn-submit" style="margin-top:5px; background-color:#2c3e50; color:white; border-radius:8px;" onclick="loadStatistics()">통계 산출하기</button>
+        </div>
+        <div id="stat_container">
+            <p style="text-align:center; color:#999; padding:20px;">연도와 월을 선택하고 버튼을 눌러주세요.</p>
+        </div>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
@@ -280,6 +302,7 @@
         if(document.getElementById('plan_month')) document.getElementById('plan_month').value = currentMonth;
         if(document.getElementById('tp_month')) document.getElementById('tp_month').value = currentMonth;
         if(document.getElementById('ap_month')) document.getElementById('ap_month').value = currentMonth;
+        if(document.getElementById('stat_month')) document.getElementById('stat_month').value = currentMonth;
 
         if(document.getElementById('al_start_date')) {
             const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
@@ -297,7 +320,7 @@
             else locs = allLocations;
             document.getElementById('ap_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + locs.map(l => `<option value="${l}">${l}</option>`).join('');
         }
-        updateApLoc(); // 초기화
+        updateApLoc();
 
         function setCurrentTimeInput() {
             const now = new Date();
@@ -320,7 +343,6 @@
             document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
         }
 
-        // 메뉴 목록 갱신 (3번 이름 변경)
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
             '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회'],
@@ -344,6 +366,7 @@
                 document.getElementById('admin_attendance_area').style.display = m === '1. 해설사 출퇴근 현황' ? 'block' : 'none';
                 document.getElementById('admin_log_area').style.display = m === '2. 해설사 활동 현황' ? 'block' : 'none';
                 document.getElementById('admin_plan_area').style.display = m === '3. 활동계획서 조회' ? 'block' : 'none';
+                document.getElementById('admin_stats_area').style.display = m === '4. 통계' ? 'block' : 'none';
 
                 if(m.includes('출퇴근관리') && userRole !== '관리자') setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
@@ -369,6 +392,7 @@
                 }
                 if(m === '2. 해설사 활동 현황') loadAdminLogs(); 
                 if(m === '3. 활동계획서 조회') loadAdminPlans();
+                if(m === '4. 통계') loadStatistics();
             };
             container.appendChild(d);
         });
@@ -702,13 +726,10 @@
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오는 중 오류가 발생했습니다.</p>'; }
         }
 
-        // --- [신규 추가] 관리자 전용: 활동계획서 조회 로직 ---
         async function loadAdminPlans() {
             const container = document.getElementById('admin_plan_container');
-            const month = document.getElementById('ap_month').value;
-            const half = document.getElementById('ap_half').value;
-            const island = document.getElementById('ap_island').value;
-            const loc = document.getElementById('ap_loc').value;
+            const month = document.getElementById('ap_month').value; const half = document.getElementById('ap_half').value;
+            const island = document.getElementById('ap_island').value; const loc = document.getElementById('ap_loc').value;
             const nameSearch = document.getElementById('ap_name').value.trim();
 
             container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중입니다...</p>';
@@ -716,13 +737,10 @@
             try {
                 const res = await fetch(`${API_BASE}/get_admin_plans?month=${month}&island=${encodeURIComponent(island)}`);
                 const data = await res.json();
-                
                 let plans = data.plans;
 
                 plans = plans.filter(p => {
-                    let dayMatch = p['날짜'].match(/(\d+)일/); 
-                    let day = dayMatch ? parseInt(dayMatch[1]) : 0;
-                    
+                    let dayMatch = p['날짜'].match(/(\d+)일/); let day = dayMatch ? parseInt(dayMatch[1]) : 0;
                     if (half === '1' && (day < 1 || day > 15)) return false;
                     if (half === '2' && (day < 16)) return false;
                     if (loc && !p['장소'].includes(loc)) return false;
@@ -730,10 +748,7 @@
                     return true;
                 });
 
-                if (plans.length === 0) { 
-                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>'; 
-                    return; 
-                }
+                if (plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>'; return; }
 
                 plans.sort((a, b) => {
                     let aDay = a['날짜'].match(/(\d+)일/) ? parseInt(a['날짜'].match(/(\d+)일/)[1]) : 0;
@@ -746,21 +761,65 @@
                 let html = '';
                 plans.forEach(p => {
                     let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
-                    html += `
-                        <div class="approval-card" style="display:block;">
-                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
-                                <strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']} <span style="font-size:0.85rem; color:#7f8c8d;">(${p['섬']})</span></strong>
-                                <span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span>
-                            </div>
-                            <div style="font-size:0.95rem; line-height:1.5; color:#333;">
-                                장소: <b>${p['장소']}</b><br>
-                                시간: ${p['활동여부']}
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']} <span style="font-size:0.85rem; color:#7f8c8d;">(${p['섬']})</span></strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
                 container.innerHTML = html;
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
+        }
+
+        // --- [신규 추가] 관리자 전용: 통계 데이터 로직 ---
+        async function loadStatistics() {
+            const container = document.getElementById('stat_container');
+            const year = document.getElementById('stat_year').value;
+            const month = document.getElementById('stat_month').value;
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">통계 데이터를 계산하는 중입니다...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_statistics?year=${year}&month=${month}`);
+                const data = await res.json();
+                
+                if (data.total.count === 0 && data.total.visitors === 0) {
+                    container.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${year}년 ${month}월의 운영일지 데이터가 없습니다.</p>`;
+                    return;
+                }
+
+                let html = '';
+
+                // 1. 전체 실적
+                html += `
+                    <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #bbdefb;">
+                        <div style="font-size:1.1rem; font-weight:800; color:#1565c0; margin-bottom:10px; text-align:center;">🏆 ${year}년 ${month}월 전체 실적</div>
+                        <div style="display:flex; justify-content:space-between; text-align:center;">
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 탐방객</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.visitors.toLocaleString()}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 청취자</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.listeners.toLocaleString()}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">해설 횟수</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.count.toLocaleString()}회</div></div>
+                        </div>
+                    </div>
+                `;
+
+                // 2. 섬별 통계 (테이블)
+                html += `<div style="font-weight:800; font-size:1.05rem; margin-bottom:10px; color:#2c3e50;">🏝️ 권역(섬)별 실적</div>`;
+                html += `<table class="stat-table"><thead><tr><th>권역</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
+                for (const [island, stats] of Object.entries(data.island_stats)) {
+                    html += `<tr><td class="t-left">${island}</td><td>${stats.visitors.toLocaleString()}</td><td>${stats.listeners.toLocaleString()}</td><td>${stats.count.toLocaleString()}</td></tr>`;
+                }
+                html += `</tbody></table>`;
+
+                // 3. 해설사별 통계 (테이블, 해설횟수 순으로 정렬)
+                html += `<div style="font-weight:800; font-size:1.05rem; margin-top:25px; margin-bottom:10px; color:#2c3e50;">🧑‍🏫 해설사별 개인 실적</div>`;
+                html += `<table class="stat-table"><thead><tr><th>이름 (소속)</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
+                
+                // 해설횟수가 많은 순서대로 정렬
+                const sortedGuides = Object.entries(data.guide_stats).sort((a, b) => b[1].count - a[1].count);
+                
+                for (const [name, stats] of sortedGuides) {
+                    html += `<tr><td class="t-left">${name}<br><span style="font-weight:normal; font-size:0.75rem; color:#7f8c8d;">${stats.island}</span></td><td>${stats.visitors.toLocaleString()}</td><td>${stats.listeners.toLocaleString()}</td><td><b>${stats.count.toLocaleString()}</b></td></tr>`;
+                }
+                html += `</tbody></table>`;
+
+                container.innerHTML = html;
+            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">통계 산출 중 오류가 발생했습니다.</p>'; }
         }
 
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
