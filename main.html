@@ -340,17 +340,35 @@
                 const res = await fetch(`${API_BASE}/get_daily_status?island=${encodeURIComponent(userIsland)}&target_date=${targetDate}`);
                 const data = await res.json();
                 let html = ''; let summary = data.log_summary;
+                
                 html += `<div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;"><div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div></div></div>`;
-                if(Object.keys(data.attendance).length === 0) { html += `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 기록된 활동이 없습니다.</p>`; } else {
+                
+                if(Object.keys(data.attendance).length === 0) { 
+                    html += `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 기록된 활동이 없습니다.</p>`; 
+                } else {
                     for (const [loc, users] of Object.entries(data.attendance)) {
                         let headerColor = loc === '퇴근' ? '#95a5a6' : '#3498db';
-                        html += `<div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;"><div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:0.95rem;">📍 ${loc} (${users.length}명)</div><div style="padding:5px 15px;">`;
-                        users.forEach(u => { html += `<div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0; border-bottom:1px dashed #eee; padding-bottom:8px;"><span style="font-weight:800; color:#333;">${u.name}</span><span style="color:#666; font-size:0.85rem;">시간: ${u.time}</span></div>`; });
+                        html += `<div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;"><div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:0.95rem;">📍 ${loc} (${users.length}명)</div><div style="padding:10px 15px;">`;
+                        
+                        users.forEach(u => { 
+                            let outStr = u.out_time ? u.out_time : '<span style="color:#e74c3c;">미퇴근</span>';
+                            html += `
+                                <div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:10px;">
+                                    <div style="font-weight:800; color:#333; margin-bottom:6px;">${u.name}</div>
+                                    <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#555; background:#f8f9fa; padding:8px; border-radius:6px;">
+                                        <span>🟢 출근: <b>${u.in_time}</b></span>
+                                        <span>🔴 퇴근: <b>${outStr}</b></span>
+                                    </div>
+                                </div>
+                            `; 
+                        });
                         html += `</div></div>`;
                     }
                 }
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">현황을 불러오지 못했습니다.</p>'; }
+            } catch (e) { 
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">현황을 불러오지 못했습니다.</p>'; 
+            }
         }
 
         function generatePlanForm() {
