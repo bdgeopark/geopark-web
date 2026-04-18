@@ -62,7 +62,7 @@
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
 
-        /* --- [완전 개편] 스캔본 완벽 복제 PDF 인쇄 스타일 --- */
+        /* --- [완전 개편 2탄] 매의 눈 맞춤형 서식 복제 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -85,29 +85,29 @@
             .print-main-title { text-align: center; font-size: 24pt; font-weight: 900; margin-bottom: 2mm; letter-spacing: 5px; }
             .print-date { text-align: center; font-size: 11pt; margin-bottom: 5mm; }
 
-            /* 표 레이아웃 절대 고정 (글씨량에 따라 칸이 찌그러지지 않음) */
+            /* 표 레이아웃 절대 고정 */
             table.fixed-table { 
                 width: 100%; border-collapse: collapse; border: 2px solid #000; 
-                table-layout: fixed; text-align: center; font-size: 11pt; 
+                table-layout: fixed; text-align: center; font-size: 11pt; height: max-content;
             }
             table.fixed-table th, table.fixed-table td { 
                 border: 1px solid #000; padding: 2px 4px; overflow: hidden; vertical-align: middle;
             }
             table.fixed-table th { font-weight: bold; background-color: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-            /* 1. 안내소 및 해설사 칸 열/행 두께 완벽 조정 */
+            /* 1. 안내소 지시사항 두 배로 확대 / 2. 성명, 활동시간 날씬하게 압축 */
             .t1-col1 { width: 15%; }
             .t1-col2 { width: 25%; }
             .t1-col3 { width: 15%; }
             .t1-col4 { width: 45%; }
             
-            .row-loc { height: 8mm; } 
-            .row-guide-header th { height: 6mm; padding: 1px; font-size: 10pt; }
-            .row-guide td { height: 6mm; padding: 1px; }
+            .row-loc th, .row-loc td { height: 16mm !important; } /* 지시사항 행 2배 뚱뚱하게 */
+            .row-guide-header th { height: 6mm !important; padding: 1px !important; font-size: 10pt; } /* 성명/활동시간 행 초슬림화 */
+            .row-guide td { height: 7mm !important; padding: 1px !important; }
 
             .print-sub-title { font-size: 12pt; font-weight: bold; margin: 5mm 0 2mm 0; text-align: left; }
 
-            /* 2. 하단 운영일지 표 슬림화 */
+            /* 하단 운영일지 */
             .t2-col1 { width: 16%; }
             .t2-col2 { width: 14%; }
             .t2-col3 { width: 14%; }
@@ -116,18 +116,20 @@
             .t2-col6 { width: 14%; }
             .t2-col7 { width: 14%; }
 
-            .row-log-header th { height: 10mm; padding: 2px; }
-            .row-log td { height: 8mm; padding: 2px; }
-            .row-sum th, .row-sum td { height: 8mm; padding: 2px; font-weight: bold; }
+            .row-log-header th { height: 10mm !important; padding: 2px !important; }
+            .row-log td { height: 7mm !important; padding: 2px !important; }
+            .row-sum th, .row-sum td { height: 7mm !important; padding: 2px !important; font-weight: bold; }
             
-            /* 3. 특이사항 높이 1줄 컷 */
-            .row-remark th, .row-remark td { height: 8mm; padding: 2px; vertical-align: middle; text-align: left !important; padding-left: 5px !important; }
+            /* 3. 특이사항 높이 1줄로 확 줄임 */
+            .row-remark th, .row-remark td { height: 8mm !important; padding: 2px !important; vertical-align: middle !important; white-space: nowrap; overflow: hidden; text-align: left !important; padding-left: 5px !important;}
 
-            /* 4. 서명란 완벽 계산 고정 (플렉스 박스) */
+            /* 4. 서명란 황금 간격 세팅 (우측에서 5mm 띄움) */
             .signature-box { 
-                display: flex; justify-content: space-between; 
-                margin-top: 10mm; padding-right: 5mm; 
-                font-size: 13pt; font-weight: bold;
+                text-align: right; 
+                margin-top: 8mm; 
+                padding-right: 5mm; 
+                font-size: 13pt; 
+                font-weight: bold;
             }
         }
     </style>
@@ -632,7 +634,7 @@
         async function loadAdminAttendance() {
             const container = document.getElementById('admin_attendance_container');
             const targetDate = document.getElementById('admin_date_input').value;
-            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중입니다...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_attendance?target_date=${targetDate}`);
@@ -674,7 +676,7 @@
 
             if (!startDate || !endDate) return;
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중입니다...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_logs?start_date=${startDate}&end_date=${endDate}&loc=${encodeURIComponent(loc)}&name=${encodeURIComponent(nameSearch)}`);
@@ -830,7 +832,7 @@
                         btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; 
                     }
 
-                    // 12시간 체제 (위, 아래 하나씩 추가)
+                    // 12시간 체제로 위아래 추가
                     const times = [
                         "07:00~08:00",
                         "08:00~09:00", "09:00~10:00", "10:00~11:00", "11:00~12:00",
@@ -846,10 +848,9 @@
 
                         for (const [loc, info] of Object.entries(locs)) {
                             
-                            // 안내소 단어 제거
+                            // 1. 안내소 단어 싹 지우기
                             let displayLoc = loc.replace(/ 안내소|안내소/g, '').trim();
                             
-                            // 해설사 무조건 4칸 고정 (칸 틀어짐 방지)
                             let guideRows = '';
                             for(let i=0; i<4; i++) {
                                 if(info.guides && info.guides[i]) {
@@ -857,21 +858,12 @@
                                     let tIn = g.in || '';
                                     let tOut = g.out || '';
                                     let timeStr = (tIn || tOut) ? `${tIn} ~ ${tOut}` : '';
-                                    let totalHours = '';
-                                    if(tIn && tOut) {
-                                        let hIn = parseInt(tIn.split(':')[0]);
-                                        let hOut = parseInt(tOut.split(':')[0]);
-                                        let diff = hOut - hIn;
-                                        if(diff >= 5) diff -= 1; 
-                                        totalHours = diff > 0 ? `${diff}시간` : '';
-                                    }
-                                    guideRows += `<tr class="row-guide"><td>${g.name}</td><td colspan="2">${timeStr}</td><td>${totalHours}</td></tr>`;
+                                    guideRows += `<tr class="row-guide"><td>${g.name}</td><td colspan="2">${timeStr}</td></tr>`;
                                 } else {
-                                    guideRows += `<tr class="row-guide"><td></td><td colspan="2"></td><td></td></tr>`;
+                                    guideRows += `<tr class="row-guide"><td></td><td colspan="2"></td></tr>`;
                                 }
                             }
 
-                            // 시간대별 기록 매칭
                             let logRows = '';
                             let totalV = 0, totalL = 0, totalC = 0;
                             let remarkSum = '';
@@ -901,7 +893,6 @@
                                 }
                             });
 
-                            // 최종 페이지 조립
                             html += `
                                 <div class="print-page">
                                     <div class="print-top-left">【서식 3】 지질공원 안내소 운영일지</div>
@@ -916,10 +907,9 @@
                                             <td class="t1-col4" style="text-align:left;"></td>
                                         </tr>
                                         <tr class="row-guide-header">
-                                            <th rowspan="5" style="width:15%;">해설사</th>
-                                            <th style="width:25%; font-size:10pt;">성명</th>
-                                            <th colspan="2" style="width:45%; font-size:10pt;">활동 시간</th>
-                                            <th style="width:15%; font-size:10pt;">합계 시간</th>
+                                            <th rowspan="5" class="t1-col1">해설사</th>
+                                            <th class="t1-col2">성명</th>
+                                            <th colspan="2">활동 시간</th>
                                         </tr>
                                         ${guideRows}
                                     </table>
@@ -933,7 +923,7 @@
                                             <th class="t2-col4">해설<br>횟수(회)</th>
                                             <th class="t2-col5">교육<br>청취자(명)</th>
                                             <th class="t2-col6">교육<br>횟수(회)</th>
-                                            <th class="t2-col7" style="font-size:9pt; line-height:1.2;">비고(환경정비,<br>시설점검, 교육 등)</th>
+                                            <th class="t2-col7" style="font-size:9pt; line-height:1.2;">비고(환경정비,<br>시설점검 등)</th>
                                         </tr>
                                         ${logRows}
                                         <tr class="row-sum">
@@ -947,17 +937,13 @@
                                         </tr>
                                         <tr class="row-remark">
                                             <th>특이사항</th>
-                                            <td colspan="6" style="text-align:left;">${remarkSum}</td>
+                                            <td colspan="6">${remarkSum}</td>
                                         </tr>
                                     </table>
 
                                     <div class="signature-box">
-                                        <div>
-                                            <span>조장 확인</span>
-                                            <span style="margin-left: 10mm;">(서명)</span>
-                                            <span style="margin-left: 5mm;">면 팀장 확인</span>
-                                        </div>
-                                        <div>(서명)</div>
+                                        조장 확인<span style="margin-left: 4mm;">(서명)</span>
+                                        <span style="margin-left: 5mm;">면 팀장 확인</span><span style="margin-left: 4mm;">(서명)</span>
                                     </div>
                                 </div>
                             `;
