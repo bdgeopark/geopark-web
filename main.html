@@ -55,7 +55,6 @@
         .admin-time-act { background: #e8f5e9; padding: 6px 10px; border-radius: 6px; color: #1b5e20; }
         .admin-time-none { background: #ffebee; padding: 6px 10px; border-radius: 6px; color: #b71c1c; }
         
-        /* 관리자 활동현황 전용 스타일 */
         .log-item-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .log-item-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
         .log-item-stats { display: flex; gap: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
@@ -195,10 +194,7 @@
     </div>
 
     <div id="admin_attendance_area" class="hidden-section">
-        <div class="form-group">
-            <label>📅 조회 날짜 선택</label>
-            <input type="date" id="admin_date_input" onchange="loadAdminAttendance()">
-        </div>
+        <div class="form-group"><label>📅 조회 날짜 선택</label><input type="date" id="admin_date_input" onchange="loadAdminAttendance()"></div>
         <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <label style="margin:0;">📊 전 지역 출퇴근 종합 현황</label>
@@ -211,20 +207,32 @@
     <div id="admin_log_area" class="hidden-section">
         <div class="form-group">
             <label>🔍 활동(운영일지) 검색 조건 설정</label>
-            <div class="flex-group">
-                <input type="date" id="al_start_date" style="flex:1;">
-                <span style="font-weight:bold;">~</span>
-                <input type="date" id="al_end_date" style="flex:1;">
-            </div>
-            <div class="flex-group">
-                <select id="al_loc" style="flex:1;"></select>
-                <input type="text" id="al_name" placeholder="이름 검색" style="flex:1;">
-            </div>
+            <div class="flex-group"><input type="date" id="al_start_date" style="flex:1;"><span style="font-weight:bold;">~</span><input type="date" id="al_end_date" style="flex:1;"></div>
+            <div class="flex-group"><select id="al_loc" style="flex:1;"></select><input type="text" id="al_name" placeholder="이름 검색" style="flex:1;"></div>
             <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadAdminLogs()">종합 검색하기</button>
         </div>
-        <div id="admin_log_container">
-            <p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p>
+        <div id="admin_log_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
+    </div>
+
+    <div id="admin_plan_area" class="hidden-section">
+        <div class="form-group">
+            <label>🔍 활동계획서 검색 조건 설정</label>
+            <div class="flex-group">
+                <select id="ap_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
+                <select id="ap_half" style="flex:1.5;"><option value="all">전체 일정</option><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
+            </div>
+            <div class="flex-group">
+                <select id="ap_island" style="flex:1;" onchange="updateApLoc()">
+                    <option value="전체">전체 섬</option><option value="백령도">백령도</option><option value="대청도">대청도</option><option value="소청도">소청도</option>
+                </select>
+                <select id="ap_loc" style="flex:1;"><option value="">- 모든 안내소 -</option></select>
+            </div>
+            <div class="form-group" style="margin-top:8px;">
+                <input type="text" id="ap_name" placeholder="해설사 이름 검색">
+            </div>
+            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadAdminPlans()">조회하기</button>
         </div>
+        <div id="admin_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p></div>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
@@ -265,21 +273,31 @@
         if(locSelect) { myLocations.forEach(loc => { locSelect.add(new Option(loc, loc)); logLocSelect.add(new Option(loc, loc)); }); }
         if(batchLocSelect) batchLocSelect.innerHTML = locOptionsHtml;
 
-        // 조장/관리자 검색용 안내소 목록 셋팅
         if(document.getElementById('tp_loc')) document.getElementById('tp_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
         if(document.getElementById('al_loc')) document.getElementById('al_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + allLocations.map(l => `<option value="${l}">${l}</option>`).join('');
 
         const currentMonth = (new Date().getMonth() + 1).toString();
         if(document.getElementById('plan_month')) document.getElementById('plan_month').value = currentMonth;
         if(document.getElementById('tp_month')) document.getElementById('tp_month').value = currentMonth;
+        if(document.getElementById('ap_month')) document.getElementById('ap_month').value = currentMonth;
 
-        // 관리자 활동현황 기본 날짜 세팅 (오늘~오늘)
         if(document.getElementById('al_start_date')) {
             const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
             const dateOffset = new Date(now.getTime() - offset).toISOString().split('T')[0];
             document.getElementById('al_start_date').value = dateOffset;
             document.getElementById('al_end_date').value = dateOffset;
         }
+
+        function updateApLoc() {
+            const island = document.getElementById('ap_island').value;
+            let locs = [];
+            if (island === '백령도') locs = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
+            else if (island === '대청도') locs = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
+            else if (island === '소청도') locs = ['탑동', '분바위'];
+            else locs = allLocations;
+            document.getElementById('ap_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + locs.map(l => `<option value="${l}">${l}</option>`).join('');
+        }
+        updateApLoc(); // 초기화
 
         function setCurrentTimeInput() {
             const now = new Date();
@@ -302,10 +320,11 @@
             document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
         }
 
+        // 메뉴 목록 갱신 (3번 이름 변경)
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
             '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회'],
-            '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획 조회', '4. 통계']
+            '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계']
         };
 
         const container = document.getElementById('menu_container');
@@ -324,6 +343,7 @@
                 
                 document.getElementById('admin_attendance_area').style.display = m === '1. 해설사 출퇴근 현황' ? 'block' : 'none';
                 document.getElementById('admin_log_area').style.display = m === '2. 해설사 활동 현황' ? 'block' : 'none';
+                document.getElementById('admin_plan_area').style.display = m === '3. 활동계획서 조회' ? 'block' : 'none';
 
                 if(m.includes('출퇴근관리') && userRole !== '관리자') setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
@@ -347,10 +367,8 @@
                     }
                     loadAdminAttendance();
                 }
-                
-                if(m === '2. 해설사 활동 현황') {
-                    loadAdminLogs(); // 메뉴 켤때 바로 한번 검색해서 보여줌
-                }
+                if(m === '2. 해설사 활동 현황') loadAdminLogs(); 
+                if(m === '3. 활동계획서 조회') loadAdminPlans();
             };
             container.appendChild(d);
         });
@@ -364,7 +382,6 @@
                     currentLoc = data.loc;
                     localStorage.setItem("current_location", currentLoc);
                     updateCurrentLocBadge();
-                    
                     if(data.in_time) { localStorage.setItem("last_in_time", data.in_time); document.getElementById('in_time_display').innerText = `기록됨: ${data.in_time}`; } else { document.getElementById('in_time_display').innerText = ''; }
                     if(data.out_time) { localStorage.setItem("last_out_time", data.out_time); document.getElementById('out_time_display').innerText = `기록됨: ${data.out_time}`; } else { document.getElementById('out_time_display').innerText = ''; }
                 }
@@ -623,7 +640,6 @@
             } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
         }
 
-        // --- [신규 추가] 관리자 전용: 활동 현황(운영일지) 로직 ---
         async function loadAdminLogs() {
             const container = document.getElementById('admin_log_container');
             const startDate = document.getElementById('al_start_date').value;
@@ -631,26 +647,18 @@
             const loc = document.getElementById('al_loc').value;
             const nameSearch = document.getElementById('al_name').value.trim();
 
-            if (!startDate || !endDate) {
-                alert("시작일과 종료일을 모두 선택해주세요.");
-                return;
-            }
-            if (startDate > endDate) {
-                alert("시작일이 종료일보다 늦을 수 없습니다.");
-                return;
-            }
+            if (!startDate || !endDate) { alert("시작일과 종료일을 모두 선택해주세요."); return; }
+            if (startDate > endDate) { alert("시작일이 종료일보다 늦을 수 없습니다."); return; }
 
             container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중입니다...</p>';
             
             try {
-                // 시작일, 종료일, 장소, 이름을 파라미터로 전송
                 const res = await fetch(`${API_BASE}/get_admin_logs?start_date=${startDate}&end_date=${endDate}&loc=${encodeURIComponent(loc)}&name=${encodeURIComponent(nameSearch)}`);
                 const data = await res.json();
                 
                 let html = '';
                 let summary = data.summary;
                 
-                // 총합 요약 카드 렌더링
                 html += `
                     <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
                         <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
@@ -668,7 +676,6 @@
                     return;
                 }
 
-                // 개별 일지 내역 렌더링
                 data.logs.forEach(log => {
                     let rLoc = log['안내소'] || log['장소'] || '장소 미상';
                     let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.8rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
@@ -691,11 +698,69 @@
                         </div>
                     `;
                 });
-
                 container.innerHTML = html;
-            } catch (e) {
-                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오는 중 오류가 발생했습니다.</p>';
-            }
+            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오는 중 오류가 발생했습니다.</p>'; }
+        }
+
+        // --- [신규 추가] 관리자 전용: 활동계획서 조회 로직 ---
+        async function loadAdminPlans() {
+            const container = document.getElementById('admin_plan_container');
+            const month = document.getElementById('ap_month').value;
+            const half = document.getElementById('ap_half').value;
+            const island = document.getElementById('ap_island').value;
+            const loc = document.getElementById('ap_loc').value;
+            const nameSearch = document.getElementById('ap_name').value.trim();
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중입니다...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_admin_plans?month=${month}&island=${encodeURIComponent(island)}`);
+                const data = await res.json();
+                
+                let plans = data.plans;
+
+                plans = plans.filter(p => {
+                    let dayMatch = p['날짜'].match(/(\d+)일/); 
+                    let day = dayMatch ? parseInt(dayMatch[1]) : 0;
+                    
+                    if (half === '1' && (day < 1 || day > 15)) return false;
+                    if (half === '2' && (day < 16)) return false;
+                    if (loc && !p['장소'].includes(loc)) return false;
+                    if (nameSearch && !p['이름'].includes(nameSearch)) return false;
+                    return true;
+                });
+
+                if (plans.length === 0) { 
+                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>'; 
+                    return; 
+                }
+
+                plans.sort((a, b) => {
+                    let aDay = a['날짜'].match(/(\d+)일/) ? parseInt(a['날짜'].match(/(\d+)일/)[1]) : 0;
+                    let bDay = b['날짜'].match(/(\d+)일/) ? parseInt(b['날짜'].match(/(\d+)일/)[1]) : 0;
+                    if(aDay !== bDay) return aDay - bDay; 
+                    if(a['섬'] !== b['섬']) return a['섬'].localeCompare(b['섬']);
+                    return a['이름'].localeCompare(b['이름']);
+                });
+
+                let html = '';
+                plans.forEach(p => {
+                    let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `
+                        <div class="approval-card" style="display:block;">
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+                                <strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']} <span style="font-size:0.85rem; color:#7f8c8d;">(${p['섬']})</span></strong>
+                                <span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span>
+                            </div>
+                            <div style="font-size:0.95rem; line-height:1.5; color:#333;">
+                                장소: <b>${p['장소']}</b><br>
+                                시간: ${p['활동여부']}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) { container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>'; }
         }
 
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
