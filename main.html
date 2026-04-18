@@ -171,6 +171,30 @@
         </div>
     </div>
 
+    <div id="team_plan_area" class="hidden-section">
+        <div class="form-group">
+            <label>🔍 검색 조건 설정</label>
+            <div class="flex-group">
+                <select id="tp_month" style="flex:1;">
+                    <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+                </select>
+                <select id="tp_half" style="flex:1.5;">
+                    <option value="all">전체 일정</option>
+                    <option value="1">전반기 (1~15일)</option>
+                    <option value="2">하반기 (16~말일)</option>
+                </select>
+            </div>
+            <div class="flex-group">
+                <select id="tp_loc" style="flex:1;"></select>
+                <input type="text" id="tp_name" placeholder="이름 검색" style="flex:1;">
+            </div>
+            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadTeamPlans()">검색하기</button>
+        </div>
+        <div id="team_plan_container">
+            <p style="text-align:center; color:#999; padding:20px;">조건을 설정하고 검색 버튼을 눌러주세요.</p>
+        </div>
+    </div>
+
     <div class="logout" onclick="logout()">로그아웃</div>
 
     <script>
@@ -210,7 +234,13 @@
         myLocations.forEach(loc => { locSelect.add(new Option(loc, loc)); logLocSelect.add(new Option(loc, loc)); });
         batchLocSelect.innerHTML = locOptionsHtml;
 
-        document.getElementById('plan_month').value = (new Date().getMonth() + 1).toString();
+        // 조원 계획 검색용 안내소 셀렉트박스 설정
+        let tpLocOptionsHtml = `<option value="">- 모든 안내소 -</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
+        document.getElementById('tp_loc').innerHTML = tpLocOptionsHtml;
+
+        const currentMonth = (new Date().getMonth() + 1).toString();
+        document.getElementById('plan_month').value = currentMonth;
+        document.getElementById('tp_month').value = currentMonth;
 
         function setCurrentTimeInput() {
             const now = new Date();
@@ -229,9 +259,10 @@
         document.getElementById('batch_start').value = "08:00"; document.getElementById('batch_end').value = "17:00";
         document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
 
+        // 메뉴 추가 (8. 조원 활동계획 조회)
         const menuData = {
             '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
-            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회'],
+            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회'],
             '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획 조회', '4. 통계']
         };
 
@@ -247,10 +278,13 @@
                 document.getElementById('approval_area').style.display = m.includes('변경 승인') ? 'block' : 'none';
                 document.getElementById('my_plan_area').style.display = m.includes('나의 활동계획 조회') ? 'block' : 'none';
                 document.getElementById('status_area').style.display = m.includes('현황 조회') && !m.includes('나의') ? 'block' : 'none';
+                document.getElementById('team_plan_area').style.display = m.includes('조원 활동계획 조회') ? 'block' : 'none';
+
                 if(m.includes('출퇴근관리')) setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
                 if(m.includes('변경 승인')) loadPendingRequests(); 
                 if(m.includes('나의 활동계획 조회')) loadMyPlans(); 
+                if(m.includes('조원 활동계획 조회')) loadTeamPlans(); 
                 if(m.includes('현황 조회') && !m.includes('나의')) {
                     if(!document.getElementById('status_date_input').value) {
                         const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
@@ -351,19 +385,15 @@
                 let rawDiff = parseInt(eTime.split(':')[0]) - parseInt(sTime.split(':')[0]);
                 
                 if (dayIdx === 0) currentWeekWorkDays = 0;
-                
                 if (loc !== '휴무') {
                     if(rawDiff <= 0) isValid = false; 
                     currentWeekWorkDays++;
                     if ((rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) requiresApproval = true;
-                } else {
-                    totalRestDays++;
-                }
-                
+                } else { totalRestDays++; }
                 if (dayIdx === 6 || row === document.querySelectorAll('.plan-row')[document.querySelectorAll('.plan-row').length - 1]) {
                     if (currentWeekWorkDays >= 7) weekWarningTriggered = true;
                 }
-                // 기본 상태값을 '승인대기'로 적용
+                // 실 데이터 기준 '승인대기'
                 plans.push({ plan_date: row.querySelector('.plan-date-label span').innerText, location: loc === '휴무' ? '-' : loc, activity_status: loc === '휴무' ? '휴무' : `${sTime}~${eTime} (${rawDiff >= 5 ? rawDiff-1 : rawDiff}시간)`, remarks: row.querySelector('.p-remarks').value, status: (loc !== '휴무' && (rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) ? "초과승인대기" : "승인대기" });
             });
             if (!isValid) { alert("시간 설정이 잘못된 날짜가 있습니다."); return; }
@@ -419,6 +449,69 @@
             } catch (e) {}
         }
 
+        // --- [조장 전용] 조원 활동계획 전체 조회 및 필터 기능 ---
+        async function loadTeamPlans() {
+            const container = document.getElementById('team_plan_container');
+            const month = document.getElementById('tp_month').value;
+            const half = document.getElementById('tp_half').value;
+            const loc = document.getElementById('tp_loc').value;
+            const nameSearch = document.getElementById('tp_name').value.trim();
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중입니다...</p>';
+            try {
+                const res = await fetch(`${API_BASE}/get_island_plans?island=${encodeURIComponent(userIsland)}&month=${month}`);
+                const data = await res.json();
+                
+                let plans = data.plans;
+
+                // 프론트엔드에서 전반기/하반기, 장소, 이름으로 실시간 필터링
+                plans = plans.filter(p => {
+                    let dayMatch = p['날짜'].match(/(\d+)일/);
+                    let day = dayMatch ? parseInt(dayMatch[1]) : 0;
+                    
+                    if (half === '1' && (day < 1 || day > 15)) return false;
+                    if (half === '2' && (day < 16)) return false;
+                    if (loc && !p['장소'].includes(loc)) return false;
+                    if (nameSearch && !p['이름'].includes(nameSearch)) return false;
+
+                    return true;
+                });
+
+                if (plans.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>';
+                    return;
+                }
+
+                // 날짜 오름차순, 그 다음 이름순으로 정렬
+                plans.sort((a, b) => {
+                    let aDay = a['날짜'].match(/(\d+)일/) ? parseInt(a['날짜'].match(/(\d+)일/)[1]) : 0;
+                    let bDay = b['날짜'].match(/(\d+)일/) ? parseInt(b['날짜'].match(/(\d+)일/)[1]) : 0;
+                    if(aDay !== bDay) return aDay - bDay;
+                    return a['이름'].localeCompare(b['이름']);
+                });
+
+                let html = '';
+                plans.forEach(p => {
+                    let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `
+                        <div class="approval-card" style="display:block;">
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+                                <strong style="font-size:1.05rem;">${p['날짜']} - ${p['이름']}</strong>
+                                <span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span>
+                            </div>
+                            <div style="font-size:0.95rem; line-height:1.5; color:#333;">
+                                장소: <b>${p['장소']}</b><br>
+                                시간: ${p['활동여부']}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
+        }
+
         async function loadPendingRequests() {
             const container = document.getElementById('pending_container'); const header = document.getElementById('approval_header');
             container.innerHTML = '<p style="text-align:center; color:#999;">불러오는 중...</p>'; header.style.display = 'none'; document.getElementById('chk_all').checked = false;
@@ -426,7 +519,6 @@
                 const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`); const data = await res.json();
                 if(data.plans.length === 0 && data.changes.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">대기 내역이 없습니다.</p>'; return; }
                 header.style.display = 'flex'; let html = '';
-                // 구 시스템 탭 이름 반영: 활동계획
                 data.plans.forEach(p => { html += `<div class="approval-card"><input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획", row_index: p.row_index})}'> <div class="app-content"><span class="app-tag tag-plan">신규 계획</span><div class="app-info"><b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}<br>장소: ${p['장소']} (${p['활동여부']})</div></div></div>`; });
                 data.changes.forEach(c => { html += `<div class="approval-card"><input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획_변경신청", row_index: c.row_index})}'> <div class="app-content"><span class="app-tag tag-change">변경/취소</span><div class="app-info"><b>${c['신청자']}</b> 해설사<br>날짜: ${c['변경대상일']}<br>내용: ${c['변경유형']} - ${c['상세내용']}</div></div></div>`; });
                 container.innerHTML = html;
