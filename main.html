@@ -6,7 +6,6 @@
     <title>지질공원 통합관리 시스템</title>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     <style>
-        /* 기본 폰트 사이즈를 html 태그에 설정하여 비율로 커지게 만듦 */
         html { font-size: 16px; }
         body { font-family: 'Pretendard', sans-serif; background-color: #F5F6F8; margin: 0; padding: 1.25rem; color: #191919; box-sizing: border-box; }
         
@@ -17,7 +16,6 @@
         .user-info .role { font-size: 0.85rem; color: #666; margin-top: 0.25rem; }
         .current-badge { background-color: #3498db; color: white; font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 0.6rem; font-weight: 600; }
         
-        /* 글자 크기 조절 버튼 스타일 */
         .font-controls { display: flex; gap: 0.5rem; }
         .font-btn { background: #f8f9fa; border: 1px solid #ddd; padding: 0.5rem 0.8rem; border-radius: 0.5rem; font-weight: 800; color: #333; cursor: pointer; font-size: 1rem; }
         .font-btn:active { background: #e9ecef; }
@@ -306,14 +304,13 @@
     <div id="print_area"></div>
 
     <script>
-        // --- [신규 추가] 글자 크기 조절 기능 ---
         let baseFontSize = parseInt(localStorage.getItem("font_size")) || 16;
         document.documentElement.style.fontSize = baseFontSize + 'px';
         
         function changeFontSize(step) {
-            baseFontSize += step * 2; // 2px 단위로 조절
-            if (baseFontSize < 12) baseFontSize = 12; // 최소 크기
-            if (baseFontSize > 24) baseFontSize = 24; // 최대 크기
+            baseFontSize += step * 2; 
+            if (baseFontSize < 12) baseFontSize = 12; 
+            if (baseFontSize > 24) baseFontSize = 24; 
             document.documentElement.style.fontSize = baseFontSize + 'px';
             localStorage.setItem("font_size", baseFontSize);
         }
@@ -402,10 +399,10 @@
             document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
         }
 
-        // --- [수정] 방어 코드가 적용된 날짜 숫자 추출 함수 ---
+        // --- 에러 안나게 무조건 숫자로 뽑아주는 마법의 함수 ---
         function getDayNum(rawDate) {
             if (!rawDate) return 0;
-            let dateStr = String(rawDate); // 무조건 글자로 변환해서 뻗는 현상 방지
+            let dateStr = String(rawDate); 
             let m = dateStr.match(/(\d+)일/);
             if (m) return parseInt(m[1]);
             let parts = dateStr.split('-');
@@ -879,7 +876,7 @@
 
             try {
                 const res = await fetch(`${API_BASE}/get_report_data?island=${encodeURIComponent(userIsland)}&year=${year}&month=${month}`);
-                if (!res.ok) throw new Error("서버 응답 오류");
+                if (!res.ok) throw new Error(`서버 응답 오류 (상태코드: ${res.status})`);
                 const data = await res.json();
                 
                 let html = ''; let title = ''; let printArea = document.getElementById('print_area');
@@ -887,8 +884,15 @@
                 if(type === 'plan') {
                     title = `${year}년 ${month}월 ${userIsland} 활동계획서`;
                     let p = data.plans;
-                    p = p.filter(x => { let d = getDayNum(x['날짜']); return half === '1' ? (d >= 1 && d <= 15) : (d > 15); });
+                    
+                    p = p.filter(x => { 
+                        let d = getDayNum(x['날짜']); 
+                        if(d === 0) return true; // 날짜를 못 읽겠으면 안전하게 출력시킴
+                        return half === '1' ? (d >= 1 && d <= 15) : (d > 15); 
+                    });
+                    
                     if(p.length === 0) { alert("해당 기간의 계획서 데이터가 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
+                    
                     html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>이름</th><th>장소</th><th>활동여부(시간)</th><th>상태</th></tr></thead><tbody>`;
                     p.sort((a, b) => getDayNum(a['날짜']) - getDayNum(b['날짜']));
                     p.forEach(r => { html += `<tr><td>${r['날짜']||''}</td><td>${r['이름']||''}</td><td>${r['장소']||''}</td><td>${r['활동여부']||''}</td><td>${r['상태']||''}</td></tr>`; });
@@ -897,12 +901,19 @@
                 else if(type === 'result') {
                     title = `${year}년 ${month}월 ${userIsland} 활동결과보고서`;
                     let r = data.records; let l = data.logs;
-                    r = r.filter(x => { let d = getDayNum(x['날짜']); return half === '1' ? (d >= 1 && d <= 15) : (d > 15); });
+                    
+                    r = r.filter(x => { 
+                        let d = getDayNum(x['날짜']); 
+                        if(d === 0) return true;
+                        return half === '1' ? (d >= 1 && d <= 15) : (d > 15); 
+                    });
+                    
                     if(r.length === 0) { alert("해당 기간의 활동 기록이 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
+
                     html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>이름</th><th>장소</th><th>출퇴근 시간</th><th>탐방객</th><th>청취자</th><th>해설</th></tr></thead><tbody>`;
-                    r.sort((a, b) => String(a['날짜']||'').localeCompare(String(b['날짜']||'')));
+                    r.sort((a, b) => getDayNum(a['날짜']) - getDayNum(b['날짜']));
                     r.forEach(rec => {
-                        let myLog = l.find(x => x['날짜'] === rec['날짜'] && x['이름'] === rec['이름']);
+                        let myLog = l.find(x => String(x['날짜']) === String(rec['날짜']) && String(x['이름']) === String(rec['이름']));
                         let v = myLog ? myLog['탐방객수'] : '-'; let lis = myLog ? myLog['청취자수'] : '-'; let cnt = myLog ? myLog['해설횟수'] : '-';
                         html += `<tr><td>${rec['날짜']||''}</td><td>${rec['이름']||''}</td><td>${rec['장소']||''}</td><td>${rec['출근시간']||''} ~ ${rec['퇴근시간']||'미퇴근'}</td><td>${v}</td><td>${lis}</td><td>${cnt}</td></tr>`;
                     });
@@ -911,10 +922,17 @@
                 else if(type === 'log') {
                     title = `${year}년 ${month}월 ${userIsland} 안내소 운영일지`;
                     let l = data.logs;
-                    l = l.filter(x => { let d = getDayNum(x['날짜']); return half === '1' ? (d >= 1 && d <= 15) : (d > 15); });
+                    
+                    l = l.filter(x => { 
+                        let d = getDayNum(x['날짜']); 
+                        if(d === 0) return true;
+                        return half === '1' ? (d >= 1 && d <= 15) : (d > 15); 
+                    });
+
                     if(l.length === 0) { alert("해당 기간의 운영일지 기록이 없습니다."); btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; }
+
                     html += `<div class="print-title">${title}</div><table class="print-table"><thead><tr><th>날짜</th><th>안내소</th><th>이름</th><th>시간</th><th>탐방객</th><th>청취자</th><th>특이사항</th></tr></thead><tbody>`;
-                    l.sort((a, b) => String(a['날짜']||'').localeCompare(String(b['날짜']||'')));
+                    l.sort((a, b) => getDayNum(a['날짜']) - getDayNum(b['날짜']));
                     l.forEach(log => {
                         let loc = log['안내소'] || log['장소'] || '';
                         html += `<tr><td>${log['날짜']||''}</td><td>${loc}</td><td>${log['이름']||''}</td><td>${log['시간'] || ''}</td><td>${log['탐방객수']||'0'}</td><td>${log['청취자수']||'0'}</td><td>${log['특이사항']||''}</td></tr>`;
@@ -929,7 +947,7 @@
                 window.print();
                 
             } catch(e) {
-                alert("보고서 생성 중 오류가 발생했습니다. (데이터 형식을 확인해주세요)");
+                alert("보고서 생성 중 오류가 발생했습니다: " + e.message);
                 btn.innerText = "📄 PDF 변환 및 인쇄";
                 btn.disabled = false;
             }
