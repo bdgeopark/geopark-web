@@ -34,14 +34,10 @@
         .calc-hours { font-size: 0.85rem; font-weight: bold; color: #27ae60; }
         .calc-hours.over { color: #e74c3c; }
 
-        /* 조장 승인 전용 스타일 수정 */
         .approval-header { display:flex; justify-content:space-between; align-items:center; background:white; padding:12px; border-radius:12px; border:1px solid #E5E5E5; margin-bottom:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .approval-card { display:flex; gap:12px; align-items:flex-start; background:#f9f9f9; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:10px; }
-        
-        /* 체크박스 너비 고정 및 축소 방지 */
         .chk-box { width: 20px !important; height: 20px !important; transform: scale(1.3); margin-top:5px; cursor:pointer; flex-shrink: 0; padding: 0; }
         .app-content { flex: 1; word-break: keep-all; }
-        
         .app-tag { display:inline-block; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; margin-bottom:8px; }
         .tag-plan { background:#e1f5fe; color:#01579b; }
         .tag-change { background:#fff3e0; color:#e65100; }
@@ -150,6 +146,15 @@
         <button class="btn-submit" onclick="submitPlanChange()">승인 요청하기</button>
     </div>
 
+    <div id="my_plan_area" class="hidden-section">
+        <div class="form-group">
+            <label>📋 내가 제출한 활동계획 (최근 30일)</label>
+            <div id="my_plan_container">
+                <p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+
     <div id="approval_area" class="hidden-section">
         <div class="form-group">
             <label>📁 조원 결재함 (승인 대기 목록)</label>
@@ -240,9 +245,10 @@
         document.getElementById('change_time_start').innerHTML = timeOptionsHtml;
         document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
 
+        // 메뉴 목록에 '나의 활동계획 조회' 추가
         const menuData = {
-            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경'],
-            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인'],
+            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
+            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회'],
             '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획 조회', '4. 통계']
         };
 
@@ -256,15 +262,16 @@
                 document.getElementById('plan_area').style.display = m.includes('활동계획서 작성') ? 'block' : 'none';
                 document.getElementById('change_area').style.display = m.includes('활동계획 변경') ? 'block' : 'none';
                 document.getElementById('approval_area').style.display = m.includes('변경 승인') ? 'block' : 'none';
+                document.getElementById('my_plan_area').style.display = m.includes('나의 활동계획 조회') ? 'block' : 'none';
                 
                 if(m.includes('출퇴근관리')) setCurrentTimeInput();
                 if(m.includes('활동계획 변경')) loadGuideList(); 
                 if(m.includes('변경 승인')) loadPendingRequests(); 
+                if(m.includes('나의 활동계획 조회')) loadMyPlans(); 
             };
             container.appendChild(d);
         });
 
-        // ----------------------- 1. 출퇴근 & 일지 로직 -----------------------
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
             const inputTime = document.getElementById('action_time_input').value; 
@@ -319,7 +326,6 @@
             } catch (e) {}
         }
 
-        // ----------------------- 2. 15일 계획 로직 -----------------------
         function generatePlanForm() {
             const month = parseInt(document.getElementById('plan_month').value);
             const half = parseInt(document.getElementById('plan_half').value);
@@ -431,7 +437,6 @@
             } catch (e) { alert("서버 오류가 발생했습니다."); }
         }
 
-        // ----------------------- 3. 변경 신청 로직 -----------------------
         function updateChangeUI() {
             const type = document.getElementById('change_type').value;
             document.getElementById('change_ui_time').style.display = type === '시간 변경' ? 'block' : 'none';
@@ -479,7 +484,42 @@
             } catch (e) {}
         }
 
-        // ----------------------- 4. [조장 전용] 승인 로직 (일괄 처리) -----------------------
+        // --- [신규 추가] 본인 활동계획 불러오기 ---
+        async function loadMyPlans() {
+            const container = document.getElementById('my_plan_container');
+            container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중...</p>';
+            try {
+                const res = await fetch(`${API_BASE}/get_my_plans?name=${encodeURIComponent(userName)}`);
+                const data = await res.json();
+                
+                if (data.plans.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">제출한 활동계획이 없습니다.</p>';
+                    return;
+                }
+                
+                let html = '';
+                // 데이터가 길어지는 것을 막기 위해 가장 최근 30일치(약 1달 분량)만 잘라서 보여줌
+                data.plans.slice(-30).forEach(p => {
+                    let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `
+                        <div class="approval-card" style="display:block;">
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+                                <strong style="font-size:1.05rem;">${p['날짜']}</strong>
+                                <span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span>
+                            </div>
+                            <div style="font-size:0.95rem; line-height:1.5; color:#333;">
+                                장소: <b>${p['장소']}</b><br>
+                                시간: ${p['활동여부']}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
+        }
+
         async function loadPendingRequests() {
             const container = document.getElementById('pending_container');
             const header = document.getElementById('approval_header');
