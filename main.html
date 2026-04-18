@@ -62,60 +62,52 @@
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
 
-        /* --- [완전 개편] 표 골격부터 맞추는 A4 인쇄 스타일 --- */
+        /* --- [완전 개편] 스캔본 완벽 복제 PDF 인쇄 스타일 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
-            html, body { width: 100%; height: 100%; margin: 0; padding: 0; background: white; }
+            html, body { width: 100%; height: auto; margin: 0; padding: 0; background: white; }
             #print_area, #print_area * { visibility: visible; }
             
             @page { size: A4 portrait; margin: 15mm; }
             
-            /* 명조체 강제 적용 및 기본 글자 설정 */
             #print_area { 
                 display: block; position: absolute; left: 0; top: 0; width: 100%; background: white; 
                 font-family: 'Batang', 'BatangChe', '바탕', '바탕체', serif !important; 
                 color: #000; box-sizing: border-box; 
             }
             
-            /* 1일 1페이지 A4 박스 크기 고정 (180mm x 260mm) */
             .print-page { 
-                position: relative; width: 180mm; height: 260mm; margin: 0 auto; 
-                page-break-after: always; overflow: hidden; 
+                position: relative; width: 100%; page-break-after: always; background: white; margin: 0; 
             }
             
-            /* 제목 영역 (높이 약 25mm) */
-            .print-top-left { font-size: 11pt; font-weight: bold; margin-bottom: 5mm; }
+            .print-top-left { font-size: 11pt; font-weight: bold; margin-bottom: 3mm; }
             .print-main-title { text-align: center; font-size: 24pt; font-weight: 900; margin-bottom: 2mm; letter-spacing: 5px; }
             .print-date { text-align: center; font-size: 11pt; margin-bottom: 5mm; }
 
-            /* 표 기본 골격 (너비 고정, 칸 찌그러짐 방지) */
+            /* 표 레이아웃 절대 고정 (글씨량에 따라 칸이 찌그러지지 않음) */
             table.fixed-table { 
                 width: 100%; border-collapse: collapse; border: 2px solid #000; 
-                table-layout: fixed; /* 절대 중요: 글자가 많아도 칸 너비 고정 */
-                text-align: center; font-size: 11pt; 
+                table-layout: fixed; text-align: center; font-size: 11pt; 
             }
             table.fixed-table th, table.fixed-table td { 
-                border: 1px solid #000; padding: 2px 4px; 
-                overflow: hidden; /* 넘치는 글자 숨김 */
-                vertical-align: middle;
+                border: 1px solid #000; padding: 2px 4px; overflow: hidden; vertical-align: middle;
             }
             table.fixed-table th { font-weight: bold; background-color: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-            /* [상단 표] 열 너비 지정 */
+            /* 1. 안내소 및 해설사 칸 열/행 두께 완벽 조정 */
             .t1-col1 { width: 15%; }
             .t1-col2 { width: 25%; }
             .t1-col3 { width: 15%; }
             .t1-col4 { width: 45%; }
             
-            /* [상단 표] 행 높이 강제 고정 */
-            .row-loc { height: 10mm; } /* 안내소 행: 얇게 */
-            .row-guide-header { height: 8mm; } /* 해설사 제목 행 */
-            .row-guide { height: 8mm; } /* 해설사 명단 행 (4줄 고정) */
+            .row-loc { height: 8mm; } 
+            .row-guide-header th { height: 6mm; padding: 1px; font-size: 10pt; }
+            .row-guide td { height: 6mm; padding: 1px; }
 
-            .print-sub-title { font-size: 12pt; font-weight: bold; margin: 6mm 0 2mm 0; text-align: left; }
+            .print-sub-title { font-size: 12pt; font-weight: bold; margin: 5mm 0 2mm 0; text-align: left; }
 
-            /* [하단 표] 열 너비 지정 */
+            /* 2. 하단 운영일지 표 슬림화 */
             .t2-col1 { width: 16%; }
             .t2-col2 { width: 14%; }
             .t2-col3 { width: 14%; }
@@ -124,17 +116,18 @@
             .t2-col6 { width: 14%; }
             .t2-col7 { width: 14%; }
 
-            /* [하단 표] 행 높이 강제 고정 */
-            .row-log-header { height: 12mm; } /* 시간, 탐방객 등 제목 (2줄 허용) */
-            .row-log { height: 10mm; } /* 08시~18시 데이터 (10줄) */
-            .row-sum { height: 10mm; font-weight: bold; } /* 합계 */
-            .row-remark { height: 25mm; vertical-align: top !important; text-align: left !important; padding: 5px !important; word-break: break-all; white-space: pre-wrap; } /* 특이사항 */
+            .row-log-header th { height: 10mm; padding: 2px; }
+            .row-log td { height: 8mm; padding: 2px; }
+            .row-sum th, .row-sum td { height: 8mm; padding: 2px; font-weight: bold; }
+            
+            /* 3. 특이사항 높이 1줄 컷 */
+            .row-remark th, .row-remark td { height: 8mm; padding: 2px; vertical-align: middle; text-align: left !important; padding-left: 5px !important; }
 
-            /* 결재 서명란 (A4 용지 최하단 우측 고정) */
+            /* 4. 서명란 완벽 계산 고정 (플렉스 박스) */
             .signature-box { 
-                position: absolute; bottom: 5mm; right: 0; 
-                font-size: 14pt; font-weight: bold; text-align: right; 
-                width: 100%;
+                display: flex; justify-content: space-between; 
+                margin-top: 10mm; padding-right: 5mm; 
+                font-size: 13pt; font-weight: bold;
             }
         }
     </style>
@@ -639,7 +632,7 @@
         async function loadAdminAttendance() {
             const container = document.getElementById('admin_attendance_container');
             const targetDate = document.getElementById('admin_date_input').value;
-            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_attendance?target_date=${targetDate}`);
@@ -681,7 +674,7 @@
 
             if (!startDate || !endDate) return;
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_logs?start_date=${startDate}&end_date=${endDate}&loc=${encodeURIComponent(loc)}&name=${encodeURIComponent(nameSearch)}`);
@@ -808,7 +801,6 @@
             } catch (e) {}
         }
 
-        // --- [수정 완료] PDF 생성 시 뼈대(테두리/높이) 고정 후 글자 넣는 로직 ---
         async function generatePDF() {
             const type = document.getElementById('rep_type').value;
             const year = document.getElementById('rep_year').value;
@@ -838,10 +830,13 @@
                         btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; 
                     }
 
+                    // 12시간 체제 (위, 아래 하나씩 추가)
                     const times = [
+                        "07:00~08:00",
                         "08:00~09:00", "09:00~10:00", "10:00~11:00", "11:00~12:00",
                         "12:00~13:00", "13:00~14:00", "14:00~15:00", "15:00~16:00",
-                        "16:00~17:00", "17:00~18:00"
+                        "16:00~17:00", "17:00~18:00", 
+                        "18:00~19:00"
                     ];
 
                     sortedDates.forEach(dateStr => {
@@ -851,7 +846,10 @@
 
                         for (const [loc, info] of Object.entries(locs)) {
                             
-                            // 해설사 줄 (무조건 4칸 고정 생성으로 양식 틀어짐 방지)
+                            // 안내소 단어 제거
+                            let displayLoc = loc.replace(/ 안내소|안내소/g, '').trim();
+                            
+                            // 해설사 무조건 4칸 고정 (칸 틀어짐 방지)
                             let guideRows = '';
                             for(let i=0; i<4; i++) {
                                 if(info.guides && info.guides[i]) {
@@ -873,7 +871,7 @@
                                 }
                             }
 
-                            // 운영일지 줄 (10칸 고정 생성)
+                            // 시간대별 기록 매칭
                             let logRows = '';
                             let totalV = 0, totalL = 0, totalC = 0;
                             let remarkSum = '';
@@ -885,7 +883,7 @@
                                     totalV += parseInt(log.visitors||0);
                                     totalL += parseInt(log.listeners||0);
                                     totalC += parseInt(log.count||0);
-                                    if(log.remarks) remarkSum += log.remarks + "\n";
+                                    if(log.remarks) remarkSum += log.remarks + " ";
 
                                     logRows += `
                                         <tr class="row-log">
@@ -913,15 +911,15 @@
                                     <table class="fixed-table">
                                         <tr class="row-loc">
                                             <th class="t1-col1">안내소</th>
-                                            <td class="t1-col2" style="font-size:14pt; font-weight:bold;">${loc}</td>
+                                            <td class="t1-col2" style="font-size:12pt; font-weight:bold;">${displayLoc}</td>
                                             <th class="t1-col3">지시사항</th>
-                                            <td class="t1-col4"></td>
+                                            <td class="t1-col4" style="text-align:left;"></td>
                                         </tr>
                                         <tr class="row-guide-header">
-                                            <th rowspan="5">해설사</th>
-                                            <th>성명</th>
-                                            <th colspan="2">활동 시간</th>
-                                            <th>합계 시간</th>
+                                            <th rowspan="5" style="width:15%;">해설사</th>
+                                            <th style="width:25%; font-size:10pt;">성명</th>
+                                            <th colspan="2" style="width:45%; font-size:10pt;">활동 시간</th>
+                                            <th style="width:15%; font-size:10pt;">합계 시간</th>
                                         </tr>
                                         ${guideRows}
                                     </table>
@@ -935,7 +933,7 @@
                                             <th class="t2-col4">해설<br>횟수(회)</th>
                                             <th class="t2-col5">교육<br>청취자(명)</th>
                                             <th class="t2-col6">교육<br>횟수(회)</th>
-                                            <th class="t2-col7" style="width:16%;">비고(환경정비,<br>시설점검 등)</th>
+                                            <th class="t2-col7" style="font-size:9pt; line-height:1.2;">비고(환경정비,<br>시설점검, 교육 등)</th>
                                         </tr>
                                         ${logRows}
                                         <tr class="row-sum">
@@ -949,13 +947,17 @@
                                         </tr>
                                         <tr class="row-remark">
                                             <th>특이사항</th>
-                                            <td colspan="6">${remarkSum}</td>
+                                            <td colspan="6" style="text-align:left;">${remarkSum}</td>
                                         </tr>
                                     </table>
 
                                     <div class="signature-box">
-                                        조장 확인 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (서명) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                        면 팀장 확인 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (서명)
+                                        <div>
+                                            <span>조장 확인</span>
+                                            <span style="margin-left: 10mm;">(서명)</span>
+                                            <span style="margin-left: 5mm;">면 팀장 확인</span>
+                                        </div>
+                                        <div>(서명)</div>
                                     </div>
                                 </div>
                             `;
