@@ -62,7 +62,7 @@
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
 
-        /* --- [완전 개편 2탄] 매의 눈 맞춤형 서식 복제 --- */
+        /* --- 스캔본 완벽 복제 PDF 인쇄 스타일 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -85,7 +85,6 @@
             .print-main-title { text-align: center; font-size: 24pt; font-weight: 900; margin-bottom: 2mm; letter-spacing: 5px; }
             .print-date { text-align: center; font-size: 11pt; margin-bottom: 5mm; }
 
-            /* 표 레이아웃 절대 고정 */
             table.fixed-table { 
                 width: 100%; border-collapse: collapse; border: 2px solid #000; 
                 table-layout: fixed; text-align: center; font-size: 11pt; height: max-content;
@@ -95,19 +94,17 @@
             }
             table.fixed-table th { font-weight: bold; background-color: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-            /* 1. 안내소 지시사항 두 배로 확대 / 2. 성명, 활동시간 날씬하게 압축 */
             .t1-col1 { width: 15%; }
             .t1-col2 { width: 25%; }
             .t1-col3 { width: 15%; }
             .t1-col4 { width: 45%; }
             
-            .row-loc th, .row-loc td { height: 16mm !important; } /* 지시사항 행 2배 뚱뚱하게 */
-            .row-guide-header th { height: 6mm !important; padding: 1px !important; font-size: 10pt; } /* 성명/활동시간 행 초슬림화 */
+            .row-loc th, .row-loc td { height: 16mm !important; }
+            .row-guide-header th { height: 6mm !important; padding: 1px !important; font-size: 10pt; }
             .row-guide td { height: 7mm !important; padding: 1px !important; }
 
             .print-sub-title { font-size: 12pt; font-weight: bold; margin: 5mm 0 2mm 0; text-align: left; }
 
-            /* 하단 운영일지 */
             .t2-col1 { width: 16%; }
             .t2-col2 { width: 14%; }
             .t2-col3 { width: 14%; }
@@ -120,10 +117,8 @@
             .row-log td { height: 7mm !important; padding: 2px !important; }
             .row-sum th, .row-sum td { height: 7mm !important; padding: 2px !important; font-weight: bold; }
             
-            /* 3. 특이사항 높이 1줄로 확 줄임 */
             .row-remark th, .row-remark td { height: 8mm !important; padding: 2px !important; vertical-align: middle !important; white-space: nowrap; overflow: hidden; text-align: left !important; padding-left: 5px !important;}
 
-            /* 4. 서명란 황금 간격 세팅 (우측에서 5mm 띄움) */
             .signature-box { 
                 text-align: right; 
                 margin-top: 8mm; 
@@ -207,6 +202,18 @@
         <div class="form-group"><label>📋 나의 활동계획</label><div id="my_plan_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div></div>
     </div>
 
+    <div id="my_activity_area" class="hidden-section">
+        <div class="form-group">
+            <label>📅 조회 월 선택</label>
+            <div class="flex-group">
+                <select id="ma_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
+                <select id="ma_month" style="flex:1;"></select>
+            </div>
+            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadMyActivity()">조회하기</button>
+        </div>
+        <div id="my_activity_container"><p style="text-align:center; color:#999; padding:20px;">조회할 월을 선택하고 버튼을 눌러주세요.</p></div>
+    </div>
+
     <div id="approval_area" class="hidden-section">
         <div class="form-group">
             <div id="approval_header" class="approval-header" style="display:none;">
@@ -236,7 +243,7 @@
             </select>
             <div class="flex-group">
                 <select id="rep_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
-                <select id="rep_month" style="flex:1;"><option value="1">1월</option><option value="2">2월</option><option value="3">3월</option><option value="4">4월</option><option value="5">5월</option><option value="6">6월</option><option value="7">7월</option><option value="8">8월</option><option value="9">9월</option><option value="10">10월</option><option value="11">11월</option><option value="12">12월</option></select>
+                <select id="rep_month" style="flex:1;"></select>
             </div>
             <select id="rep_half" style="margin-top:8px;"><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
             <button class="btn-submit" style="margin-top:15px; background-color:#2c3e50; color:white; border-radius:8px; font-size:1.1rem; padding:15px;" onclick="generatePDF()">📄 PDF 변환 및 인쇄</button>
@@ -323,7 +330,7 @@
 
         const currentMonth = (new Date().getMonth() + 1).toString();
         
-        ['plan_month', 'tp_month', 'ap_month', 'stat_month', 'rep_month'].forEach(id => {
+        ['plan_month', 'tp_month', 'ap_month', 'stat_month', 'rep_month', 'ma_month'].forEach(id => {
             let el = document.getElementById(id);
             if(el) {
                 el.innerHTML = '';
@@ -371,9 +378,16 @@
             document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
         }
 
+        // --- 뒤로가기 방지 로직 ---
+        window.history.pushState(null, "", window.location.href);
+        window.addEventListener('popstate', function() {
+            window.history.pushState(null, "", window.location.href);
+            document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
+        });
+
         const menuData = {
-            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회'],
-            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)'],
+            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회', '6. 나의 활동 현황'],
+            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)', '10. 나의 활동 현황'],
             '관리자': ['1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계']
         };
 
@@ -393,6 +407,7 @@
                 else if(m.includes('나의 활동계획 조회')) { document.getElementById('my_plan_area').style.display = 'block'; loadMyPlans(); }
                 else if(m.includes('조원 활동계획 조회')) { document.getElementById('team_plan_area').style.display = 'block'; loadTeamPlans(); }
                 else if(m.includes('보고서 출력')) document.getElementById('report_area').style.display = 'block';
+                else if(m.includes('나의 활동 현황')) { document.getElementById('my_activity_area').style.display = 'block'; loadMyActivity(); }
                 else if(m === '1. 해설사 출퇴근 현황') { document.getElementById('admin_attendance_area').style.display = 'block'; loadAdminAttendance(); }
                 else if(m === '2. 해설사 활동 현황') { document.getElementById('admin_log_area').style.display = 'block'; loadAdminLogs(); }
                 else if(m === '3. 활동계획서 조회') { document.getElementById('admin_plan_area').style.display = 'block'; loadAdminPlans(); }
@@ -569,6 +584,48 @@
             } catch (e) {}
         }
 
+        async function loadMyActivity() {
+            const container = document.getElementById('my_activity_container');
+            const year = document.getElementById('ma_year').value;
+            const month = document.getElementById('ma_month').value;
+            
+            container.innerHTML = '<p style="text-align:center; color:#999;">활동 내역을 불러오는 중...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_my_activity?name=${encodeURIComponent(userName)}&year=${year}&month=${month}`);
+                const data = await res.json();
+                
+                let html = `
+                    <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
+                        <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${year}년 ${month}월 총 활동 시간</div>
+                        <div style="font-size:1.5rem; font-weight:900; color:#0d47a1;">${data.total_hours} 시간</div>
+                    </div>
+                `;
+                
+                if(data.records.length === 0) {
+                    html += '<p style="text-align:center; color:#999; padding:20px;">해당 월의 활동 내역이 없습니다.</p>';
+                } else {
+                    data.records.forEach(r => {
+                        html += `
+                            <div class="approval-card" style="display:block;">
+                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+                                    <strong style="font-size:1.05rem;">${r.date}</strong>
+                                    <span style="color:#2980b9; font-weight:bold; font-size:0.9rem;">${r.hours}시간</span>
+                                </div>
+                                <div style="font-size:0.95rem; line-height:1.5; color:#333; display:flex; justify-content:space-between;">
+                                    <span>📍 ${r.loc}</span>
+                                    <span>${r.in} ~ ${r.out || '미퇴근'}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
+        }
+
         async function loadTeamPlans() {
             const container = document.getElementById('team_plan_container');
             const month = document.getElementById('tp_month').value; const half = document.getElementById('tp_half').value;
@@ -634,7 +691,7 @@
         async function loadAdminAttendance() {
             const container = document.getElementById('admin_attendance_container');
             const targetDate = document.getElementById('admin_date_input').value;
-            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_attendance?target_date=${targetDate}`);
@@ -676,7 +733,7 @@
 
             if (!startDate || !endDate) return;
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_logs?start_date=${startDate}&end_date=${endDate}&loc=${encodeURIComponent(loc)}&name=${encodeURIComponent(nameSearch)}`);
@@ -832,7 +889,7 @@
                         btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; 
                     }
 
-                    // 12시간 체제로 위아래 추가
+                    // 12칸
                     const times = [
                         "07:00~08:00",
                         "08:00~09:00", "09:00~10:00", "10:00~11:00", "11:00~12:00",
@@ -848,7 +905,7 @@
 
                         for (const [loc, info] of Object.entries(locs)) {
                             
-                            // 1. 안내소 단어 싹 지우기
+                            // 안내소 글자 삭제
                             let displayLoc = loc.replace(/ 안내소|안내소/g, '').trim();
                             
                             let guideRows = '';
@@ -923,7 +980,7 @@
                                             <th class="t2-col4">해설<br>횟수(회)</th>
                                             <th class="t2-col5">교육<br>청취자(명)</th>
                                             <th class="t2-col6">교육<br>횟수(회)</th>
-                                            <th class="t2-col7" style="font-size:9pt; line-height:1.2;">비고(환경정비,<br>시설점검 등)</th>
+                                            <th class="t2-col7" style="font-size:9pt; line-height:1.2;">비고<br>(환경정비, 시설점검 등)</th>
                                         </tr>
                                         ${logRows}
                                         <tr class="row-sum">
@@ -937,13 +994,15 @@
                                         </tr>
                                         <tr class="row-remark">
                                             <th>특이사항</th>
-                                            <td colspan="6">${remarkSum}</td>
+                                            <td colspan="6" style="text-align:left;">${remarkSum}</td>
                                         </tr>
                                     </table>
 
                                     <div class="signature-box">
-                                        조장 확인<span style="margin-left: 4mm;">(서명)</span>
-                                        <span style="margin-left: 5mm;">면 팀장 확인</span><span style="margin-left: 4mm;">(서명)</span>
+                                        <span>조장 확인</span>
+                                        <span style="margin-left: 4mm;">(서명)</span>
+                                        <span style="margin-left: 15mm;">면 팀장 확인</span>
+                                        <span style="margin-left: 5mm;">(서명)</span>
                                     </div>
                                 </div>
                             `;
