@@ -62,20 +62,11 @@
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
 
-        /* [신규 추가] 처리 중 화면 오버레이 (버튼 연타 방지) */
-        #loading_overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.85); z-index: 9999;
-            justify-content: center; align-items: center; flex-direction: column;
-        }
-        .spinner {
-            border: 5px solid #f3f3f3; border-top: 5px solid #3498db;
-            border-radius: 50%; width: 50px; height: 50px;
-            animation: spin 1s linear infinite;
-        }
+        #loading_overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- 스캔본 완벽 복제 PDF 인쇄 스타일 --- */
+        /* --- PDF 인쇄 스타일 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -133,17 +124,16 @@
     </div>
 
     <div id="log_area" class="hidden-section">
-        <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select"></select></div>
-        <div class="form-group"><label>시간 선택</label><select id="log_time"></select></div>
-        <div class="form-group"><label>공동해설 여부</label><select id="log_co"><option value="X">X (단독해설)</option><option value="O">O (공동해설)</option></select></div>
-        <div class="form-group" id="co_guide_group" style="display: none;"><label>👥 동료 선택</label><select id="log_co_guide"><option value="">확인 중...</option></select></div>
-        <div id="stats_group">
-            <div class="form-group"><label>탐방객 수 (명)</label><input type="number" id="log_visitors" value="0"></div>
-            <div class="form-group"><label>청취자 수 (명)</label><input type="number" id="log_listeners" value="0"></div>
-            <div class="form-group"><label>해설 횟수 (회)</label><input type="number" id="log_count" value="0"></div>
-        </div>
-        <div class="form-group"><label>📝 특이사항</label><textarea id="log_remarks" rows="3"></textarea></div>
-        <button class="btn-submit" onclick="submitLog()">일지 저장하기</button>
+        <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select" onchange="loadTodayLogs()"></select></div>
+        
+        <div id="log_sessions_container">
+            </div>
+
+        <button class="btn-act btn-move" style="padding:10px; font-size:0.95rem; border-radius:8px; margin-bottom:15px; background-color:#7f8c8d;" onclick="addSessionRow()">➕ 해설 회차 추가</button>
+
+        <div class="form-group"><label>📝 오늘 하루 종합 특이사항</label><textarea id="log_remarks" rows="3" placeholder="시설 점검, 환경 정비 등 오늘의 특이사항을 적어주세요."></textarea></div>
+        
+        <button class="btn-submit" onclick="submitTodayLogs()">일지 저장(수정)하기</button>
     </div>
 
     <div id="status_area" class="hidden-section">
@@ -278,7 +268,6 @@
         const userIsland = localStorage.getItem("user_island");
         let currentLoc = localStorage.getItem("current_location") || "미출근";
 
-        // 로딩 제어 함수
         function showLoading() { document.getElementById('loading_overlay').style.display = 'flex'; }
         function hideLoading() { document.getElementById('loading_overlay').style.display = 'none'; }
 
@@ -356,12 +345,10 @@
             document.getElementById('action_time_input').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         }
 
-        const logTime = document.getElementById('log_time');
-        if(logTime) {
-            for(let i=6; i<=19; i++) {
-                let start = i < 10 ? '0'+i : i; let end = (i+1) < 10 ? '0'+(i+1) : (i+1);
-                logTime.add(new Option(`${start}:00 ~ ${end}:00`, `${start}:00 ~ ${end}:00`));
-            }
+        let timeOptsHtml = '<option value="">- 시간 선택 -</option>';
+        for(let i=6; i<=19; i++) {
+            let s = i<10 ? '0'+i : i; let e = (i+1)<10 ? '0'+(i+1) : (i+1);
+            timeOptsHtml += `<option value="${s}:00 ~ ${e}:00">${s}:00 ~ ${e}:00</option>`;
         }
 
         let timeOptionsHtml = '';
@@ -392,7 +379,7 @@
                 document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
                 
                 if(m.includes('출퇴근관리') && userRole !== '관리자') { document.getElementById('attendance_area').style.display = 'block'; setCurrentTimeInput(); }
-                else if(m.includes('운영일지 작성')) document.getElementById('log_area').style.display = 'block';
+                else if(m.includes('운영일지 작성')) { document.getElementById('log_area').style.display = 'block'; loadTodayLogs(); }
                 else if(m === '3. 출퇴근 및 활동 현황 조회') { document.getElementById('status_area').style.display = 'block'; loadDailyStatus(); }
                 else if(m === '4. 활동계획서 작성' || (userRole === '해설사' && m === '3. 활동계획서 작성')) document.getElementById('plan_area').style.display = 'block';
                 else if(m.includes('활동계획 변경')) { document.getElementById('change_area').style.display = 'block'; loadGuideList(); }
@@ -427,14 +414,13 @@
             const inputTime = document.getElementById('action_time_input').value; 
             if(!inputTime) return;
 
-            // [수정] 출근 버튼 중복 확인 및 수정 여부 묻기
             if (action === '출근') {
                 const isWorking = currentLoc !== "미출근";
                 const lastInTime = document.getElementById('in_time_display').innerText.replace('기록됨: ', '');
                 
                 if (isWorking && lastInTime) {
                     if(!confirm(`이미 ${lastInTime}에 출근(또는 이동) 기록이 존재합니다.\n입력하신 시간(${inputTime})으로 수정(덮어쓰기) 하시겠습니까?`)) {
-                        return; // 취소 누르면 종료
+                        return; 
                     }
                 } else {
                     if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
@@ -443,7 +429,7 @@
                 if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
             }
 
-            showLoading(); // 로딩 창 띄우기
+            showLoading(); 
             try {
                 const res = await fetch(`${API_BASE}/record`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -460,23 +446,111 @@
             } catch (e) {
                 alert("네트워크 오류가 발생했습니다.");
             } finally {
-                hideLoading(); // 처리가 끝나면 로딩 창 닫기
+                hideLoading(); 
             }
         }
 
-        async function submitLog() {
-            const coSelectValue = document.getElementById('log_co').value;
-            const isCoInitiator = coSelectValue === 'O'; let coCommentaryValue = isCoInitiator ? document.getElementById('log_co_guide').value : (coSelectValue === '○' ? '○' : 'X');
-            if(!confirm("운영일지를 저장하시겠습니까?")) return;
-            
+        // [신규 개편] 회차별 운영일지 작성 UI 생성
+        let sessionCount = 0;
+        function addSessionRow(data = null) {
+            sessionCount++;
+            const container = document.getElementById('log_sessions_container');
+            const row = document.createElement('div');
+            row.className = 'session-row';
+            row.style = 'background: white; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);';
+
+            row.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="font-weight:bold; color:#2980b9; font-size:0.95rem;">${sessionCount}회차</div>
+                    <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; background:#f1f2f6; padding:4px 8px; border-radius:4px; font-weight:bold;">
+                        <input type="checkbox" class="s-co chk-box" style="width:16px!important; height:16px!important; margin:0;"> 공동해설
+                    </label>
+                </div>
+                <div class="flex-group" style="margin-bottom:8px;">
+                    <select class="s-time" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; background:#fff;">${timeOptsHtml}</select>
+                </div>
+                <div class="flex-group">
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">탐방객</label><input type="number" class="s-v" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">청취자</label><input type="number" class="s-l" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">횟수</label><input type="number" class="s-c" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                </div>
+            `;
+            container.appendChild(row);
+
+            if(data) {
+                row.querySelector('.s-time').value = data.time;
+                row.querySelector('.s-v').value = data.v;
+                row.querySelector('.s-l').value = data.l;
+                row.querySelector('.s-c').value = data.c;
+                if(data.is_co === 'O' || data.is_co === '○') row.querySelector('.s-co').checked = true;
+            }
+        }
+
+        // [신규 개편] 오늘 작성한 일지 불러오기
+        async function loadTodayLogs() {
+            const loc = document.getElementById('log_location_select').value;
+            if(!loc) return;
+
+            showLoading();
+            const container = document.getElementById('log_sessions_container');
+            container.innerHTML = '';
+            sessionCount = 0;
+            document.getElementById('log_remarks').value = '';
+
+            try {
+                const res = await fetch(`${API_BASE}/get_today_logs?name=${encodeURIComponent(userName)}&loc=${encodeURIComponent(loc)}`);
+                const data = await res.json();
+
+                if(data.logs && data.logs.length > 0) {
+                    data.logs.forEach(log => addSessionRow(log));
+                    document.getElementById('log_remarks').value = data.remarks;
+                } else {
+                    addSessionRow(); addSessionRow(); addSessionRow();
+                }
+            } catch(e) {
+                addSessionRow(); addSessionRow(); addSessionRow();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // [신규 개편] 일지 통째로 저장(수정)
+        async function submitTodayLogs() {
+            const loc = document.getElementById('log_location_select').value;
+            const remarks = document.getElementById('log_remarks').value;
+            let logs = [];
+            let hasData = false;
+
+            document.querySelectorAll('.session-row').forEach(row => {
+                const time = row.querySelector('.s-time').value;
+                const v = parseInt(row.querySelector('.s-v').value) || 0;
+                const l = parseInt(row.querySelector('.s-l').value) || 0;
+                const c = parseInt(row.querySelector('.s-c').value) || 0;
+                const is_co = row.querySelector('.s-co').checked ? 'O' : 'X';
+
+                if(time) {
+                    logs.push({ time: time, visitors: v, listeners: l, count: c, is_co: is_co });
+                    hasData = true;
+                }
+            });
+
+            if(!hasData && !confirm("입력된 시간이 하나도 없습니다. 이대로 저장하시겠습니까?\n(해당 안내소의 기존 기록이 모두 삭제됩니다.)")) return;
+            if(hasData && !confirm("현재 화면에 입력된 내용으로 오늘의 운영일지를 덮어쓰기 저장하시겠습니까?")) return;
+
             showLoading();
             try {
-                const res = await fetch(`${API_BASE}/log_operation`, {
+                const res = await fetch(`${API_BASE}/save_today_logs`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, log_location: document.getElementById('log_location_select').value, target_time: document.getElementById('log_time').value, visitors: isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value), listeners: isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value), count: isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value), co_commentary: coCommentaryValue, remarks: document.getElementById('log_remarks').value })
+                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, log_location: loc, remarks: remarks, logs: logs })
                 });
-                if(res.ok) { alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; }
-            } catch (e) { alert("저장 중 오류 발생"); } finally { hideLoading(); }
+                if(res.ok) {
+                    alert("저장(수정)이 완료되었습니다.");
+                }
+            } catch(e) {
+                alert("저장 중 오류가 발생했습니다.");
+            } finally {
+                hideLoading();
+            }
         }
 
         async function loadDailyStatus() {
@@ -617,7 +691,7 @@
                 const data = await res.json();
                 
                 let html = '';
-                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 총 활동 내역`;
+                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 활동 내역`;
 
                 html += `
                     <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
@@ -828,7 +902,7 @@
             const island = document.getElementById('ap_island').value; const loc = document.getElementById('ap_loc').value;
             const nameSearch = document.getElementById('ap_name').value.trim();
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중입니다...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_plans?month=${month}&island=${encodeURIComponent(island)}`);
