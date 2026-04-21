@@ -62,74 +62,54 @@
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
         .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
 
+        /* [신규 추가] 처리 중 화면 오버레이 (버튼 연타 방지) */
+        #loading_overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.85); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3; border-top: 5px solid #3498db;
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* --- 스캔본 완벽 복제 PDF 인쇄 스타일 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
             html, body { width: 100%; height: auto; margin: 0; padding: 0; background: white; }
             #print_area, #print_area * { visibility: visible; }
-            
             @page { size: A4 portrait; margin: 15mm; }
-            
-            #print_area { 
-                display: block; position: absolute; left: 0; top: 0; width: 100%; background: white; 
-                font-family: 'Batang', 'BatangChe', '바탕', '바탕체', serif !important; 
-                color: #000; box-sizing: border-box; 
-            }
-            
-            .print-page { 
-                position: relative; width: 100%; page-break-after: always; background: white; margin: 0; 
-            }
-            
+            #print_area { display: block; position: absolute; left: 0; top: 0; width: 100%; background: white; font-family: 'Batang', 'BatangChe', '바탕', '바탕체', serif !important; color: #000; box-sizing: border-box; }
+            .print-page { position: relative; width: 100%; page-break-after: always; background: white; margin: 0; }
             .print-top-left { font-size: 11pt; font-weight: bold; margin-bottom: 3mm; }
             .print-main-title { text-align: center; font-size: 24pt; font-weight: 900; margin-bottom: 2mm; letter-spacing: 5px; }
             .print-date { text-align: center; font-size: 11pt; margin-bottom: 5mm; }
-
-            table.fixed-table { 
-                width: 100%; border-collapse: collapse; border: 2px solid #000; 
-                table-layout: fixed; text-align: center; font-size: 11pt; height: max-content;
-            }
-            table.fixed-table th, table.fixed-table td { 
-                border: 1px solid #000; padding: 2px 4px; overflow: hidden; vertical-align: middle;
-            }
+            table.fixed-table { width: 100%; border-collapse: collapse; border: 2px solid #000; table-layout: fixed; text-align: center; font-size: 11pt; height: max-content; }
+            table.fixed-table th, table.fixed-table td { border: 1px solid #000; padding: 2px 4px; overflow: hidden; vertical-align: middle; }
             table.fixed-table th { font-weight: bold; background-color: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-            .t1-col1 { width: 15%; }
-            .t1-col2 { width: 25%; }
-            .t1-col3 { width: 15%; }
-            .t1-col4 { width: 45%; }
-            
+            .t1-col1 { width: 15%; } .t1-col2 { width: 25%; } .t1-col3 { width: 15%; } .t1-col4 { width: 45%; }
             .row-loc th, .row-loc td { height: 16mm !important; }
             .row-guide-header th { height: 6mm !important; padding: 1px !important; font-size: 10pt; }
             .row-guide td { height: 7mm !important; padding: 1px !important; }
-
             .print-sub-title { font-size: 12pt; font-weight: bold; margin: 5mm 0 2mm 0; text-align: left; }
-
-            .t2-col1 { width: 16%; }
-            .t2-col2 { width: 14%; }
-            .t2-col3 { width: 14%; }
-            .t2-col4 { width: 14%; }
-            .t2-col5 { width: 14%; }
-            .t2-col6 { width: 14%; }
-            .t2-col7 { width: 14%; }
-
+            .t2-col1 { width: 16%; } .t2-col2 { width: 14%; } .t2-col3 { width: 14%; } .t2-col4 { width: 14%; } .t2-col5 { width: 14%; } .t2-col6 { width: 14%; } .t2-col7 { width: 14%; }
             .row-log-header th { height: 10mm !important; padding: 2px !important; }
             .row-log td { height: 7mm !important; padding: 2px !important; }
             .row-sum th, .row-sum td { height: 7mm !important; padding: 2px !important; font-weight: bold; }
-            
             .row-remark th, .row-remark td { height: 8mm !important; padding: 2px !important; vertical-align: middle !important; white-space: nowrap; overflow: hidden; text-align: left !important; padding-left: 5px !important;}
-
-            .signature-box { 
-                text-align: right; 
-                margin-top: 8mm; 
-                padding-right: 5mm; 
-                font-size: 13pt; 
-                font-weight: bold;
-            }
+            .signature-box { text-align: right; margin-top: 8mm; padding-right: 5mm; font-size: 13pt; font-weight: bold; }
         }
     </style>
 </head>
 <body>
+
+    <div id="loading_overlay">
+        <div class="spinner"></div>
+        <div style="margin-top:15px; font-weight:bold; font-size:1.1rem; color:#2c3e50;">처리 중입니다. 잠시만 기다려주세요...</div>
+    </div>
 
     <div class="header">
         <div class="profile-icon">👤</div>
@@ -298,6 +278,10 @@
         const userIsland = localStorage.getItem("user_island");
         let currentLoc = localStorage.getItem("current_location") || "미출근";
 
+        // 로딩 제어 함수
+        function showLoading() { document.getElementById('loading_overlay').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loading_overlay').style.display = 'none'; }
+
         if (!userName) location.href = "index.html";
         document.getElementById('name_display').innerText = userName + " 님";
         document.getElementById('role_display').innerText = `[${userRole}] ${userIsland || '관리자'}`;
@@ -442,7 +426,24 @@
             const loc = document.getElementById('location_select').value;
             const inputTime = document.getElementById('action_time_input').value; 
             if(!inputTime) return;
-            if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+
+            // [수정] 출근 버튼 중복 확인 및 수정 여부 묻기
+            if (action === '출근') {
+                const isWorking = currentLoc !== "미출근";
+                const lastInTime = document.getElementById('in_time_display').innerText.replace('기록됨: ', '');
+                
+                if (isWorking && lastInTime) {
+                    if(!confirm(`이미 ${lastInTime}에 출근(또는 이동) 기록이 존재합니다.\n입력하신 시간(${inputTime})으로 수정(덮어쓰기) 하시겠습니까?`)) {
+                        return; // 취소 누르면 종료
+                    }
+                } else {
+                    if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+                }
+            } else {
+                if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+            }
+
+            showLoading(); // 로딩 창 띄우기
             try {
                 const res = await fetch(`${API_BASE}/record`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -456,20 +457,26 @@
                     else if (action === '퇴근') document.getElementById('out_time_display').innerText = `기록됨: ${inputTime}`;
                     alert(action + " 완료!");
                 } else alert("기록 실패!");
-            } catch (e) {}
+            } catch (e) {
+                alert("네트워크 오류가 발생했습니다.");
+            } finally {
+                hideLoading(); // 처리가 끝나면 로딩 창 닫기
+            }
         }
 
         async function submitLog() {
             const coSelectValue = document.getElementById('log_co').value;
             const isCoInitiator = coSelectValue === 'O'; let coCommentaryValue = isCoInitiator ? document.getElementById('log_co_guide').value : (coSelectValue === '○' ? '○' : 'X');
             if(!confirm("운영일지를 저장하시겠습니까?")) return;
+            
+            showLoading();
             try {
                 const res = await fetch(`${API_BASE}/log_operation`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ name: userName, island: userIsland, role: userRole, log_location: document.getElementById('log_location_select').value, target_time: document.getElementById('log_time').value, visitors: isCoInitiator ? 0 : parseInt(document.getElementById('log_visitors').value), listeners: isCoInitiator ? 0 : parseInt(document.getElementById('log_listeners').value), count: isCoInitiator ? 0 : parseInt(document.getElementById('log_count').value), co_commentary: coCommentaryValue, remarks: document.getElementById('log_remarks').value })
                 });
                 if(res.ok) { alert("저장되었습니다."); document.getElementById('log_area').style.display = 'none'; }
-            } catch (e) {}
+            } catch (e) { alert("저장 중 오류 발생"); } finally { hideLoading(); }
         }
 
         async function loadDailyStatus() {
@@ -548,10 +555,12 @@
             let confirmMsg = `활동계획을 제출하시겠습니까?`;
             if(requiresApproval) confirmMsg += `\n※ 8시간 초과 근무 포함되어 추가 승인이 필요합니다.`;
             if(!confirm(confirmMsg)) return;
+
+            showLoading();
             try {
                 const res = await fetch(`${API_BASE}/submit_plan_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, plans: plans }) });
                 if(res.ok) { alert("제출되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; }
-            } catch (e) {}
+            } catch (e) { alert("제출 중 오류 발생"); } finally { hideLoading(); }
         }
 
         function updateChangeUI() {
@@ -574,10 +583,12 @@
             if(!targetDate || !remarks) { alert("날짜와 사유를 입력해주세요."); return; }
             let changeDetail = changeType === '시간 변경' ? `${document.getElementById('change_time_start').value}~${document.getElementById('change_time_end').value} 로 변경` : (changeType === '해설사 변경(대타)' ? `${document.getElementById('change_target_guide').value} 대타 요청` : "휴무 처리 요청");
             if(!confirm("승인 요청하시겠습니까?")) return;
+
+            showLoading();
             try {
                 const res = await fetch(`${API_BASE}/request_plan_change`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: changeType === '해설사 변경(대타)' ? document.getElementById('change_target_guide').value : "" }) });
                 if(res.ok) { alert("완료되었습니다."); document.getElementById('change_area').style.display = 'none'; }
-            } catch (e) {}
+            } catch (e) { alert("오류 발생"); } finally { hideLoading(); }
         }
 
         async function loadMyPlans() {
@@ -593,7 +604,6 @@
             } catch (e) {}
         }
 
-        // [수정 완료] 시간 정렬 및 개별 기록 분리
         async function loadMyActivity() {
             const container = document.getElementById('my_activity_container');
             const year = document.getElementById('ma_year').value;
@@ -607,14 +617,12 @@
                 const data = await res.json();
                 
                 let html = '';
+                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 총 활동 내역`;
 
-                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 활동 내역`;
-
-                // 상단 합계 박스 (전체 / 특정일 모두 출력)
                 html += `
                     <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
                         <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${dateTitle}</div>
-                        <div style="font-size:1.5rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">총 ${data.total_hours} 시간 근무</div>
+                        <div style="font-size:1.3rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">총 ${data.total_hours} 시간 근무</div>
                         <div style="display:flex; justify-content:space-between; font-size:0.85rem; background:white; padding:10px; border-radius:8px; color:#333;">
                             <div style="flex:1;">탐방객 <b>${data.total_v}</b>명</div>
                             <div style="flex:1;">청취자 <b>${data.total_l}</b>명</div>
@@ -710,10 +718,12 @@
             const boxes = document.querySelectorAll('.item-chk:checked'); if(boxes.length === 0) { alert("항목을 선택해주세요."); return; }
             if(!confirm(`${boxes.length}건을 [${status}] 하시겠습니까?`)) return;
             let approvals = []; boxes.forEach(box => { let d = JSON.parse(box.value); d.status = status; approvals.push(d); });
+            
+            showLoading();
             try {
                 const res = await fetch(`${API_BASE}/process_approval_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ approvals: approvals }) });
                 if(res.ok) { alert("완료되었습니다."); loadPendingRequests(); }
-            } catch (e) {}
+            } catch (e) { alert("오류 발생"); } finally { hideLoading(); }
         }
 
         async function loadAdminAttendance() {
@@ -752,7 +762,6 @@
             } catch (e) {}
         }
 
-        // [수정] 관리자 - 해설사 활동 현황 (UI 통일 및 시간 정렬 적용)
         async function loadAdminLogs() {
             const container = document.getElementById('admin_log_container');
             const startDate = document.getElementById('al_start_date').value;
@@ -771,7 +780,7 @@
                 
                 let html = `
                     <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
-                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
+                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적</div>
                         <div style="display:flex; justify-content:space-between; text-align:center;">
                             <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 탐방객</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.visitors}명</div></div>
                             <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 청취자</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.listeners}명</div></div>
@@ -786,7 +795,7 @@
                 }
 
                 data.logs.forEach(log => {
-                    let rLoc = log['안내소'] || log['장소'] || '장소 미상';
+                    let rLoc = log['장소'] || '장소 미상';
                     let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.8rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
                     
                     html += `
@@ -819,7 +828,7 @@
             const island = document.getElementById('ap_island').value; const loc = document.getElementById('ap_loc').value;
             const nameSearch = document.getElementById('ap_name').value.trim();
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_plans?month=${month}&island=${encodeURIComponent(island)}`);
@@ -902,6 +911,7 @@
             btn.innerText = "데이터를 불러오는 중...";
             btn.disabled = true;
 
+            showLoading();
             try {
                 const res = await fetch(`${API_BASE}/get_report_data?island=${encodeURIComponent(userIsland)}&year=${year}&month=${month}`);
                 const data = await res.json();
@@ -1053,6 +1063,8 @@
                 alert("보고서 생성 중 오류가 발생했습니다.");
                 btn.innerText = "📄 PDF 변환 및 인쇄";
                 btn.disabled = false;
+            } finally {
+                hideLoading();
             }
         }
 
