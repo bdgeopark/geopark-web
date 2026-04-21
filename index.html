@@ -95,7 +95,8 @@
             }
 
             try {
-                const res = await fetch('https://bdgeopark.onrender.com/login', {
+                // 👇 여기가 새 주소(railway)로 변경된 부분입니다!
+                const res = await fetch('https://geopark-system-production.up.railway.app/login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ uid: String(id), upw: String(pw) })
