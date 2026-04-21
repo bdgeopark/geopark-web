@@ -593,7 +593,7 @@
             } catch (e) {}
         }
 
-        // [수정] 내 활동 현황 화면 렌더링
+        // [수정] 특정일 조회 시 상단 합계 표시 및 데이터 출력 로직 변경
         async function loadMyActivity() {
             const container = document.getElementById('my_activity_container');
             const year = document.getElementById('ma_year').value;
@@ -608,30 +608,32 @@
                 
                 let html = '';
 
-                // 전체(all) 선택 시에만 상단 합계 박스 출력
-                if (day === 'all') {
-                    html += `
-                        <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
-                            <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${year}년 ${month}월 총 활동 내역</div>
-                            <div style="font-size:1.5rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">총 ${data.total_hours} 시간 근무</div>
-                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; background:white; padding:10px; border-radius:8px; color:#333;">
-                                <div style="flex:1;">탐방객 <b>${data.total_v}</b>명</div>
-                                <div style="flex:1;">청취자 <b>${data.total_l}</b>명</div>
-                                <div style="flex:1;">해설 <b>${data.total_c}</b>회</div>
-                            </div>
+                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 활동 내역`;
+                let timeTitle = day === 'all' ? `총 ${data.total_hours} 시간 근무` : `해당 일 ${data.total_hours} 시간 근무`;
+
+                // 항상 상단에 합계 박스 표시
+                html += `
+                    <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
+                        <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${dateTitle}</div>
+                        <div style="font-size:1.5rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">${timeTitle}</div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; background:white; padding:10px; border-radius:8px; color:#333;">
+                            <div style="flex:1;">탐방객 <b>${data.total_v}</b>명</div>
+                            <div style="flex:1;">청취자 <b>${data.total_l}</b>명</div>
+                            <div style="flex:1;">해설 <b>${data.total_c}</b>회</div>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
                 
                 if(data.records.length === 0) {
                     html += '<p style="text-align:center; color:#999; padding:20px;">해당 기간의 해설 기록이 없습니다.</p>';
                 } else {
                     data.records.forEach(r => {
+                        let displayTime = r.time && r.time.trim() !== '' ? r.time : '시간 미기록';
                         html += `
                             <div class="approval-card" style="display:block;">
                                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
                                     <strong style="font-size:1.05rem;">${r.date}</strong>
-                                    <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${r.time}</span>
+                                    <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${displayTime}</span>
                                 </div>
                                 <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px;">
                                     📍 <b>${r.loc}</b>
@@ -917,6 +919,7 @@
                         btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; 
                     }
 
+                    // 12시간 체제 (상하 1칸씩 추가)
                     const times = [
                         "07:00~08:00",
                         "08:00~09:00", "09:00~10:00", "10:00~11:00", "11:00~12:00",
