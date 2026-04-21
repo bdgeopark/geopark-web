@@ -208,8 +208,7 @@
             <div class="flex-group">
                 <select id="ma_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
                 <select id="ma_month" style="flex:1;"></select>
-                <select id="ma_day" style="flex:1;">
-                    </select>
+                <select id="ma_day" style="flex:1;"></select>
             </div>
             <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadMyActivity()">조회하기</button>
         </div>
@@ -341,10 +340,9 @@
             }
         });
 
-        // [수정] 일(Day) 선택 옵션 추가 (전체 항목을 제일 위로)
         if(document.getElementById('ma_day')) {
             let dayEl = document.getElementById('ma_day');
-            dayEl.innerHTML = `<option value="all">전체</option>`;
+            dayEl.innerHTML = `<option value="all">전체 (월)</option>`;
             for(let i=1; i<=31; i++) {
                 let d = i < 10 ? '0'+i : i;
                 dayEl.innerHTML += `<option value="${d}">${i}일</option>`;
@@ -595,7 +593,7 @@
             } catch (e) {}
         }
 
-        // [수정] 출퇴근 시간과 해설(운영일지) 시간 분리 표시
+        // [수정] 내 활동 현황 화면 렌더링
         async function loadMyActivity() {
             const container = document.getElementById('my_activity_container');
             const year = document.getElementById('ma_year').value;
@@ -608,31 +606,35 @@
                 const res = await fetch(`${API_BASE}/get_my_activity?name=${encodeURIComponent(userName)}&year=${year}&month=${month}&day=${day}`);
                 const data = await res.json();
                 
-                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 시간` : `${year}년 ${month}월 ${parseInt(day)}일 총 활동 시간`;
+                let html = '';
 
-                let html = `
-                    <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
-                        <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${dateTitle}</div>
-                        <div style="font-size:1.5rem; font-weight:900; color:#0d47a1;">${data.total_hours} 시간</div>
-                    </div>
-                `;
+                // 전체(all) 선택 시에만 상단 합계 박스 출력
+                if (day === 'all') {
+                    html += `
+                        <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
+                            <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${year}년 ${month}월 총 활동 내역</div>
+                            <div style="font-size:1.5rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">총 ${data.total_hours} 시간 근무</div>
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; background:white; padding:10px; border-radius:8px; color:#333;">
+                                <div style="flex:1;">탐방객 <b>${data.total_v}</b>명</div>
+                                <div style="flex:1;">청취자 <b>${data.total_l}</b>명</div>
+                                <div style="flex:1;">해설 <b>${data.total_c}</b>회</div>
+                            </div>
+                        </div>
+                    `;
+                }
                 
                 if(data.records.length === 0) {
-                    html += '<p style="text-align:center; color:#999; padding:20px;">해당 기간의 활동 내역이 없습니다.</p>';
+                    html += '<p style="text-align:center; color:#999; padding:20px;">해당 기간의 해설 기록이 없습니다.</p>';
                 } else {
                     data.records.forEach(r => {
                         html += `
                             <div class="approval-card" style="display:block;">
                                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
                                     <strong style="font-size:1.05rem;">${r.date}</strong>
-                                    <span style="color:#2980b9; font-weight:bold; font-size:0.9rem;">총 ${r.hours}시간</span>
+                                    <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${r.time}</span>
                                 </div>
-                                <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px; display:flex; justify-content:space-between;">
-                                    <span>📍 ${r.loc}</span>
-                                    <span style="text-align:right;">
-                                        <div style="margin-bottom:3px;">🏢 출퇴근: <b>${r.in} ~ ${r.out || '미퇴근'}</b></div>
-                                        <div style="color:#d35400; font-size:0.85rem;">🎤 해설시간: <b>${r.c_times}</b></div>
-                                    </span>
+                                <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px;">
+                                    📍 <b>${r.loc}</b>
                                 </div>
                                 <div style="display:flex; gap:10px; font-size:0.85rem; background:#f8f9fa; padding:8px; border-radius:6px; margin-bottom:8px;">
                                     <div style="flex:1; text-align:center;">탐방객 <b>${r.v}</b></div>
