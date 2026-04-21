@@ -593,7 +593,7 @@
             } catch (e) {}
         }
 
-        // [수정] 특정일 조회 시 상단 합계 표시 및 데이터 출력 로직 변경
+        // [수정 완료] 시간 정렬 및 개별 기록 분리
         async function loadMyActivity() {
             const container = document.getElementById('my_activity_container');
             const year = document.getElementById('ma_year').value;
@@ -609,13 +609,12 @@
                 let html = '';
 
                 let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 활동 내역`;
-                let timeTitle = day === 'all' ? `총 ${data.total_hours} 시간 근무` : `해당 일 ${data.total_hours} 시간 근무`;
 
-                // 항상 상단에 합계 박스 표시
+                // 상단 합계 박스 (전체 / 특정일 모두 출력)
                 html += `
                     <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
                         <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${dateTitle}</div>
-                        <div style="font-size:1.5rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">${timeTitle}</div>
+                        <div style="font-size:1.5rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">총 ${data.total_hours} 시간 근무</div>
                         <div style="display:flex; justify-content:space-between; font-size:0.85rem; background:white; padding:10px; border-radius:8px; color:#333;">
                             <div style="flex:1;">탐방객 <b>${data.total_v}</b>명</div>
                             <div style="flex:1;">청취자 <b>${data.total_l}</b>명</div>
@@ -628,12 +627,11 @@
                     html += '<p style="text-align:center; color:#999; padding:20px;">해당 기간의 해설 기록이 없습니다.</p>';
                 } else {
                     data.records.forEach(r => {
-                        let displayTime = r.time && r.time.trim() !== '' ? r.time : '시간 미기록';
                         html += `
                             <div class="approval-card" style="display:block;">
                                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
                                     <strong style="font-size:1.05rem;">${r.date}</strong>
-                                    <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${displayTime}</span>
+                                    <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${r.time}</span>
                                 </div>
                                 <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px;">
                                     📍 <b>${r.loc}</b>
@@ -754,6 +752,7 @@
             } catch (e) {}
         }
 
+        // [수정] 관리자 - 해설사 활동 현황 (UI 통일 및 시간 정렬 적용)
         async function loadAdminLogs() {
             const container = document.getElementById('admin_log_container');
             const startDate = document.getElementById('al_start_date').value;
@@ -789,20 +788,23 @@
                 data.logs.forEach(log => {
                     let rLoc = log['안내소'] || log['장소'] || '장소 미상';
                     let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.8rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
+                    
                     html += `
-                        <div class="log-item-card">
-                            <div class="log-item-header">
-                                <span style="font-weight:800; color:#2c3e50;">🗓️ ${log['날짜']} - ${log['이름']} ${isCo}</span>
-                                <span style="font-size:0.85rem; color:#7f8c8d;">${log['시간'] || ''}</span>
+                        <div class="approval-card" style="display:block;">
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+                                <strong style="font-size:1.05rem;">${log['날짜']} - ${log['이름']} ${isCo}</strong>
+                                <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${log['표시시간']}</span>
                             </div>
-                            <div style="font-weight:bold; color:#2980b9; margin-bottom:10px;">📍 ${log['섬']} > ${rLoc}</div>
-                            <div class="log-item-stats">
-                                <div>탐방객 <b>${log['탐방객수'] || 0}</b></div>
-                                <div>청취자 <b>${log['청취자수'] || 0}</b></div>
-                                <div>해설 <b>${log['해설횟수'] || 0}</b></div>
+                            <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px;">
+                                📍 <b>${log['섬']} > ${rLoc}</b>
                             </div>
-                            <div style="font-size:0.85rem; color:#555; background:#f1f2f6; padding:8px; border-radius:6px;">
-                                📝 특이사항: ${log['특이사항'] || '없음'}
+                            <div style="display:flex; gap:10px; font-size:0.85rem; background:#f8f9fa; padding:8px; border-radius:6px; margin-bottom:8px;">
+                                <div style="flex:1; text-align:center;">탐방객 <b>${log['탐방객수'] || 0}</b></div>
+                                <div style="flex:1; text-align:center;">청취자 <b>${log['청취자수'] || 0}</b></div>
+                                <div style="flex:1; text-align:center;">해설 <b>${log['해설횟수'] || 0}</b></div>
+                            </div>
+                            <div style="font-size:0.85rem; color:#555;">
+                                📝 <b>특이사항:</b> ${log['특이사항'] || '없음'}
                             </div>
                         </div>
                     `;
@@ -919,7 +921,6 @@
                         btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; 
                     }
 
-                    // 12시간 체제 (상하 1칸씩 추가)
                     const times = [
                         "07:00~08:00",
                         "08:00~09:00", "09:00~10:00", "10:00~11:00", "11:00~12:00",
