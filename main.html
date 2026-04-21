@@ -125,15 +125,16 @@
 
     <div id="log_area" class="hidden-section">
         <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select" onchange="loadTodayLogs()"></select></div>
+        <div class="form-group"><label>⏱ 시간대 선택</label><select id="log_time_select" onchange="renderLogTimeSlot()"></select></div>
         
         <div id="log_sessions_container">
             </div>
 
         <button class="btn-act btn-move" style="padding:10px; font-size:0.95rem; border-radius:8px; margin-bottom:15px; background-color:#7f8c8d;" onclick="addSessionRow()">➕ 해설 회차 추가</button>
 
-        <div class="form-group"><label>📝 오늘 하루 종합 특이사항</label><textarea id="log_remarks" rows="3" placeholder="시설 점검, 환경 정비 등 오늘의 특이사항을 적어주세요."></textarea></div>
+        <div class="form-group"><label>📝 해당 시간대 특이사항</label><textarea id="log_remarks" rows="3" placeholder="특이사항을 입력하세요."></textarea></div>
         
-        <button class="btn-submit" onclick="submitTodayLogs()">일지 저장(수정)하기</button>
+        <button class="btn-submit" onclick="submitTimeSlotLogs()">해당 시간대 일지 저장(덮어쓰기)</button>
     </div>
 
     <div id="status_area" class="hidden-section">
@@ -345,10 +346,15 @@
             document.getElementById('action_time_input').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         }
 
-        let timeOptsHtml = '<option value="">- 시간 선택 -</option>';
-        for(let i=6; i<=19; i++) {
-            let s = i<10 ? '0'+i : i; let e = (i+1)<10 ? '0'+(i+1) : (i+1);
-            timeOptsHtml += `<option value="${s}:00 ~ ${e}:00">${s}:00 ~ ${e}:00</option>`;
+        // [신규] 시간대 옵션 (07시 ~ 19시)
+        let logTimeSelect = document.getElementById('log_time_select');
+        let timeOptsHtml = '';
+        if(logTimeSelect) {
+            for(let i=7; i<=18; i++) {
+                let s = i<10 ? '0'+i : i; let e = (i+1)<10 ? '0'+(i+1) : (i+1);
+                timeOptsHtml += `<option value="${s}:00~${e}:00">${s}:00 ~ ${e}:00</option>`;
+                logTimeSelect.innerHTML = timeOptsHtml;
+            }
         }
 
         let timeOptionsHtml = '';
@@ -450,10 +456,65 @@
             }
         }
 
-        // [신규 개편] 회차별 운영일지 작성 UI 생성
-        let sessionCount = 0;
-        function addSessionRow(data = null) {
-            sessionCount++;
+        // [신규 개편] 전역 변수 - 오늘 기록된 데이터를 시간대별로 보관
+        let todayLogDataByTime = {};
+
+        // 1. 안내소가 바뀌거나 처음 들어올 때 오늘 데이터 전체 조회
+        async function loadTodayLogs() {
+            const loc = document.getElementById('log_location_select').value;
+            if(!loc) return;
+
+            showLoading();
+            try {
+                const res = await fetch(`${API_BASE}/get_today_logs?name=${encodeURIComponent(userName)}&loc=${encodeURIComponent(loc)}`);
+                const data = await res.json();
+                
+                todayLogDataByTime = {};
+                if(data.logs && data.logs.length > 0) {
+                    data.logs.forEach(log => {
+                        const t = log.time.replace(/\s/g,''); // 공백 제거 포맷 통일 (예: 10:00~11:00)
+                        if(!todayLogDataByTime[t]) todayLogDataByTime[t] = { sessions: [], remark: '' };
+                        todayLogDataByTime[t].sessions.push(log);
+                        if(log.rmk) todayLogDataByTime[t].remark = log.rmk;
+                    });
+                }
+                // 조회 끝나면 현재 선택된 시간대 화면 그려주기
+                renderLogTimeSlot();
+            } catch(e) {
+                renderLogTimeSlot();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // 2. 시간대가 변경될 때마다 화면(1,2,3회차) 렌더링
+        function renderLogTimeSlot() {
+            const t = document.getElementById('log_time_select').value.replace(/\s/g,'');
+            const container = document.getElementById('log_sessions_container');
+            container.innerHTML = '';
+            document.getElementById('log_remarks').value = '';
+            
+            let existingData = todayLogDataByTime[t];
+
+            if(existingData && existingData.sessions.length > 0) {
+                // 기존 데이터가 있으면 채워넣기
+                existingData.sessions.forEach((s, idx) => { addSessionRow(idx + 1, s); });
+                document.getElementById('log_remarks').value = existingData.remark || '';
+                
+                // 만약 2회차까지만 있으면 3회차는 빈칸으로 채워주기 (기본 3칸 유지)
+                for(let i = existingData.sessions.length + 1; i <= 3; i++) {
+                    addSessionRow(i);
+                }
+            } else {
+                // 아예 없으면 깨끗하게 3칸 생성
+                addSessionRow(1); addSessionRow(2); addSessionRow(3);
+            }
+        }
+
+        // 3. 회차별 입력 폼 한 줄 만들기
+        function addSessionRow(index = null, data = null) {
+            if(!index) index = document.querySelectorAll('.session-row').length + 1;
+            
             const container = document.getElementById('log_sessions_container');
             const row = document.createElement('div');
             row.className = 'session-row';
@@ -461,24 +522,20 @@
 
             row.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div style="font-weight:bold; color:#2980b9; font-size:0.95rem;">${sessionCount}회차</div>
+                    <div style="font-weight:bold; color:#2980b9; font-size:0.95rem;">${index}회차</div>
                     <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; background:#f1f2f6; padding:4px 8px; border-radius:4px; font-weight:bold;">
                         <input type="checkbox" class="s-co chk-box" style="width:16px!important; height:16px!important; margin:0;"> 공동해설
                     </label>
                 </div>
-                <div class="flex-group" style="margin-bottom:8px;">
-                    <select class="s-time" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; background:#fff;">${timeOptsHtml}</select>
-                </div>
                 <div class="flex-group">
-                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">탐방객</label><input type="number" class="s-v" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
-                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">청취자</label><input type="number" class="s-l" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
-                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">횟수</label><input type="number" class="s-c" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">탐방객수</label><input type="number" class="s-v" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">청취자수</label><input type="number" class="s-l" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">해설횟수</label><input type="number" class="s-c" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
                 </div>
             `;
             container.appendChild(row);
 
             if(data) {
-                row.querySelector('.s-time').value = data.time;
                 row.querySelector('.s-v').value = data.v;
                 row.querySelector('.s-l').value = data.l;
                 row.querySelector('.s-c').value = data.c;
@@ -486,65 +543,36 @@
             }
         }
 
-        // [신규 개편] 오늘 작성한 일지 불러오기
-        async function loadTodayLogs() {
+        // 4. 해당 시간대 통째로 저장(덮어쓰기)
+        async function submitTimeSlotLogs() {
             const loc = document.getElementById('log_location_select').value;
-            if(!loc) return;
-
-            showLoading();
-            const container = document.getElementById('log_sessions_container');
-            container.innerHTML = '';
-            sessionCount = 0;
-            document.getElementById('log_remarks').value = '';
-
-            try {
-                const res = await fetch(`${API_BASE}/get_today_logs?name=${encodeURIComponent(userName)}&loc=${encodeURIComponent(loc)}`);
-                const data = await res.json();
-
-                if(data.logs && data.logs.length > 0) {
-                    data.logs.forEach(log => addSessionRow(log));
-                    document.getElementById('log_remarks').value = data.remarks;
-                } else {
-                    addSessionRow(); addSessionRow(); addSessionRow();
-                }
-            } catch(e) {
-                addSessionRow(); addSessionRow(); addSessionRow();
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // [신규 개편] 일지 통째로 저장(수정)
-        async function submitTodayLogs() {
-            const loc = document.getElementById('log_location_select').value;
+            const t = document.getElementById('log_time_select').value;
             const remarks = document.getElementById('log_remarks').value;
-            let logs = [];
-            let hasData = false;
-
+            let sessions = [];
+            
             document.querySelectorAll('.session-row').forEach(row => {
-                const time = row.querySelector('.s-time').value;
                 const v = parseInt(row.querySelector('.s-v').value) || 0;
                 const l = parseInt(row.querySelector('.s-l').value) || 0;
                 const c = parseInt(row.querySelector('.s-c').value) || 0;
                 const is_co = row.querySelector('.s-co').checked ? 'O' : 'X';
-
-                if(time) {
-                    logs.push({ time: time, visitors: v, listeners: l, count: c, is_co: is_co });
-                    hasData = true;
-                }
+                
+                sessions.push({ v: v, l: l, c: c, is_co: is_co });
             });
 
-            if(!hasData && !confirm("입력된 시간이 하나도 없습니다. 이대로 저장하시겠습니까?\n(해당 안내소의 기존 기록이 모두 삭제됩니다.)")) return;
-            if(hasData && !confirm("현재 화면에 입력된 내용으로 오늘의 운영일지를 덮어쓰기 저장하시겠습니까?")) return;
+            if(!confirm(`[${t}] 시간대의 운영일지를 저장(덮어쓰기)하시겠습니까?\n(기존 입력된 값이 있다면 모두 덮어써집니다.)`)) return;
 
             showLoading();
             try {
-                const res = await fetch(`${API_BASE}/save_today_logs`, {
+                const res = await fetch(`${API_BASE}/save_timeslot_logs`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, log_location: loc, remarks: remarks, logs: logs })
+                    body: JSON.stringify({ 
+                        name: userName, island: userIsland, role: userRole, 
+                        log_location: loc, target_time: t, remarks: remarks, sessions: sessions 
+                    })
                 });
                 if(res.ok) {
-                    alert("저장(수정)이 완료되었습니다.");
+                    alert("성공적으로 저장(수정)되었습니다.");
+                    loadTodayLogs(); // 저장 후 최신 데이터로 다시 덮어주기
                 }
             } catch(e) {
                 alert("저장 중 오류가 발생했습니다.");
@@ -854,7 +882,7 @@
                 
                 let html = `
                     <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
-                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적</div>
+                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
                         <div style="display:flex; justify-content:space-between; text-align:center;">
                             <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 탐방객</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.visitors}명</div></div>
                             <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 청취자</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.listeners}명</div></div>
