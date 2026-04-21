@@ -209,8 +209,7 @@
                 <select id="ma_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
                 <select id="ma_month" style="flex:1;"></select>
                 <select id="ma_day" style="flex:1;">
-                    <option value="all">전체 (월)</option>
-                </select>
+                    </select>
             </div>
             <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadMyActivity()">조회하기</button>
         </div>
@@ -342,9 +341,10 @@
             }
         });
 
-        // '나의 활동 현황'용 일(Day) 선택 옵션 생성
+        // [수정] 일(Day) 선택 옵션 추가 (전체 항목을 제일 위로)
         if(document.getElementById('ma_day')) {
             let dayEl = document.getElementById('ma_day');
+            dayEl.innerHTML = `<option value="all">전체</option>`;
             for(let i=1; i<=31; i++) {
                 let d = i < 10 ? '0'+i : i;
                 dayEl.innerHTML += `<option value="${d}">${i}일</option>`;
@@ -595,7 +595,7 @@
             } catch (e) {}
         }
 
-        // [수정 완료] 나의 활동 현황: 특정 날짜(일) 조회 기능 추가
+        // [수정] 출퇴근 시간과 해설(운영일지) 시간 분리 표시
         async function loadMyActivity() {
             const container = document.getElementById('my_activity_container');
             const year = document.getElementById('ma_year').value;
@@ -625,11 +625,14 @@
                             <div class="approval-card" style="display:block;">
                                 <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
                                     <strong style="font-size:1.05rem;">${r.date}</strong>
-                                    <span style="color:#2980b9; font-weight:bold; font-size:0.9rem;">${r.hours}시간</span>
+                                    <span style="color:#2980b9; font-weight:bold; font-size:0.9rem;">총 ${r.hours}시간</span>
                                 </div>
                                 <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px; display:flex; justify-content:space-between;">
                                     <span>📍 ${r.loc}</span>
-                                    <span>⏰ ${r.in} ~ ${r.out || '미퇴근'}</span>
+                                    <span style="text-align:right;">
+                                        <div style="margin-bottom:3px;">🏢 출퇴근: <b>${r.in} ~ ${r.out || '미퇴근'}</b></div>
+                                        <div style="color:#d35400; font-size:0.85rem;">🎤 해설시간: <b>${r.c_times}</b></div>
+                                    </span>
                                 </div>
                                 <div style="display:flex; gap:10px; font-size:0.85rem; background:#f8f9fa; padding:8px; border-radius:6px; margin-bottom:8px;">
                                     <div style="flex:1; text-align:center;">탐방객 <b>${r.v}</b></div>
@@ -912,7 +915,6 @@
                         btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; 
                     }
 
-                    // 12시간 체제 (상하 1칸씩 추가)
                     const times = [
                         "07:00~08:00",
                         "08:00~09:00", "09:00~10:00", "10:00~11:00", "11:00~12:00",
