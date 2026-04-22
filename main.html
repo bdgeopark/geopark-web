@@ -147,13 +147,27 @@
 
     <div id="plan_area" class="hidden-section">
         <div class="form-group">
+            <div id="plan_target_user_group" style="display:none; margin-bottom:10px;">
+                <label>👤 작성 대상자 (조원 선택 가능)</label>
+                <select id="plan_target_user"></select>
+            </div>
             <div class="flex-group"><select id="plan_month" style="flex:1;"></select><select id="plan_half" style="flex:1.5;"><option value="1">전반기</option><option value="2">하반기</option></select></div>
             <button class="btn-act btn-move" style="margin-top:10px; padding:12px;" onclick="generatePlanForm()">📝 양식 펼치기</button>
         </div>
         <div id="plan_list_container" style="display:none; margin-top:20px; border-top:2px dashed #CCC; padding-top:20px;">
             <div class="time-input-wrap">
-                <div class="flex-group"><select id="batch_loc" style="flex:1;"></select><select id="batch_start" style="flex:1;"></select><span>~</span><select id="batch_end" style="flex:1;"></select></div>
-                <button onclick="applyBatchSettings()" style="width:100%; margin-top:8px; padding:10px; background:#333; color:white; border:none; border-radius:8px;">일괄 적용</button>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600; color:#555; margin-bottom:5px;">
+                    <div style="flex:1;">📍 안내소 선택</div>
+                    <div style="flex:1; padding-left:4px;">⏰ 출근시간</div>
+                    <div style="flex:1; padding-left:14px;">⏰ 퇴근시간</div>
+                </div>
+                <div class="flex-group">
+                    <select id="batch_loc" style="flex:1; padding:10px;"></select>
+                    <select id="batch_start" style="flex:1; padding:10px;"></select>
+                    <span style="font-weight:bold; color:#7f8c8d;">~</span>
+                    <select id="batch_end" style="flex:1; padding:10px;"></select>
+                </div>
+                <button onclick="applyBatchSettings()" style="width:100%; margin-top:10px; padding:12px; background:#2c3e50; color:white; border:none; border-radius:8px; font-weight:bold; font-size:1rem;">일괄 적용</button>
             </div>
             <div id="plan_rows"></div>
             <button class="btn-submit" onclick="submitBulkPlan()">🚀 제출하기</button>
@@ -191,8 +205,9 @@
         <div class="form-group">
             <div id="approval_header" class="approval-header" style="display:none;">
                 <label><input type="checkbox" id="chk_all" class="chk-box" onclick="toggleAllApprovals(this)"> 전체 선택</label>
-                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('승인완료')">승인</button><button class="btn-act btn-out" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('반려')">반려</button></div>
+                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button><button class="btn-act btn-out" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('반려')">반려</button></div>
             </div>
+            <p style="font-size:0.8rem; color:#e74c3c; margin-bottom:10px;">※ 조장님은 아래 카드에서 직접 장소/시간 및 내용을 수정한 뒤 승인할 수 있습니다.</p>
             <div id="pending_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
         </div>
     </div>
@@ -285,10 +300,8 @@
         }
         updateCurrentLocBadge();
 
-        // --- [신규 추가] 조장 전용 대시보드 표시 함수 ---
         async function checkPendingForLeader() {
-            if (userRole !== '조장') return; // 조장이 아니면 실행 안함
-            
+            if (userRole !== '조장') return; 
             try {
                 const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`);
                 const data = await res.json();
@@ -305,21 +318,16 @@
                                 <div>
                                     <div style="font-weight:900; color:#d35400; font-size:1.1rem;">결재 대기 문서가 있습니다!</div>
                                     <div style="font-size:0.85rem; color:#e67e22; margin-top:4px;">
-                                        활동계획 및 변경 신청 <b style="font-size:1rem;">${totalPending}</b>건이 승인을 기다립니다. (터치하여 확인)
+                                        활동계획 및 변경 신청 <b style="font-size:1rem;">${totalPending}</b>건이 승인을 기다립니다.
                                     </div>
                                 </div>
                             </div>
                         </div>
                     `;
-                } else {
-                    dash.style.display = 'none'; // 대기 건이 없으면 숨김
-                }
-            } catch (e) {
-                // 에러 발생 시 조용히 넘김 (사용자 방해 안함)
-            }
+                } else { dash.style.display = 'none'; }
+            } catch (e) {}
         }
 
-        // 알림 클릭 시 바로 결재 화면으로 이동하는 함수
         function goToApproval() {
             document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
             document.getElementById('approval_area').style.display = 'block';
@@ -398,12 +406,20 @@
             logTimeSelect.innerHTML = timeOptsHtml;
         }
 
+        // [신규 개편] 30분 단위 시간 옵션 추가
         let timeOptionsHtml = '';
-        for(let i=6; i<=20; i++) { let h = i < 10 ? '0'+i : i; timeOptionsHtml += `<option value="${h}:00">${h}:00</option>`; }
+        for(let i=6; i<=20; i++) { 
+            let h = i < 10 ? '0'+i : i; 
+            timeOptionsHtml += `<option value="${h}:00">${h}:00</option>`;
+            if (i !== 20) timeOptionsHtml += `<option value="${h}:30">${h}:30</option>`;
+        }
         if(document.getElementById('batch_start')) {
-            document.getElementById('batch_start').innerHTML = timeOptionsHtml; document.getElementById('batch_end').innerHTML = timeOptionsHtml;
-            document.getElementById('batch_start').value = "08:00"; document.getElementById('batch_end').value = "17:00";
-            document.getElementById('change_time_start').innerHTML = timeOptionsHtml; document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
+            document.getElementById('batch_start').innerHTML = timeOptionsHtml; 
+            document.getElementById('batch_end').innerHTML = timeOptionsHtml;
+            document.getElementById('batch_start').value = "08:00"; 
+            document.getElementById('batch_end').value = "17:00";
+            document.getElementById('change_time_start').innerHTML = timeOptionsHtml; 
+            document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
         }
 
         window.history.pushState(null, "", window.location.href);
@@ -428,7 +444,10 @@
                 if(m.includes('출퇴근관리') && userRole !== '관리자') { document.getElementById('attendance_area').style.display = 'block'; setCurrentTimeInput(); }
                 else if(m.includes('운영일지 작성')) { document.getElementById('log_area').style.display = 'block'; loadTodayLogs(); }
                 else if(m === '3. 출퇴근 및 활동 현황 조회') { document.getElementById('status_area').style.display = 'block'; loadDailyStatus(); }
-                else if(m === '4. 활동계획서 작성' || (userRole === '해설사' && m === '3. 활동계획서 작성')) document.getElementById('plan_area').style.display = 'block';
+                else if(m === '4. 활동계획서 작성' || (userRole === '해설사' && m === '3. 활동계획서 작성')) { 
+                    document.getElementById('plan_area').style.display = 'block'; 
+                    if(userRole === '조장') loadPlanTargetUsers(); 
+                }
                 else if(m.includes('활동계획 변경')) { document.getElementById('change_area').style.display = 'block'; loadGuideList(); }
                 else if(m.includes('변경 승인')) { document.getElementById('approval_area').style.display = 'block'; loadPendingRequests(); }
                 else if(m.includes('나의 활동계획 조회')) { document.getElementById('my_plan_area').style.display = 'block'; loadMyPlans(); }
@@ -442,6 +461,20 @@
             };
             container.appendChild(d);
         });
+
+        // [신규] 조장이 활동계획서를 대리 작성할 대상 목록 불러오기
+        function loadPlanTargetUsers() {
+            document.getElementById('plan_target_user_group').style.display = 'block';
+            fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=none`)
+            .then(res => res.json())
+            .then(data => {
+                let tg = document.getElementById('plan_target_user');
+                tg.innerHTML = `<option value="${userName}">본인 (${userName})</option>`;
+                data.guides.forEach(g => {
+                    if(g !== userName) tg.innerHTML += `<option value="${g}">${g} 해설사</option>`;
+                });
+            });
+        }
 
         async function syncMyStatus() {
             if(userRole === '관리자') return;
@@ -466,9 +499,7 @@
                 const lastInTime = document.getElementById('in_time_display').innerText.replace('기록됨: ', '');
                 
                 if (isWorking && lastInTime) {
-                    if(!confirm(`이미 ${lastInTime}에 출근(또는 이동) 기록이 존재합니다.\n입력하신 시간(${inputTime})으로 수정(덮어쓰기) 하시겠습니까?`)) {
-                        return; 
-                    }
+                    if(!confirm(`이미 ${lastInTime}에 출근(또는 이동) 기록이 존재합니다.\n입력하신 시간(${inputTime})으로 수정(덮어쓰기) 하시겠습니까?`)) return; 
                 } else {
                     if(!confirm(`[${inputTime}] 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
                 }
@@ -536,10 +567,7 @@
             if(existingData && existingData.sessions.length > 0) {
                 existingData.sessions.forEach((s, idx) => { addSessionRow(idx + 1, s); });
                 document.getElementById('log_remarks').value = existingData.remark || '';
-                
-                for(let i = existingData.sessions.length + 1; i <= 3; i++) {
-                    addSessionRow(i);
-                }
+                for(let i = existingData.sessions.length + 1; i <= 3; i++) { addSessionRow(i); }
             } else {
                 addSessionRow(1); addSessionRow(2); addSessionRow(3);
             }
@@ -587,7 +615,6 @@
                 const l = parseInt(row.querySelector('.s-l').value) || 0;
                 const c = parseInt(row.querySelector('.s-c').value) || 0;
                 const is_co = row.querySelector('.s-co').checked ? 'O' : 'X';
-                
                 sessions.push({ v: v, l: l, c: c, is_co: is_co });
             });
 
@@ -606,11 +633,7 @@
                     alert("성공적으로 저장(수정)되었습니다.");
                     loadTodayLogs(); 
                 }
-            } catch(e) {
-                alert("저장 중 오류가 발생했습니다.");
-            } finally {
-                hideLoading();
-            }
+            } catch(e) { alert("저장 중 오류가 발생했습니다."); } finally { hideLoading(); }
         }
 
         async function loadDailyStatus() {
@@ -656,43 +679,70 @@
             const loc = document.getElementById('batch_loc').value; const start = document.getElementById('batch_start').value; const end = document.getElementById('batch_end').value;
             document.querySelectorAll('.plan-row').forEach(row => { row.querySelector('.p-loc').value = loc; row.querySelector('.p-start').value = start; row.querySelector('.p-end').value = end; calcRowHours(row); });
         }
+
         function handleRowChange(elem) { calcRowHours(elem.closest('.plan-row')); }
+
+        // [수정] 30분 단위 소수점 시간 계산
         function calcRowHours(row) {
             const loc = row.querySelector('.p-loc').value; const start = row.querySelector('.p-start').value; const end = row.querySelector('.p-end').value; const hoursSpan = row.querySelector('.calc-hours');
             if (loc === '휴무') { hoursSpan.innerText = "휴무"; hoursSpan.className = "calc-hours"; row.querySelector('.p-start').disabled = true; row.querySelector('.p-end').disabled = true; return; }
+            
             row.querySelector('.p-start').disabled = false; row.querySelector('.p-end').disabled = false;
-            let sHour = parseInt(start.split(':')[0]); let eHour = parseInt(end.split(':')[0]); let diff = (eHour - sHour) >= 5 ? (eHour - sHour) - 1 : (eHour - sHour);
-            if ((eHour-sHour) <= 0) { hoursSpan.innerText = "시간 오류"; hoursSpan.className = "calc-hours over"; } else { hoursSpan.innerText = `${diff}시간 (식사제외)`; hoursSpan.className = diff > 8 ? "calc-hours over" : "calc-hours"; }
+            
+            let sParts = start.split(':'); let sHour = parseInt(sParts[0]) + (parseInt(sParts[1])/60.0);
+            let eParts = end.split(':'); let eHour = parseInt(eParts[0]) + (parseInt(eParts[1])/60.0);
+            let rawDiff = eHour - sHour;
+            
+            if (rawDiff <= 0) { 
+                hoursSpan.innerText = "시간 오류"; hoursSpan.className = "calc-hours over"; 
+            } else { 
+                let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
+                hoursSpan.innerText = `${diff}시간 (식사제외)`; 
+                hoursSpan.className = diff > 8 ? "calc-hours over" : "calc-hours"; 
+            }
         }
 
         async function submitBulkPlan() {
             let plans = []; let isValid = true; let totalRestDays = 0; let currentWeekWorkDays = 0; let weekWarningTriggered = false; let requiresApproval = false;
+            
+            let targetName = userName;
+            if(userRole === '조장') {
+                let tg = document.getElementById('plan_target_user');
+                if(tg && tg.value) targetName = tg.value;
+            }
+
             document.querySelectorAll('.plan-row').forEach(row => {
                 let dayIdx = parseInt(row.getAttribute('data-day'));
                 let loc = row.querySelector('.p-loc').value; let sTime = row.querySelector('.p-start').value; let eTime = row.querySelector('.p-end').value;
-                let rawDiff = parseInt(eTime.split(':')[0]) - parseInt(sTime.split(':')[0]);
+                
+                let sParts = sTime.split(':'); let sHour = parseInt(sParts[0]) + (parseInt(sParts[1])/60.0);
+                let eParts = eTime.split(':'); let eHour = parseInt(eParts[0]) + (parseInt(eParts[1])/60.0);
+                let rawDiff = eHour - sHour;
                 
                 if (dayIdx === 0) currentWeekWorkDays = 0;
                 if (loc !== '휴무') {
                     if(rawDiff <= 0) isValid = false; 
                     currentWeekWorkDays++;
-                    if ((rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) requiresApproval = true;
+                    let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
+                    if (diff > 8) requiresApproval = true;
                 } else { totalRestDays++; }
+                
                 if (dayIdx === 6 || row === document.querySelectorAll('.plan-row')[document.querySelectorAll('.plan-row').length - 1]) {
                     if (currentWeekWorkDays >= 7) weekWarningTriggered = true;
                 }
-                plans.push({ plan_date: row.querySelector('.plan-date-label span').innerText, location: loc === '휴무' ? '-' : loc, activity_status: loc === '휴무' ? '휴무' : `${sTime}~${eTime} (${rawDiff >= 5 ? rawDiff-1 : rawDiff}시간)`, remarks: row.querySelector('.p-remarks').value, status: (loc !== '휴무' && (rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) ? "초과승인대기" : "승인대기" });
+                let actStr = loc === '휴무' ? '휴무' : `${sTime}~${eTime} (${rawDiff >= 5 ? rawDiff-1 : rawDiff}시간)`;
+                plans.push({ plan_date: row.querySelector('.plan-date-label span').innerText, location: loc === '휴무' ? '-' : loc, activity_status: actStr, remarks: row.querySelector('.p-remarks').value, status: (loc !== '휴무' && (rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) ? "초과승인대기" : "승인대기" });
             });
             if (!isValid) { alert("시간 설정이 잘못된 날짜가 있습니다."); return; }
             if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장됩니다.\n이대로 제출하시겠습니까?`)) return;
             
-            let confirmMsg = `활동계획을 제출하시겠습니까?`;
+            let confirmMsg = `[${targetName}] 님의 활동계획을 제출하시겠습니까?`;
             if(requiresApproval) confirmMsg += `\n※ 8시간 초과 근무 포함되어 추가 승인이 필요합니다.`;
             if(!confirm(confirmMsg)) return;
 
             showLoading();
             try {
-                const res = await fetch(`${API_BASE}/submit_plan_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, plans: plans }) });
+                const res = await fetch(`${API_BASE}/submit_plan_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: targetName, island: userIsland, plans: plans }) });
                 if(res.ok) { alert("제출되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; }
             } catch (e) { alert("제출 중 오류 발생"); } finally { hideLoading(); }
         }
@@ -833,6 +883,7 @@
             } catch (e) {}
         }
 
+        // [신규 개편] 결재 항목 직접 수정 가능하도록 UI 강화
         async function loadPendingRequests() {
             const container = document.getElementById('pending_container'); const header = document.getElementById('approval_header');
             container.innerHTML = '<p style="text-align:center; color:#999;">불러오는 중...</p>'; header.style.display = 'none'; document.getElementById('chk_all').checked = false;
@@ -840,23 +891,94 @@
                 const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`); const data = await res.json();
                 if(data.plans.length === 0 && data.changes.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">대기 내역이 없습니다.</p>'; return; }
                 header.style.display = 'flex'; let html = '';
-                data.plans.forEach(p => { html += `<div class="approval-card"><input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획", row_index: p.row_index})}'> <div class="app-content"><span class="app-tag tag-plan">신규 계획</span><div class="app-info"><b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}<br>장소: ${p['장소']} (${p['활동여부']})</div></div></div>`; });
-                data.changes.forEach(c => { html += `<div class="approval-card"><input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획_변경신청", row_index: c.row_index})}'> <div class="app-content"><span class="app-tag tag-change">변경/취소</span><div class="app-info"><b>${c['신청자']}</b> 해설사<br>날짜: ${c['변경대상일']}<br>내용: ${c['변경유형']} - ${c['상세내용']}</div></div></div>`; });
+                
+                data.plans.forEach(p => { 
+                    let timeMatch = p['활동여부'].match(/(\d{2}:\d{2})~(\d{2}:\d{2})/);
+                    let sTime = timeMatch ? timeMatch[1] : '08:00';
+                    let eTime = timeMatch ? timeMatch[2] : '17:00';
+                    
+                    let locOpts = locOptionsHtml.replace(`value="${p['장소']}"`, `value="${p['장소']}" selected`);
+                    let startOpts = timeOptionsHtml.replace(`value="${sTime}"`, `value="${sTime}" selected`);
+                    let endOpts = timeOptionsHtml.replace(`value="${eTime}"`, `value="${eTime}" selected`);
+
+                    html += `
+                        <div class="approval-card">
+                            <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획", row_index: p.row_index})}'> 
+                            <div class="app-content">
+                                <span class="app-tag tag-plan">신규 계획</span>
+                                <div class="app-info"><b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}</div>
+                                <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
+                                    <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 장소 / 시간 직접 수정</div>
+                                    <select class="edit-loc" style="width:100%; padding:6px; margin-bottom:5px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${locOpts}</select>
+                                    <div style="display:flex; gap:5px; align-items:center;">
+                                        <select class="edit-start" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${startOpts}</select>
+                                        <span style="font-weight:bold; color:#7f8c8d;">~</span>
+                                        <select class="edit-end" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${endOpts}</select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`; 
+                });
+                
+                data.changes.forEach(c => { 
+                    html += `
+                        <div class="approval-card">
+                            <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획_변경신청", row_index: c.row_index})}'> 
+                            <div class="app-content">
+                                <span class="app-tag tag-change">변경/취소</span>
+                                <div class="app-info"><b>${c['신청자']}</b> 해설사<br>날짜: ${c['변경대상일']}<br>유형: ${c['변경유형']}</div>
+                                <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
+                                    <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 상세내용 수정</div>
+                                    <input type="text" class="edit-detail" value="${c['상세내용']}" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem; font-family:'Pretendard'; box-sizing:border-box;">
+                                </div>
+                            </div>
+                        </div>`; 
+                });
                 container.innerHTML = html;
             } catch (e) {}
         }
 
         function toggleAllApprovals(source) { document.querySelectorAll('.item-chk').forEach(chk => chk.checked = source.checked); }
 
+        // [신규 개편] 승인 시 조장이 수정한 값을 서버로 함께 전송
         async function processBulkApp(status) {
             const boxes = document.querySelectorAll('.item-chk:checked'); if(boxes.length === 0) { alert("항목을 선택해주세요."); return; }
-            if(!confirm(`${boxes.length}건을 [${status}] 하시겠습니까?`)) return;
-            let approvals = []; boxes.forEach(box => { let d = JSON.parse(box.value); d.status = status; approvals.push(d); });
+            if(!confirm(`선택한 ${boxes.length}건을 [${status}] 하시겠습니까?\n(입력창에서 수정한 내용이 그대로 반영됩니다.)`)) return;
+            
+            let approvals = []; 
+            boxes.forEach(box => { 
+                let d = JSON.parse(box.value); 
+                d.status = status; 
+                let card = box.closest('.approval-card');
+                
+                if (d.sheet_name === '활동계획') {
+                    let eLoc = card.querySelector('.edit-loc').value;
+                    let eStart = card.querySelector('.edit-start').value;
+                    let eEnd = card.querySelector('.edit-end').value;
+
+                    let sParts = eStart.split(':'); let sHour = parseInt(sParts[0]) + (parseInt(sParts[1])/60.0);
+                    let eParts = eEnd.split(':'); let eHour = parseInt(eParts[0]) + (parseInt(eParts[1])/60.0);
+                    let rawDiff = eHour - sHour;
+                    let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
+
+                    let actStr = eLoc === '휴무' ? '휴무' : `${eStart}~${eEnd} (${diff}시간)`;
+                    d.loc = eLoc === '휴무' ? '-' : eLoc;
+                    d.time_str = actStr;
+                } else if (d.sheet_name === '활동계획_변경신청') {
+                    d.detail = card.querySelector('.edit-detail').value;
+                }
+                
+                approvals.push(d); 
+            });
             
             showLoading();
             try {
                 const res = await fetch(`${API_BASE}/process_approval_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ approvals: approvals }) });
-                if(res.ok) { alert("완료되었습니다."); loadPendingRequests(); }
+                if(res.ok) { 
+                    alert("처리가 완료되었습니다."); 
+                    loadPendingRequests(); 
+                    checkPendingForLeader(); // 처리 후 조장 대시보드 새로고침
+                }
             } catch (e) { alert("오류 발생"); } finally { hideLoading(); }
         }
 
@@ -962,7 +1084,7 @@
             const island = document.getElementById('ap_island').value; const loc = document.getElementById('ap_loc').value;
             const nameSearch = document.getElementById('ap_name').value.trim();
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중...</p>';
             
             try {
                 const res = await fetch(`${API_BASE}/get_admin_plans?month=${month}&island=${encodeURIComponent(island)}`);
@@ -1204,10 +1326,7 @@
 
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
 
-        // 앱 시작 시 상태 동기화 후 조장이면 알림 검사
-        syncMyStatus().then(() => {
-            checkPendingForLeader();
-        });
+        syncMyStatus().then(() => { checkPendingForLeader(); });
     </script>
 </body>
 </html>
