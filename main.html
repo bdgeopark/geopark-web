@@ -113,6 +113,8 @@
         </div>
     </div>
 
+    <div id="leader_dashboard" style="display: none; margin-bottom: 15px;"></div>
+
     <div id="menu_container"></div>
 
     <div id="attendance_area" class="hidden-section">
@@ -127,8 +129,7 @@
         <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select" onchange="loadTodayLogs()"></select></div>
         <div class="form-group"><label>⏱ 시간대 선택</label><select id="log_time_select" onchange="renderLogTimeSlot()"></select></div>
         
-        <div id="log_sessions_container">
-            </div>
+        <div id="log_sessions_container"></div>
 
         <button class="btn-act btn-move" style="padding:10px; font-size:0.95rem; border-radius:8px; margin-bottom:15px; background-color:#7f8c8d;" onclick="addSessionRow()">➕ 해설 회차 추가</button>
 
@@ -284,6 +285,47 @@
         }
         updateCurrentLocBadge();
 
+        // --- [신규 추가] 조장 전용 대시보드 표시 함수 ---
+        async function checkPendingForLeader() {
+            if (userRole !== '조장') return; // 조장이 아니면 실행 안함
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`);
+                const data = await res.json();
+                
+                const totalPending = data.plans.length + data.changes.length;
+                const dash = document.getElementById('leader_dashboard');
+                
+                if (totalPending > 0) {
+                    dash.style.display = 'block';
+                    dash.innerHTML = `
+                        <div class="menu-card" style="background-color: #fff3e0; border-left: 6px solid #e67e22; margin-bottom: 0;" onclick="goToApproval()">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:1.8rem;">🚨</span>
+                                <div>
+                                    <div style="font-weight:900; color:#d35400; font-size:1.1rem;">결재 대기 문서가 있습니다!</div>
+                                    <div style="font-size:0.85rem; color:#e67e22; margin-top:4px;">
+                                        활동계획 및 변경 신청 <b style="font-size:1rem;">${totalPending}</b>건이 승인을 기다립니다. (터치하여 확인)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    dash.style.display = 'none'; // 대기 건이 없으면 숨김
+                }
+            } catch (e) {
+                // 에러 발생 시 조용히 넘김 (사용자 방해 안함)
+            }
+        }
+
+        // 알림 클릭 시 바로 결재 화면으로 이동하는 함수
+        function goToApproval() {
+            document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
+            document.getElementById('approval_area').style.display = 'block';
+            loadPendingRequests();
+        }
+
         const locSelect = document.getElementById('location_select');
         const logLocSelect = document.getElementById('log_location_select');
         const batchLocSelect = document.getElementById('batch_loc');
@@ -346,15 +388,14 @@
             document.getElementById('action_time_input').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
         }
 
-        // [신규] 시간대 옵션 (07시 ~ 19시)
         let logTimeSelect = document.getElementById('log_time_select');
         let timeOptsHtml = '';
         if(logTimeSelect) {
             for(let i=7; i<=18; i++) {
                 let s = i<10 ? '0'+i : i; let e = (i+1)<10 ? '0'+(i+1) : (i+1);
                 timeOptsHtml += `<option value="${s}:00~${e}:00">${s}:00 ~ ${e}:00</option>`;
-                logTimeSelect.innerHTML = timeOptsHtml;
             }
+            logTimeSelect.innerHTML = timeOptsHtml;
         }
 
         let timeOptionsHtml = '';
@@ -456,10 +497,8 @@
             }
         }
 
-        // [신규 개편] 전역 변수 - 오늘 기록된 데이터를 시간대별로 보관
         let todayLogDataByTime = {};
 
-        // 1. 안내소가 바뀌거나 처음 들어올 때 오늘 데이터 전체 조회
         async function loadTodayLogs() {
             const loc = document.getElementById('log_location_select').value;
             if(!loc) return;
@@ -472,13 +511,12 @@
                 todayLogDataByTime = {};
                 if(data.logs && data.logs.length > 0) {
                     data.logs.forEach(log => {
-                        const t = log.time.replace(/\s/g,''); // 공백 제거 포맷 통일 (예: 10:00~11:00)
+                        const t = log.time.replace(/\s/g,'');
                         if(!todayLogDataByTime[t]) todayLogDataByTime[t] = { sessions: [], remark: '' };
                         todayLogDataByTime[t].sessions.push(log);
                         if(log.rmk) todayLogDataByTime[t].remark = log.rmk;
                     });
                 }
-                // 조회 끝나면 현재 선택된 시간대 화면 그려주기
                 renderLogTimeSlot();
             } catch(e) {
                 renderLogTimeSlot();
@@ -487,7 +525,6 @@
             }
         }
 
-        // 2. 시간대가 변경될 때마다 화면(1,2,3회차) 렌더링
         function renderLogTimeSlot() {
             const t = document.getElementById('log_time_select').value.replace(/\s/g,'');
             const container = document.getElementById('log_sessions_container');
@@ -497,21 +534,17 @@
             let existingData = todayLogDataByTime[t];
 
             if(existingData && existingData.sessions.length > 0) {
-                // 기존 데이터가 있으면 채워넣기
                 existingData.sessions.forEach((s, idx) => { addSessionRow(idx + 1, s); });
                 document.getElementById('log_remarks').value = existingData.remark || '';
                 
-                // 만약 2회차까지만 있으면 3회차는 빈칸으로 채워주기 (기본 3칸 유지)
                 for(let i = existingData.sessions.length + 1; i <= 3; i++) {
                     addSessionRow(i);
                 }
             } else {
-                // 아예 없으면 깨끗하게 3칸 생성
                 addSessionRow(1); addSessionRow(2); addSessionRow(3);
             }
         }
 
-        // 3. 회차별 입력 폼 한 줄 만들기
         function addSessionRow(index = null, data = null) {
             if(!index) index = document.querySelectorAll('.session-row').length + 1;
             
@@ -543,7 +576,6 @@
             }
         }
 
-        // 4. 해당 시간대 통째로 저장(덮어쓰기)
         async function submitTimeSlotLogs() {
             const loc = document.getElementById('log_location_select').value;
             const t = document.getElementById('log_time_select').value;
@@ -572,7 +604,7 @@
                 });
                 if(res.ok) {
                     alert("성공적으로 저장(수정)되었습니다.");
-                    loadTodayLogs(); // 저장 후 최신 데이터로 다시 덮어주기
+                    loadTodayLogs(); 
                 }
             } catch(e) {
                 alert("저장 중 오류가 발생했습니다.");
@@ -882,7 +914,7 @@
                 
                 let html = `
                     <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
-                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적 (작성된 일지: ${summary.logs}건)</div>
+                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적</div>
                         <div style="display:flex; justify-content:space-between; text-align:center;">
                             <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 탐방객</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.visitors}명</div></div>
                             <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 청취자</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.listeners}명</div></div>
@@ -1172,7 +1204,10 @@
 
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
 
-        syncMyStatus();
+        // 앱 시작 시 상태 동기화 후 조장이면 알림 검사
+        syncMyStatus().then(() => {
+            checkPendingForLeader();
+        });
     </script>
 </body>
 </html>
