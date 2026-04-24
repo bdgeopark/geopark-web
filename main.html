@@ -384,7 +384,6 @@
             }
         });
 
-        // [수정] 연도, 월, 일 Placeholder 적용
         let maMonthEl = document.getElementById('ma_month');
         if(maMonthEl) {
             maMonthEl.innerHTML = '<option value="" disabled selected>월</option>';
@@ -516,7 +515,20 @@
             const actionDate = document.getElementById('attendance_date_input').value;
             if(!inputTime || !actionDate) { alert("날짜와 시간을 확인해주세요."); return; }
 
-            if(!confirm(`[${actionDate}] ${inputTime} 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+            const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+            if (action === '출근') {
+                const isWorking = currentLoc !== "미출근";
+                const lastInTime = document.getElementById('in_time_display').innerText.replace('기록됨: ', '');
+                
+                if (actionDate === todayStr && isWorking && lastInTime) {
+                    if(!confirm(`이미 ${lastInTime}에 출근(또는 이동) 기록이 존재합니다.\n입력하신 시간(${inputTime})으로 수정(덮어쓰기) 하시겠습니까?`)) return; 
+                } else {
+                    if(!confirm(`[${actionDate}] ${inputTime} 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+                }
+            } else {
+                if(!confirm(`[${actionDate}] ${inputTime} 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+            }
 
             showLoading(); 
             try {
@@ -619,6 +631,15 @@
             const targetDate = document.getElementById('log_date_input').value; 
             let sessions = [];
             
+            // --- 신규 추가: 미출근 상태에서 오늘치 일지 저장 시도 시 경고 ---
+            const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            if (targetDate === todayStr && currentLoc === "미출근") {
+                if(!confirm("🚨 현재 '미출근' 상태입니다!\n\n출근 기록 없이 일지를 저장하면 통합 현황판에 '미출근'으로 표시됩니다.\n(권장: [취소]를 누르고 '출퇴근관리'에서 먼저 출근하기)\n\n그래도 이대로 저장하시겠습니까?")) {
+                    return;
+                }
+            }
+            // -----------------------------------------------------------------
+
             document.querySelectorAll('.session-row').forEach(row => {
                 const v = parseInt(row.querySelector('.s-v').value) || 0;
                 const l = parseInt(row.querySelector('.s-l').value) || 0;
@@ -796,7 +817,6 @@
             } catch (e) {}
         }
 
-        // [수정] 조회 드롭다운 유효성 검사 추가
         async function loadMyActivity() {
             const year = document.getElementById('ma_year').value;
             const month = document.getElementById('ma_month').value;
