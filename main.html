@@ -136,6 +136,7 @@
     </div>
 
     <div id="log_area" class="hidden-section">
+        <div class="form-group"><label>📅 날짜 선택</label><input type="date" id="log_date_input" onchange="loadTodayLogs()"></div>
         <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select" onchange="loadTodayLogs()"></select></div>
         <div class="form-group"><label>⏱ 시간대 선택</label><select id="log_time_select" onchange="renderLogTimeSlot()"></select></div>
         
@@ -383,11 +384,17 @@
             }
         }
 
+        // [초기화] 날짜 입력 필드들 기본 오늘 날짜 세팅
+        const nowForInit = new Date(); 
+        const offsetInit = nowForInit.getTimezoneOffset() * 60000;
+        const dateOffset = new Date(nowForInit.getTime() - offsetInit).toISOString().split('T')[0];
+        
         if(document.getElementById('al_start_date')) {
-            const now = new Date(); const offset = now.getTimezoneOffset() * 60000;
-            const dateOffset = new Date(now.getTime() - offset).toISOString().split('T')[0];
             document.getElementById('al_start_date').value = dateOffset;
             document.getElementById('al_end_date').value = dateOffset;
+        }
+        if(document.getElementById('log_date_input')) {
+            document.getElementById('log_date_input').value = dateOffset;
         }
 
         function updateApLoc() {
@@ -472,7 +479,6 @@
             container.appendChild(d);
         });
 
-        // [신규] 관리자 전용 대시보드 로드 함수
         async function loadAdminDashboard() {
             const container = document.getElementById('admin_dash_container');
             document.getElementById('dash_today_date').innerText = new Date().toLocaleDateString('ko-KR', {month:'long', day:'numeric'});
@@ -593,13 +599,15 @@
 
         let todayLogDataByTime = {};
 
+        // [수정] 날짜 값을 서버로 함께 전달하여 과거 기록도 가져오도록 변경
         async function loadTodayLogs() {
             const loc = document.getElementById('log_location_select').value;
+            const targetDate = document.getElementById('log_date_input').value; // 추가된 날짜 선택칸
             if(!loc) return;
 
             showLoading();
             try {
-                const res = await fetch(`${API_BASE}/get_today_logs?name=${encodeURIComponent(userName)}&loc=${encodeURIComponent(loc)}`);
+                const res = await fetch(`${API_BASE}/get_today_logs?name=${encodeURIComponent(userName)}&loc=${encodeURIComponent(loc)}&target_date=${targetDate}`);
                 const data = await res.json();
                 
                 todayLogDataByTime = {};
@@ -671,6 +679,7 @@
             const loc = document.getElementById('log_location_select').value;
             const t = document.getElementById('log_time_select').value;
             const remarks = document.getElementById('log_remarks').value;
+            const targetDate = document.getElementById('log_date_input').value; // 추가된 날짜 선택칸 읽기
             let sessions = [];
             
             document.querySelectorAll('.session-row').forEach(row => {
@@ -681,7 +690,7 @@
                 sessions.push({ v: v, l: l, c: c, is_co: is_co });
             });
 
-            if(!confirm(`[${t}] 시간대의 운영일지를 저장(덮어쓰기)하시겠습니까?\n(기존 입력된 값이 있다면 모두 덮어써집니다.)`)) return;
+            if(!confirm(`[${targetDate}] [${t}] 시간대의 운영일지를 저장(덮어쓰기)하시겠습니까?\n(기존 입력된 값이 있다면 모두 덮어써집니다.)`)) return;
 
             showLoading();
             try {
@@ -689,7 +698,7 @@
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 
                         name: userName, island: userIsland, role: userRole, 
-                        log_location: loc, target_time: t, remarks: remarks, sessions: sessions 
+                        log_location: loc, target_date: targetDate, target_time: t, remarks: remarks, sessions: sessions 
                     })
                 });
                 if(res.ok) {
@@ -1232,7 +1241,6 @@
             } catch (e) {}
         }
 
-        // [대규모 개편] 관리자 통계 화면 - 한달 활동시간 및 알림 배지 적용
         async function loadStatistics() {
             const container = document.getElementById('stat_container');
             const year = document.getElementById('stat_year').value;
@@ -1263,7 +1271,6 @@
 
                 html += `<div style="font-weight:800; font-size:1.05rem; margin-top:25px; margin-bottom:10px; color:#2c3e50;">🧑‍🏫 해설사별 개인 실적 및 근무 알림</div>`;
                 
-                // 테이블에 활동시간, 비고(알림) 컬럼 추가
                 html += `
                     <div style="overflow-x:auto;">
                     <table class="stat-table" style="min-width: 600px;">
@@ -1486,7 +1493,6 @@
 
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
 
-        // 관리자로 로그인한 경우 기본 화면 로드 변경
         if(userRole === '관리자') {
             document.getElementById('admin_dashboard_area').style.display = 'block';
             loadAdminDashboard();
