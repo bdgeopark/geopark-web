@@ -228,9 +228,22 @@
 
     <div id="approval_area" class="hidden-section">
         <div class="form-group">
+            
+            <div class="flex-group" style="margin-bottom:10px;">
+                <select id="approval_filter_loc" style="flex:1; padding:10px; background-color:#fff;" onchange="renderPendingRequests()">
+                    <option value="all">전체 안내소</option>
+                </select>
+                <select id="approval_filter_name" style="flex:1; padding:10px; background-color:#fff;" onchange="renderPendingRequests()">
+                    <option value="all">전체 해설사</option>
+                </select>
+            </div>
+
             <div id="approval_header" class="approval-header" style="display:none;">
                 <label><input type="checkbox" id="chk_all" class="chk-box" onclick="toggleAllApprovals(this)"> 전체 선택</label>
-                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button><button class="btn-act btn-out" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('반려')">반려</button></div>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-act btn-in" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button>
+                    <button class="btn-act btn-out" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('반려')">반려</button>
+                </div>
             </div>
             <p style="font-size:0.8rem; color:#e74c3c; margin-bottom:10px; font-weight:bold;">※ 내용 및 장소/시간을 수정한 후 [선택 승인]을 누르면 수정된 내용으로 반영됩니다.</p>
             <div id="pending_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
@@ -466,19 +479,14 @@
             document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
         });
 
-        // [핵심 변경] 메뉴 클릭 핸들러 번호 의존성 제거 (유연한 텍스트 매칭)
-        const container = document.getElementById('menu_container');
-        
-        let currentMenuData = [];
-        if(userRole === '해설사') {
-            currentMenuData = ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회', '6. 나의 활동 현황'];
-        } else if (userRole === '조장') {
-            currentMenuData = ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)', '10. 나의 활동 현황'];
-        } else {
-            currentMenuData = ['0. 오늘 통합 현황', '1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계'];
-        }
+        const menuData = {
+            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회', '6. 나의 활동 현황'],
+            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)', '10. 나의 활동 현황'],
+            '관리자': ['0. 오늘 통합 현황', '1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계']
+        };
 
-        currentMenuData.forEach(m => {
+        const container = document.getElementById('menu_container');
+        (menuData[userRole] || menuData['해설사']).forEach(m => {
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
@@ -502,13 +510,11 @@
                 }
                 else if(m.includes('활동계획서 작성')) { 
                     document.getElementById('plan_area').style.display = 'block'; 
-                    // 조장, 관리자는 대리 작성 기능을 활성화
                     if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('plan_target_user', 'plan_target_user_group'); 
                 }
                 else if(m.includes('활동계획 변경')) { 
                     document.getElementById('change_area').style.display = 'block'; 
                     loadGuideList(); 
-                    // 조장, 관리자는 대리 변경 기능을 활성화
                     if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('change_target_user', 'change_target_user_group');
                 }
                 else if(m.includes('변경 승인')) { 
@@ -548,7 +554,6 @@
             container.appendChild(d);
         });
 
-        // [통합] 계획서/변경신청 대리 작성 대상자 로드 함수
         function loadPlanTargetUsers(selectId, groupId) {
             document.getElementById(groupId).style.display = 'block';
             fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=none`)
@@ -993,58 +998,120 @@
             } catch (e) {}
         }
 
-        async function loadPendingRequests() {
-            const container = document.getElementById('pending_container'); const header = document.getElementById('approval_header');
-            container.innerHTML = '<p style="text-align:center; color:#999;">불러오는 중...</p>'; header.style.display = 'none'; document.getElementById('chk_all').checked = false;
-            try {
-                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`); const data = await res.json();
-                if(data.plans.length === 0 && data.changes.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">대기 내역이 없습니다.</p>'; return; }
-                header.style.display = 'flex'; let html = '';
-                
-                data.plans.forEach(p => { 
-                    let timeMatch = p['활동여부'].match(/(\d{2}:\d{2})~(\d{2}:\d{2})/);
-                    let sTime = timeMatch ? timeMatch[1] : '08:00';
-                    let eTime = timeMatch ? timeMatch[2] : '17:00';
-                    
-                    let locOpts = locOptionsHtml.replace(`value="${p['장소']}"`, `value="${p['장소']}" selected`);
-                    let startOpts = timeOptionsHtml.replace(`value="${sTime}"`, `value="${sTime}" selected`);
-                    let endOpts = timeOptionsHtml.replace(`value="${eTime}"`, `value="${eTime}" selected`);
+        // [신규] 승인 대기 내역 로드 시, 필터 적용을 위해 데이터를 전역에 캐싱
+        let pendingDataCache = { plans: [], changes: [] };
 
-                    html += `
-                        <div class="approval-card">
-                            <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획", row_index: p.row_index})}'> 
-                            <div class="app-content">
-                                <span class="app-tag tag-plan">신규 계획</span>
-                                <div class="app-info"><b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}</div>
-                                <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
-                                    <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 장소 / 시간 직접 수정</div>
-                                    <select class="edit-loc" style="width:100%; padding:6px; margin-bottom:5px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${locOpts}</select>
-                                    <div style="display:flex; gap:5px; align-items:center;">
-                                        <select class="edit-start" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${startOpts}</select>
-                                        <span style="font-weight:bold; color:#7f8c8d;">~</span>
-                                        <select class="edit-end" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${endOpts}</select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`; 
-                });
+        async function loadPendingRequests() {
+            const container = document.getElementById('pending_container'); 
+            const header = document.getElementById('approval_header');
+            container.innerHTML = '<p style="text-align:center; color:#999;">불러오는 중...</p>'; 
+            header.style.display = 'none'; 
+            document.getElementById('chk_all').checked = false;
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`); 
+                const data = await res.json();
+                pendingDataCache = data;
+
+                let locs = new Set();
+                let names = new Set();
+
+                data.plans.forEach(p => { locs.add(p['장소']); names.add(p['이름']); });
+                data.changes.forEach(c => { names.add(c['신청자']); }); 
+
+                let locFilter = document.getElementById('approval_filter_loc');
+                let nameFilter = document.getElementById('approval_filter_name');
+
+                let currentLoc = locFilter.value;
+                let currentName = nameFilter.value;
+
+                locFilter.innerHTML = '<option value="all">전체 안내소</option>' + Array.from(locs).map(l => `<option value="${l}">${l}</option>`).join('');
+                nameFilter.innerHTML = '<option value="all">전체 해설사</option>' + Array.from(names).map(n => `<option value="${n}">${n}</option>`).join('');
+
+                if(Array.from(locs).includes(currentLoc)) locFilter.value = currentLoc;
+                if(Array.from(names).includes(currentName)) nameFilter.value = currentName;
+
+                renderPendingRequests();
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
+        }
+
+        // [신규] 캐싱된 대기 내역을 필터에 맞게 렌더링
+        function renderPendingRequests() {
+            const container = document.getElementById('pending_container');
+            const header = document.getElementById('approval_header');
+            document.getElementById('chk_all').checked = false;
+
+            let filterLoc = document.getElementById('approval_filter_loc').value;
+            let filterName = document.getElementById('approval_filter_name').value;
+
+            let filteredPlans = pendingDataCache.plans.filter(p => {
+                if (filterLoc !== 'all' && p['장소'] !== filterLoc) return false;
+                if (filterName !== 'all' && p['이름'] !== filterName) return false;
+                return true;
+            });
+
+            let filteredChanges = pendingDataCache.changes.filter(c => {
+                if (filterName !== 'all' && c['신청자'] !== filterName) return false;
+                // 변경 신청에는 '장소' 컬럼이 없을 수 있으므로 안내소 필터 적용 시 주의
+                // 현재 데이터 구조상 변경신청은 장소를 모르므로, 장소 필터가 걸려있으면 변경신청은 숨깁니다.
+                if (filterLoc !== 'all') return false; 
+                return true;
+            });
+
+            if (filteredPlans.length === 0 && filteredChanges.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">조건에 맞는 대기 내역이 없습니다.</p>';
+                header.style.display = 'none';
+                return;
+            }
+
+            header.style.display = 'flex';
+            let html = '';
+
+            filteredPlans.forEach(p => {
+                let timeMatch = p['활동여부'].match(/(\d{2}:\d{2})~(\d{2}:\d{2})/);
+                let sTime = timeMatch ? timeMatch[1] : '08:00';
+                let eTime = timeMatch ? timeMatch[2] : '17:00';
                 
-                data.changes.forEach(c => { 
-                    html += `
-                        <div class="approval-card">
-                            <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획_변경신청", row_index: c.row_index})}'> 
-                            <div class="app-content">
-                                <span class="app-tag tag-change">변경/취소</span>
-                                <div class="app-info"><b>${c['신청자']}</b> 해설사<br>날짜: ${c['변경대상일']}<br>유형: ${c['변경유형']}</div>
-                                <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
-                                    <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 상세내용 수정</div>
-                                    <input type="text" class="edit-detail" value="${c['상세내용']}" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem; font-family:'Pretendard'; box-sizing:border-box;">
+                let locOpts = locOptionsHtml.replace(`value="${p['장소']}"`, `value="${p['장소']}" selected`);
+                let startOpts = timeOptionsHtml.replace(`value="${sTime}"`, `value="${sTime}" selected`);
+                let endOpts = timeOptionsHtml.replace(`value="${eTime}"`, `value="${eTime}" selected`);
+
+                html += `
+                    <div class="approval-card">
+                        <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획", row_index: p.row_index})}'> 
+                        <div class="app-content">
+                            <span class="app-tag tag-plan">신규 계획</span>
+                            <div class="app-info"><b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}</div>
+                            <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
+                                <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 장소 / 시간 직접 수정</div>
+                                <select class="edit-loc" style="width:100%; padding:6px; margin-bottom:5px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${locOpts}</select>
+                                <div style="display:flex; gap:5px; align-items:center;">
+                                    <select class="edit-start" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${startOpts}</select>
+                                    <span style="font-weight:bold; color:#7f8c8d;">~</span>
+                                    <select class="edit-end" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${endOpts}</select>
                                 </div>
                             </div>
-                        </div>`; 
-                });
-                container.innerHTML = html;
-            } catch (e) {}
+                        </div>
+                    </div>`; 
+            });
+            
+            filteredChanges.forEach(c => { 
+                html += `
+                    <div class="approval-card">
+                        <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획_변경신청", row_index: c.row_index})}'> 
+                        <div class="app-content">
+                            <span class="app-tag tag-change">변경/취소</span>
+                            <div class="app-info"><b>${c['신청자']}</b> 해설사<br>날짜: ${c['변경대상일']}<br>유형: ${c['변경유형']}</div>
+                            <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
+                                <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 상세내용 수정</div>
+                                <input type="text" class="edit-detail" value="${c['상세내용']}" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem; font-family:'Pretendard'; box-sizing:border-box;">
+                            </div>
+                        </div>
+                    </div>`; 
+            });
+            container.innerHTML = html;
         }
 
         function toggleAllApprovals(source) { document.querySelectorAll('.item-chk').forEach(chk => chk.checked = source.checked); }
@@ -1129,7 +1196,7 @@
         async function loadAdminDashboard() {
             const container = document.getElementById('admin_dash_container');
             document.getElementById('dash_today_date').innerText = new Date().toLocaleDateString('ko-KR', {month:'long', day:'numeric'});
-            container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">현황을 종합하는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">현황을 종합하는 중...</p>';
             
             showLoading();
             try {
