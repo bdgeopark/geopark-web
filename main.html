@@ -190,6 +190,11 @@
     </div>
 
     <div id="change_area" class="hidden-section">
+        <div class="form-group" id="change_target_user_group" style="display:none; margin-bottom:10px;">
+            <label>👤 변경 대상자 (조원 선택 가능)</label>
+            <select id="change_target_user" onchange="loadGuideList()"></select>
+        </div>
+
         <div class="form-group"><label>📅 변경 대상 날짜</label><input type="date" id="change_target_date"></div>
         <div class="form-group"><select id="change_type" onchange="updateChangeUI()"><option value="시간 변경">시간 변경</option><option value="해설사 변경(대타)">해설사 변경</option><option value="계획 취소">계획 취소</option></select></div>
         <div id="change_ui_time" class="time-input-wrap"><div class="flex-group"><select id="change_time_start"></select><span>~</span><select id="change_time_end"></select></div></div>
@@ -461,40 +466,101 @@
             document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
         });
 
-        const menuData = {
-            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회', '6. 나의 활동 현황'],
-            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)', '10. 나의 활동 현황'],
-            '관리자': ['0. 오늘 통합 현황', '1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계']
-        };
-
+        // [핵심 변경] 메뉴 클릭 핸들러 번호 의존성 제거 (유연한 텍스트 매칭)
         const container = document.getElementById('menu_container');
-        (menuData[userRole] || menuData['해설사']).forEach(m => {
+        
+        let currentMenuData = [];
+        if(userRole === '해설사') {
+            currentMenuData = ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회', '6. 나의 활동 현황'];
+        } else if (userRole === '조장') {
+            currentMenuData = ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)', '10. 나의 활동 현황'];
+        } else {
+            currentMenuData = ['0. 오늘 통합 현황', '1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계'];
+        }
+
+        currentMenuData.forEach(m => {
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
                 document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
                 
-                if(m === '0. 오늘 통합 현황') { document.getElementById('admin_dashboard_area').style.display = 'block'; loadAdminDashboard(); }
-                else if(m.includes('출퇴근관리') && userRole !== '관리자') { document.getElementById('attendance_area').style.display = 'block'; setCurrentTimeInput(); }
-                else if(m.includes('운영일지 작성')) { document.getElementById('log_area').style.display = 'block'; loadTodayLogs(); }
-                else if(m === '3. 출퇴근 및 활동 현황 조회') { document.getElementById('status_area').style.display = 'block'; loadDailyStatus(); }
-                else if(m === '4. 활동계획서 작성' || (userRole === '해설사' && m === '3. 활동계획서 작성')) { 
-                    document.getElementById('plan_area').style.display = 'block'; 
-                    if(userRole === '조장') loadPlanTargetUsers(); 
+                if(m.includes('오늘 통합 현황')) { 
+                    document.getElementById('admin_dashboard_area').style.display = 'block'; 
+                    loadAdminDashboard(); 
                 }
-                else if(m.includes('활동계획 변경')) { document.getElementById('change_area').style.display = 'block'; loadGuideList(); }
-                else if(m.includes('변경 승인')) { document.getElementById('approval_area').style.display = 'block'; loadPendingRequests(); }
-                else if(m.includes('나의 활동계획 조회')) { document.getElementById('my_plan_area').style.display = 'block'; loadMyPlans(); }
-                else if(m.includes('조원 활동계획 조회')) { document.getElementById('team_plan_area').style.display = 'block'; loadTeamPlans(); }
-                else if(m.includes('보고서 출력')) document.getElementById('report_area').style.display = 'block';
-                else if(m.includes('나의 활동 현황')) { document.getElementById('my_activity_area').style.display = 'block'; }
-                else if(m === '1. 해설사 출퇴근 현황') { document.getElementById('admin_attendance_area').style.display = 'block'; loadAdminAttendance(); }
-                else if(m === '2. 해설사 활동 현황') { document.getElementById('admin_log_area').style.display = 'block'; loadAdminLogs(); }
-                else if(m === '3. 활동계획서 조회') { document.getElementById('admin_plan_area').style.display = 'block'; loadAdminPlans(); }
-                else if(m === '4. 통계') { document.getElementById('admin_stats_area').style.display = 'block'; }
+                else if(m.includes('출퇴근관리')) { 
+                    document.getElementById('attendance_area').style.display = 'block'; 
+                    setCurrentTimeInput(); 
+                }
+                else if(m.includes('운영일지 작성')) { 
+                    document.getElementById('log_area').style.display = 'block'; 
+                    loadTodayLogs(); 
+                }
+                else if(m.includes('출퇴근 및 활동 현황 조회')) { 
+                    document.getElementById('status_area').style.display = 'block'; 
+                    loadDailyStatus(); 
+                }
+                else if(m.includes('활동계획서 작성')) { 
+                    document.getElementById('plan_area').style.display = 'block'; 
+                    // 조장, 관리자는 대리 작성 기능을 활성화
+                    if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('plan_target_user', 'plan_target_user_group'); 
+                }
+                else if(m.includes('활동계획 변경')) { 
+                    document.getElementById('change_area').style.display = 'block'; 
+                    loadGuideList(); 
+                    // 조장, 관리자는 대리 변경 기능을 활성화
+                    if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('change_target_user', 'change_target_user_group');
+                }
+                else if(m.includes('변경 승인')) { 
+                    document.getElementById('approval_area').style.display = 'block'; 
+                    loadPendingRequests(); 
+                }
+                else if(m.includes('나의 활동계획 조회')) { 
+                    document.getElementById('my_plan_area').style.display = 'block'; 
+                    loadMyPlans(); 
+                }
+                else if(m.includes('조원 활동계획 조회')) { 
+                    document.getElementById('team_plan_area').style.display = 'block'; 
+                    loadTeamPlans(); 
+                }
+                else if(m.includes('보고서 출력')) { 
+                    document.getElementById('report_area').style.display = 'block'; 
+                }
+                else if(m.includes('나의 활동 현황')) { 
+                    document.getElementById('my_activity_area').style.display = 'block'; 
+                }
+                else if(m.includes('해설사 출퇴근 현황')) { 
+                    document.getElementById('admin_attendance_area').style.display = 'block'; 
+                    loadAdminAttendance(); 
+                }
+                else if(m.includes('해설사 활동 현황')) { 
+                    document.getElementById('admin_log_area').style.display = 'block'; 
+                    loadAdminLogs(); 
+                }
+                else if(m.includes('활동계획서 조회')) { 
+                    document.getElementById('admin_plan_area').style.display = 'block'; 
+                    loadAdminPlans(); 
+                }
+                else if(m.includes('통계')) { 
+                    document.getElementById('admin_stats_area').style.display = 'block'; 
+                }
             };
             container.appendChild(d);
         });
+
+        // [통합] 계획서/변경신청 대리 작성 대상자 로드 함수
+        function loadPlanTargetUsers(selectId, groupId) {
+            document.getElementById(groupId).style.display = 'block';
+            fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=none`)
+            .then(res => res.json())
+            .then(data => {
+                let tg = document.getElementById(selectId);
+                tg.innerHTML = `<option value="${userName}">본인 (${userName})</option>`;
+                data.guides.forEach(g => {
+                    if(g !== userName) tg.innerHTML += `<option value="${g}">${g} 해설사</option>`;
+                });
+            });
+        }
 
         async function syncMyStatus() {
             if(userRole === '관리자') return;
@@ -631,14 +697,12 @@
             const targetDate = document.getElementById('log_date_input').value; 
             let sessions = [];
             
-            // --- 신규 추가: 미출근 상태에서 오늘치 일지 저장 시도 시 경고 ---
             const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
             if (targetDate === todayStr && currentLoc === "미출근") {
                 if(!confirm("🚨 현재 '미출근' 상태입니다!\n\n출근 기록 없이 일지를 저장하면 통합 현황판에 '미출근'으로 표시됩니다.\n(권장: [취소]를 누르고 '출퇴근관리'에서 먼저 출근하기)\n\n그래도 이대로 저장하시겠습니까?")) {
                     return;
                 }
             }
-            // -----------------------------------------------------------------
 
             document.querySelectorAll('.session-row').forEach(row => {
                 const v = parseInt(row.querySelector('.s-v').value) || 0;
@@ -735,7 +799,7 @@
             let plans = []; let isValid = true; let totalRestDays = 0; let currentWeekWorkDays = 0; let weekWarningTriggered = false; let requiresApproval = false;
             
             let targetName = userName;
-            if(userRole === '조장') {
+            if(userRole === '조장' || userRole === '관리자') {
                 let tg = document.getElementById('plan_target_user');
                 if(tg && tg.value) targetName = tg.value;
             }
@@ -784,22 +848,34 @@
         }
 
         async function loadGuideList() {
+            let targetName = userName;
+            if(userRole === '조장' || userRole === '관리자') {
+                let tg = document.getElementById('change_target_user');
+                if(tg && tg.value) targetName = tg.value;
+            }
+
             const select = document.getElementById('change_target_guide');
             try {
-                const res = await fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=${encodeURIComponent(userName)}`);
+                const res = await fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=${encodeURIComponent(targetName)}`);
                 if(res.ok) { const data = await res.json(); select.innerHTML = data.guides.length > 0 ? data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('') : '<option value="">동료가 없습니다.</option>'; }
             } catch (e) {}
         }
 
         async function submitPlanChange() {
+            let targetName = userName;
+            if(userRole === '조장' || userRole === '관리자') {
+                let tg = document.getElementById('change_target_user');
+                if(tg && tg.value) targetName = tg.value;
+            }
+
             const targetDate = document.getElementById('change_target_date').value; const changeType = document.getElementById('change_type').value; const remarks = document.getElementById('change_remarks').value;
             if(!targetDate || !remarks) { alert("날짜와 사유를 입력해주세요."); return; }
             let changeDetail = changeType === '시간 변경' ? `${document.getElementById('change_time_start').value}~${document.getElementById('change_time_end').value} 로 변경` : (changeType === '해설사 변경(대타)' ? `${document.getElementById('change_target_guide').value} 대타 요청` : "휴무 처리 요청");
-            if(!confirm("승인 요청하시겠습니까?")) return;
+            if(!confirm(`[${targetName}] 님의 승인 요청을 접수하시겠습니까?`)) return;
 
             showLoading();
             try {
-                const res = await fetch(`${API_BASE}/request_plan_change`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: userName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: changeType === '해설사 변경(대타)' ? document.getElementById('change_target_guide').value : "" }) });
+                const res = await fetch(`${API_BASE}/request_plan_change`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: targetName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: changeType === '해설사 변경(대타)' ? document.getElementById('change_target_guide').value : "" }) });
                 if(res.ok) { alert("완료되었습니다."); document.getElementById('change_area').style.display = 'none'; }
             } catch (e) { alert("오류 발생"); } finally { hideLoading(); }
         }
@@ -885,7 +961,7 @@
             const month = document.getElementById('tp_month').value; const half = document.getElementById('tp_half').value;
             const loc = document.getElementById('tp_loc').value; const nameSearch = document.getElementById('tp_name').value.trim();
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중...</p>';
             try {
                 const res = await fetch(`${API_BASE}/get_island_plans?island=${encodeURIComponent(userIsland)}&month=${month}`);
                 const data = await res.json();
