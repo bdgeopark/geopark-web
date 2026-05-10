@@ -25,7 +25,6 @@
         .btn-move { background-color: #3498db; color: white; }
         .btn-out { background-color: #EAEAEA; color: #191919; }
         .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
-        .btn-submit:disabled { background-color: #CCC; cursor: not-allowed; }
         .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
         .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
         .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
@@ -45,7 +44,6 @@
         .admin-island-card { background: white; border: 2px solid #2c3e50; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .admin-island-header { background: #2c3e50; color: white; padding: 12px 15px; font-size: 1.1rem; font-weight: 800; }
         .admin-loc-group { padding: 15px; border-bottom: 1px solid #ecf0f1; }
-        .admin-loc-group:last-child { border-bottom: none; }
         .admin-loc-title { font-weight: 800; color: #2980b9; margin-bottom: 10px; font-size: 1.05rem; display:flex; align-items:center; gap:5px; }
         .admin-guide-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
         .admin-guide-name { font-weight: 800; font-size: 1rem; color: #333; margin-bottom: 8px; }
@@ -54,24 +52,16 @@
         .admin-time-act { background: #e8f5e9; padding: 6px 10px; border-radius: 6px; color: #1b5e20; }
         .admin-time-none { background: #ffebee; padding: 6px 10px; border-radius: 6px; color: #b71c1c; }
         .log-item-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .log-item-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
-        .log-item-stats { display: flex; gap: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
-        .log-item-stats div { flex: 1; text-align: center; }
-        .log-item-stats b { display: block; color: #b33939; font-size: 1rem; }
         .stat-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
         .stat-table th { background-color: #2c3e50; color: white; padding: 10px; border: 1px solid #ddd; }
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
+        .stat-table .t-left { text-align: left; font-weight: bold; background: #f8f9fa; }
         .alert-badge { background-color: #e74c3c; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; display: inline-block; word-break: keep-all; }
-
         .font-control-wrap { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
         .btn-font { width: 45px; height: 45px; border-radius: 50%; border: none; background: #333; color: white; font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; }
-        .btn-font:active { transform: scale(0.9); }
-
         #loading_overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- PDF 인쇄 스타일 --- */
         #print_area { display: none; }
         @media print {
             body * { visibility: hidden; }
@@ -83,7 +73,7 @@
             .print-top-left { font-size: 11pt; font-weight: bold; margin-bottom: 3mm; }
             .print-main-title { text-align: center; font-size: 24pt; font-weight: 900; margin-bottom: 2mm; letter-spacing: 5px; }
             .print-date { text-align: center; font-size: 11pt; margin-bottom: 5mm; }
-            table.fixed-table { width: 100%; border-collapse: collapse; border: 2px solid #000; table-layout: fixed; text-align: center; font-size: 11pt; height: max-content; }
+            table.fixed-table { width: 100%; border-collapse: collapse; border: 2px solid #000; table-layout: fixed; text-align: center; font-size: 11pt; }
             table.fixed-table th, table.fixed-table td { border: 1px solid #000; padding: 2px 4px; overflow: hidden; vertical-align: middle; }
             table.fixed-table th { font-weight: bold; background-color: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .t1-col1 { width: 15%; } .t1-col2 { width: 25%; } .t1-col3 { width: 15%; } .t1-col4 { width: 45%; }
@@ -494,7 +484,6 @@
             document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
         });
 
-        // [복구 완료] 모든 메뉴 데이터와 연결 화면 완벽 복구
         const container = document.getElementById('menu_container');
         
         let currentMenuData = [];
@@ -512,21 +501,65 @@
             d.onclick = () => {
                 document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
                 
-                if(m.includes('오늘 통합 현황')) { document.getElementById('admin_dashboard_area').style.display = 'block'; loadAdminDashboard(); }
-                else if(m.includes('출퇴근관리')) { document.getElementById('attendance_area').style.display = 'block'; setCurrentTimeInput(); }
-                else if(m.includes('운영일지 작성')) { document.getElementById('log_area').style.display = 'block'; loadTodayLogs(); }
-                else if(m.includes('출퇴근 및 활동 현황 조회')) { document.getElementById('status_area').style.display = 'block'; loadDailyStatus(); }
-                else if(m.includes('활동계획서 작성')) { document.getElementById('plan_area').style.display = 'block'; if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('plan_target_user', 'plan_target_user_group'); }
-                else if(m.includes('활동계획 변경')) { document.getElementById('change_area').style.display = 'block'; loadGuideList(); if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('change_target_user', 'change_target_user_group'); }
-                else if(m.includes('변경 승인')) { document.getElementById('approval_area').style.display = 'block'; loadPendingRequests(); }
-                else if(m.includes('나의 활동계획 조회')) { document.getElementById('my_plan_area').style.display = 'block'; loadMyPlans(); }
-                else if(m.includes('조원 활동계획 조회')) { document.getElementById('team_plan_area').style.display = 'block'; loadTeamPlans(); }
-                else if(m.includes('보고서 출력')) { document.getElementById('report_area').style.display = 'block'; }
-                else if(m.includes('나의 활동 현황')) { document.getElementById('my_activity_area').style.display = 'block'; loadMyActivity(); }
-                else if(m.includes('해설사 출퇴근 현황')) { document.getElementById('admin_attendance_area').style.display = 'block'; loadAdminAttendance(); }
-                else if(m.includes('해설사 활동 현황')) { document.getElementById('admin_log_area').style.display = 'block'; loadAdminLogs(); }
-                else if(m.includes('활동계획서 조회')) { document.getElementById('admin_plan_area').style.display = 'block'; loadAdminPlans(); }
-                else if(m.includes('통계')) { document.getElementById('admin_stats_area').style.display = 'block'; }
+                if(m.includes('오늘 통합 현황')) { 
+                    document.getElementById('admin_dashboard_area').style.display = 'block'; 
+                    loadAdminDashboard(); 
+                }
+                else if(m.includes('출퇴근관리')) { 
+                    document.getElementById('attendance_area').style.display = 'block'; 
+                    setCurrentTimeInput(); 
+                }
+                else if(m.includes('운영일지 작성')) { 
+                    document.getElementById('log_area').style.display = 'block'; 
+                    loadTodayLogs(); 
+                }
+                else if(m.includes('출퇴근 및 활동 현황 조회')) { 
+                    document.getElementById('status_area').style.display = 'block'; 
+                    loadDailyStatus(); 
+                }
+                else if(m.includes('활동계획서 작성')) { 
+                    document.getElementById('plan_area').style.display = 'block'; 
+                    if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('plan_target_user', 'plan_target_user_group'); 
+                }
+                else if(m.includes('활동계획 변경')) { 
+                    document.getElementById('change_area').style.display = 'block'; 
+                    loadGuideList(); 
+                    if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('change_target_user', 'change_target_user_group');
+                }
+                else if(m.includes('변경 승인')) { 
+                    document.getElementById('approval_area').style.display = 'block'; 
+                    loadPendingRequests(); 
+                }
+                else if(m.includes('나의 활동계획 조회')) { 
+                    document.getElementById('my_plan_area').style.display = 'block'; 
+                    loadMyPlans(); 
+                }
+                else if(m.includes('조원 활동계획 조회')) { 
+                    document.getElementById('team_plan_area').style.display = 'block'; 
+                    loadTeamPlans(); 
+                }
+                else if(m.includes('보고서 출력')) { 
+                    document.getElementById('report_area').style.display = 'block'; 
+                }
+                else if(m.includes('나의 활동 현황')) { 
+                    document.getElementById('my_activity_area').style.display = 'block';
+                    loadMyActivity();
+                }
+                else if(m.includes('해설사 출퇴근 현황')) { 
+                    document.getElementById('admin_attendance_area').style.display = 'block'; 
+                    loadAdminAttendance(); 
+                }
+                else if(m.includes('해설사 활동 현황')) { 
+                    document.getElementById('admin_log_area').style.display = 'block'; 
+                    loadAdminLogs(); 
+                }
+                else if(m.includes('활동계획서 조회')) { 
+                    document.getElementById('admin_plan_area').style.display = 'block'; 
+                    loadAdminPlans(); 
+                }
+                else if(m.includes('통계')) { 
+                    document.getElementById('admin_stats_area').style.display = 'block'; 
+                }
             };
             container.appendChild(d);
         });
@@ -722,7 +755,10 @@
             container.innerHTML = '<p style="text-align:center; color:#999;">데이터를 불러오는 중입니다...</p>';
             try {
                 const res = await fetch(`${API_BASE}/get_daily_status?island=${encodeURIComponent(userIsland)}&target_date=${targetDate}`);
-                if (!res.ok) throw new Error("서버 응답 오류");
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "서버 응답 오류");
+                }
                 const data = await res.json();
                 let html = ''; let summary = data.log_summary;
                 html += `<div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;"><div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div></div></div>`;
@@ -737,10 +773,8 @@
                         html += `</div></div>`;
                     }
                 }
-                container.innerHTML = html;
-            } catch (e) {
-                container.innerHTML = `<p style="text-align:center; color:#e74c3c;">조회 실패</p>`;
-            }
+                container.innerHTML = html || '<p style="text-align:center; color:#999;">데이터가 없습니다.</p>';
+            } catch(e) { container.innerHTML = `<p style="text-align:center; color:#e74c3c;"><b>조회 실패</b><br><small>${e.message}</small></p>`; }
         }
 
         function generatePlanForm() {
@@ -1242,7 +1276,7 @@
             const year = document.getElementById('stat_year').value;
             const month = document.getElementById('stat_month').value;
 
-            container.innerHTML = '<p style="text-align:center; color:#999;">통계 데이터와 규정 준수 여부를 분석하는 중입니다...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">통계 데이터와 규정 준수 여부를 분석하는 중...</p>';
             
             showLoading();
             try {
@@ -1335,11 +1369,14 @@
             
             try {
                 const res = await fetch(`${API_BASE}/get_my_activity?name=${encodeURIComponent(userName)}&year=${y}&month=${m}&day=${d}`);
-                if (!res.ok) throw new Error("서버 오류");
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "서버 응답 오류");
+                }
                 const data = await res.json();
                 
                 let html = '';
-                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 활동 내역`;
+                let dateTitle = d === 'all' ? `${y}년 ${m}월 총 활동 내역` : `${y}년 ${m}월 ${parseInt(d)}일 활동 내역`;
 
                 html += `
                     <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
@@ -1380,7 +1417,7 @@
                 }
                 container.innerHTML = html;
             } catch(e) {
-                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+                container.innerHTML = `<p style="text-align:center; color:#e74c3c;"><b>조회 실패</b><br><small>${e.message}</small></p>`;
             }
         }
 
@@ -1388,16 +1425,21 @@
             const m = document.getElementById('tp_month').value;
             const half = document.getElementById('tp_half').value;
             const loc = document.getElementById('tp_loc').value;
-            const name = document.getElementById('tp_name').value;
+            const nameSearch = document.getElementById('tp_name').value.trim();
             const container = document.getElementById('team_plan_container');
+            
             container.innerHTML = '<p style="text-align:center; padding:20px;">계획서를 불러오는 중...</p>';
             try {
                 const res = await fetch(`${API_BASE}/get_island_plans?island=${encodeURIComponent(userIsland)}&month=${m}`);
-                if (!res.ok) throw new Error("서버 오류");
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || "서버 오류");
+                }
                 const data = await res.json();
+                
                 let filtered = data.plans.filter(p => {
                     if(loc && !(p['장소']||'').includes(loc)) return false;
-                    if(name && !(p['이름']||'').includes(name)) return false;
+                    if(nameSearch && !(p['이름']||'').includes(nameSearch)) return false;
                     
                     let stdDate = p['날짜_표준'] || p['날짜'] || '';
                     let day = 0;
@@ -1414,12 +1456,17 @@
                     if(half === '2' && day <= 15) return false;
                     return true;
                 });
+                
                 let html = '';
                 filtered.forEach(p => {
-                    html += `<div class="menu-card" style="display:block; font-size:0.9rem;"><b>${p['날짜_표준'] || p['날짜']} - ${p['이름']}</b><br>📍 ${p['장소']} (${p['활동여부']})<br><small>상태: ${p['상태']}</small></div>`;
+                    let statusColor = (p['상태']||'').includes('승인완료') ? '#27ae60' : ((p['상태']||'').includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜_표준'] || p['날짜']} - ${p['이름']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
                 });
+                
                 container.innerHTML = html || '<p style="text-align:center; padding:20px;">검색 결과가 없습니다.</p>';
-            } catch(e) { container.innerHTML = '<p>조회 실패</p>'; }
+            } catch(e) { 
+                container.innerHTML = `<p style="text-align:center; color:#e74c3c;"><b>조회 실패</b><br><small>${e.message}</small></p>`; 
+            }
         }
 
         async function generatePDF() {
