@@ -18,20 +18,86 @@
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #333; }
         select, input, textarea { width: 100%; padding: 12px; border: 1px solid #E5E5E5; border-radius: 10px; font-family: 'Pretendard'; box-sizing: border-box; font-size: 1rem; background-color: #FAFAFA; }
-        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        select:disabled { background-color: #EEEEEE; color: #999; }
+        .btn-act { width: 100%; padding: 15px; margin-bottom: 8px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.1s; }
+        .btn-act:active { transform: scale(0.98); }
         .btn-in { background-color: #FEE500; color: #191919; }
         .btn-move { background-color: #3498db; color: white; }
         .btn-out { background-color: #EAEAEA; color: #191919; }
         .btn-submit { background-color: #3C1E1E; color: #FEE500; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; }
-        .font-control-wrap { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
-        .btn-font { width: 45px; height: 45px; border-radius: 50%; border: none; background: #333; color: white; font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; }
-        #loading_overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-submit:disabled { background-color: #CCC; cursor: not-allowed; }
+        .time-text { font-size: 0.8rem; font-weight: 400; margin-top: 4px; opacity: 0.8; }
+        .logout { text-align: center; margin-top: 30px; font-size: 0.85rem; color: #999; text-decoration: underline; cursor: pointer; }
+        .time-input-wrap { background-color: #f8f9fa; padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px dashed #ccc; }
+        .plan-row { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #E5E5E5; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .plan-date-label { font-size: 1.05rem; font-weight: 800; color: #2c3e50; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 2px solid #FEE500; padding-bottom: 5px; }
+        .flex-group { display: flex; gap: 8px; margin-bottom: 8px; align-items: center;}
+        .calc-hours { font-size: 0.85rem; font-weight: bold; color: #27ae60; }
+        .calc-hours.over { color: #e74c3c; }
+        .approval-header { display:flex; justify-content:space-between; align-items:center; background:white; padding:12px; border-radius:12px; border:1px solid #E5E5E5; margin-bottom:15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .approval-card { display:flex; gap:12px; align-items:flex-start; background:#f9f9f9; border:1px solid #ddd; padding:15px; border-radius:12px; margin-bottom:10px; flex-direction:column; }
+        .chk-box { width: 20px !important; height: 20px !important; transform: scale(1.3); margin-top:5px; cursor:pointer; flex-shrink: 0; padding: 0; }
+        .app-content { flex: 1; word-break: keep-all; width:100%; }
+        .app-tag { display:inline-block; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; margin-bottom:8px; }
+        .tag-plan { background:#e1f5fe; color:#01579b; }
+        .tag-change { background:#fff3e0; color:#e65100; }
+        .app-info { font-size:0.95rem; line-height:1.5; margin-bottom:8px; color: #333; }
+        .admin-island-card { background: white; border: 2px solid #2c3e50; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .admin-island-header { background: #2c3e50; color: white; padding: 12px 15px; font-size: 1.1rem; font-weight: 800; }
+        .admin-loc-group { padding: 15px; border-bottom: 1px solid #ecf0f1; }
+        .admin-loc-group:last-child { border-bottom: none; }
+        .admin-loc-title { font-weight: 800; color: #2980b9; margin-bottom: 10px; font-size: 1.05rem; display:flex; align-items:center; gap:5px; }
+        .admin-guide-row { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+        .admin-guide-name { font-weight: 800; font-size: 1rem; color: #333; margin-bottom: 8px; }
+        .admin-time-box { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; }
+        .admin-time-plan { background: #e1f5fe; padding: 6px 10px; border-radius: 6px; color: #01579b; }
+        .admin-time-act { background: #e8f5e9; padding: 6px 10px; border-radius: 6px; color: #1b5e20; }
+        .admin-time-none { background: #ffebee; padding: 6px 10px; border-radius: 6px; color: #b71c1c; }
+        .log-item-card { background: white; border: 1px solid #E5E5E5; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .log-item-header { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
+        .log-item-stats { display: flex; gap: 10px; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .log-item-stats div { flex: 1; text-align: center; }
+        .log-item-stats b { display: block; color: #b33939; font-size: 1rem; }
         .stat-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem; }
         .stat-table th { background-color: #2c3e50; color: white; padding: 10px; border: 1px solid #ddd; }
         .stat-table td { padding: 10px; border: 1px solid #ddd; text-align: center; background: white; }
-        .alert-badge { background-color: #e74c3c; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; display: inline-block; }
+        .alert-badge { background-color: #e74c3c; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; display: inline-block; word-break: keep-all; }
+
+        .font-control-wrap { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+        .btn-font { width: 45px; height: 45px; border-radius: 50%; border: none; background: #333; color: white; font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: center; align-items: center; }
+        .btn-font:active { transform: scale(0.9); }
+
+        #loading_overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- PDF 인쇄 스타일 --- */
+        #print_area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            html, body { width: 100%; height: auto; margin: 0; padding: 0; background: white; }
+            #print_area, #print_area * { visibility: visible; }
+            @page { size: A4 portrait; margin: 15mm; }
+            #print_area { display: block; position: absolute; left: 0; top: 0; width: 100%; background: white; font-family: 'Batang', 'BatangChe', '바탕', '바탕체', serif !important; color: #000; box-sizing: border-box; }
+            .print-page { position: relative; width: 100%; page-break-after: always; background: white; margin: 0; }
+            .print-top-left { font-size: 11pt; font-weight: bold; margin-bottom: 3mm; }
+            .print-main-title { text-align: center; font-size: 24pt; font-weight: 900; margin-bottom: 2mm; letter-spacing: 5px; }
+            .print-date { text-align: center; font-size: 11pt; margin-bottom: 5mm; }
+            table.fixed-table { width: 100%; border-collapse: collapse; border: 2px solid #000; table-layout: fixed; text-align: center; font-size: 11pt; height: max-content; }
+            table.fixed-table th, table.fixed-table td { border: 1px solid #000; padding: 2px 4px; overflow: hidden; vertical-align: middle; }
+            table.fixed-table th { font-weight: bold; background-color: #f7f7f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .t1-col1 { width: 15%; } .t1-col2 { width: 25%; } .t1-col3 { width: 15%; } .t1-col4 { width: 45%; }
+            .row-loc th, .row-loc td { height: 16mm !important; }
+            .row-guide-header th { height: 6mm !important; padding: 1px !important; font-size: 10pt; }
+            .row-guide td { height: 7mm !important; padding: 1px !important; }
+            .print-sub-title { font-size: 12pt; font-weight: bold; margin: 5mm 0 2mm 0; text-align: left; }
+            .t2-col1 { width: 16%; } .t2-col2 { width: 14%; } .t2-col3 { width: 14%; } .t2-col4 { width: 14%; } .t2-col5 { width: 14%; } .t2-col6 { width: 14%; } .t2-col7 { width: 14%; }
+            .row-log-header th { height: 10mm !important; padding: 2px !important; }
+            .row-log td { height: 7mm !important; padding: 2px !important; }
+            .row-sum th, .row-sum td { height: 7mm !important; padding: 2px !important; font-weight: bold; }
+            .row-remark th, .row-remark td { height: 8mm !important; padding: 2px !important; vertical-align: middle !important; white-space: nowrap; overflow: hidden; text-align: left !important; padding-left: 5px !important;}
+            .signature-box { text-align: right; margin-top: 8mm; padding-right: 5mm; font-size: 13pt; font-weight: bold; }
+        }
     </style>
 </head>
 <body>
@@ -41,87 +107,232 @@
         <button class="btn-font" onclick="changeFontSize(-2)">A-</button>
     </div>
 
-    <div id="loading_overlay"><div class="spinner"></div><div style="margin-top:15px; font-weight:bold; font-size:1.1rem;">잠시만 기다려주세요...</div></div>
+    <div id="loading_overlay">
+        <div class="spinner"></div>
+        <div style="margin-top:15px; font-weight:bold; font-size:1.1rem; color:#2c3e50;">잠시만 기다려주세요...</div>
+    </div>
 
     <div class="header">
         <div class="profile-icon">👤</div>
         <div class="user-info">
-            <div class="name"><span id="name_display">로딩중...</span><span id="current_loc_badge" class="current-badge">미출근</span></div>
+            <div class="name">
+                <span id="name_display">로딩중...</span>
+                <span id="current_loc_badge" class="current-badge">미출근</span>
+            </div>
             <div id="role_display" class="role">직책 / 소속</div>
         </div>
     </div>
 
     <div id="leader_dashboard" style="display: none; margin-bottom: 15px;"></div>
+
     <div id="menu_container"></div>
 
     <div id="admin_dashboard_area" class="hidden-section">
-        <div style="background:#2c3e50; color:white; padding:15px; border-radius:12px; margin-bottom:15px; text-align:center;"><h2 style="margin:0; font-size:1.3rem;">🌍 <span id="dash_today_date"></span> 통합 현황</h2></div>
-        <div id="admin_dash_container"></div>
+        <div style="background:#2c3e50; color:white; padding:15px; border-radius:12px; margin-bottom:15px; text-align:center;">
+            <h2 style="margin:0; font-size:1.3rem;">🌍 <span id="dash_today_date"></span> 지질공원 통합 현황</h2>
+        </div>
+        <div class="form-group"><button onclick="loadAdminDashboard()" style="padding:8px 15px; background:#3498db; color:white; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">새로고침 🔄</button></div>
+        <div id="admin_dash_container"><p style="text-align:center; color:#999; padding:20px;">현황을 불러오는 중...</p></div>
     </div>
 
     <div id="attendance_area" class="hidden-section">
         <div class="form-group"><label>📅 출퇴근 날짜</label><input type="date" id="attendance_date_input"></div>
-        <div class="form-group"><label>📍 안내소 선택</label><select id="location_select"></select></div>
-        <div class="time-input-wrap"><label>⏱ 기록할 시간</label><input type="time" id="action_time_input"></div>
-        <button class="btn-act btn-in" onclick="sendAction('출근')">🟢 출근하기</button>
-        <button class="btn-act btn-move" onclick="sendAction('이동')">🔵 이동하기</button>
-        <button class="btn-act btn-out" onclick="sendAction('퇴근')">🔴 퇴근하기</button>
+        <div class="form-group"><label>📍 기록할 안내소 선택</label><select id="location_select"></select></div>
+        <div class="time-input-wrap"><label style="font-size: 0.8rem; font-weight: 600; color:#555; display:block; margin-bottom:5px;">⏱ 기록할 시간 (직접 수정 가능)</label><input type="time" id="action_time_input"></div>
+        <button class="btn-act btn-in" onclick="sendAction('출근')"><span>🟢 출근하기</span><div id="in_time_display" class="time-text"></div></button>
+        <button class="btn-act btn-move" onclick="sendAction('이동')"><span>🔵 이동하기 (장소변경)</span><div id="move_time_display" class="time-text"></div></button>
+        <button class="btn-act btn-out" onclick="sendAction('퇴근')"><span>🔴 퇴근하기</span><div id="out_time_display" class="time-text"></div></button>
     </div>
 
     <div id="log_area" class="hidden-section">
         <div class="form-group"><label>📅 날짜 선택</label><input type="date" id="log_date_input" onchange="loadTodayLogs()"></div>
-        <div class="form-group"><label>📍 안내소</label><select id="log_location_select" onchange="loadTodayLogs()"></select></div>
-        <div class="form-group"><label>⏱ 시간대</label><select id="log_time_select" onchange="renderLogTimeSlot()"></select></div>
+        <div class="form-group"><label>📍 작성할 안내소</label><select id="log_location_select" onchange="loadTodayLogs()"></select></div>
+        <div class="form-group"><label>⏱ 시간대 선택</label><select id="log_time_select" onchange="renderLogTimeSlot()"></select></div>
+        
         <div id="log_sessions_container"></div>
-        <button class="btn-act btn-move" style="padding:10px; font-size:0.9rem;" onclick="addSessionRow()">➕ 회차 추가</button>
-        <div class="form-group" style="margin-top:15px;"><label>📝 특이사항</label><textarea id="log_remarks" rows="3"></textarea></div>
-        <button class="btn-submit" onclick="submitTimeSlotLogs()">일지 저장</button>
+
+        <button class="btn-act btn-move" style="padding:10px; font-size:0.95rem; border-radius:8px; margin-bottom:15px; background-color:#7f8c8d;" onclick="addSessionRow()">➕ 해설 회차 추가</button>
+
+        <div class="form-group"><label>📝 해당 시간대 특이사항</label><textarea id="log_remarks" rows="3" placeholder="특이사항을 입력하세요."></textarea></div>
+        
+        <button class="btn-submit" onclick="submitTimeSlotLogs()">해당 시간대 일지 저장(덮어쓰기)</button>
     </div>
 
     <div id="status_area" class="hidden-section">
         <div class="form-group"><label>📅 날짜 선택</label><input type="date" id="status_date_input" onchange="loadDailyStatus()"></div>
-        <div id="status_container"></div>
+        <div class="form-group"><button onclick="loadDailyStatus()" style="padding:5px 10px; background:#333; color:white; border-radius:6px; cursor:pointer;">새로고침 🔄</button>
+            <div id="status_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
+        </div>
+    </div>
+
+    <div id="plan_area" class="hidden-section">
+        <div class="form-group">
+            <div id="plan_target_user_group" style="display:none; margin-bottom:10px;">
+                <label>👤 작성 대상자 (조원 선택 가능)</label>
+                <select id="plan_target_user"></select>
+            </div>
+            <div class="flex-group">
+                <select id="plan_month" style="flex:1;"></select>
+                <select id="plan_half" style="flex:1.5;"><option value="1">전반기</option><option value="2">하반기</option></select>
+            </div>
+            <button class="btn-act btn-move" style="margin-top:10px; padding:12px;" onclick="generatePlanForm()">📝 양식 펼치기</button>
+        </div>
+        <div id="plan_list_container" style="display:none; margin-top:20px; border-top:2px dashed #CCC; padding-top:20px;">
+            <div class="time-input-wrap">
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:600; color:#555; margin-bottom:5px;">
+                    <div style="flex:1;">📍 안내소 선택</div>
+                    <div style="flex:1; padding-left:4px;">⏰ 출근시간</div>
+                    <div style="flex:1; padding-left:14px;">⏰ 퇴근시간</div>
+                </div>
+                <div class="flex-group">
+                    <select id="batch_loc" style="flex:1; padding:10px;"></select>
+                    <select id="batch_start" style="flex:1; padding:10px;"></select>
+                    <span style="font-weight:bold; color:#7f8c8d;">~</span>
+                    <select id="batch_end" style="flex:1; padding:10px;"></select>
+                </div>
+                <button onclick="applyBatchSettings()" style="width:100%; margin-top:10px; padding:12px; background:#2c3e50; color:white; border:none; border-radius:8px; font-weight:bold; font-size:1rem;">일괄 적용</button>
+            </div>
+            <div id="plan_rows"></div>
+            <button class="btn-submit" onclick="submitBulkPlan()">🚀 제출하기</button>
+        </div>
+    </div>
+
+    <div id="change_area" class="hidden-section">
+        <div class="form-group" id="change_target_user_group" style="display:none; margin-bottom:10px;">
+            <label>👤 변경 대상자 (조원 선택 가능)</label>
+            <select id="change_target_user" onchange="loadGuideList()"></select>
+        </div>
+
+        <div class="form-group"><label>📅 변경 대상 날짜</label><input type="date" id="change_target_date"></div>
+        <div class="form-group"><select id="change_type" onchange="updateChangeUI()"><option value="시간 변경">시간 변경</option><option value="해설사 변경(대타)">해설사 변경</option><option value="계획 취소">계획 취소</option></select></div>
+        <div id="change_ui_time" class="time-input-wrap"><div class="flex-group"><select id="change_time_start"></select><span>~</span><select id="change_time_end"></select></div></div>
+        <div id="change_ui_guide" class="time-input-wrap" style="display:none;"><select id="change_target_guide"></select></div>
+        <div id="change_ui_cancel" class="time-input-wrap" style="display:none;"><label style="color:#e74c3c;">휴무 전환</label></div>
+        <div class="form-group"><textarea id="change_remarks" rows="2" placeholder="사유"></textarea></div>
+        <button class="btn-submit" onclick="submitPlanChange()">요청하기</button>
+    </div>
+
+    <div id="my_plan_area" class="hidden-section">
+        <div class="form-group"><label>📋 나의 활동계획</label><div id="my_plan_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div></div>
     </div>
 
     <div id="my_activity_area" class="hidden-section">
         <div class="form-group">
+            <label>📅 조회 기간 선택</label>
             <div class="flex-group">
-                <select id="ma_year"><option value="2025">2025년</option><option value="2026">2026년</option><option value="2027">2027년</option></select>
-                <select id="ma_month"></select>
-                <select id="ma_day"></select>
+                <select id="ma_year" style="flex:1;">
+                    <option value="2025">2025년</option>
+                    <option value="2026">2026년</option>
+                    <option value="2027">2027년</option>
+                </select>
+                <select id="ma_month" style="flex:1;"></select>
+                <select id="ma_day" style="flex:1;"></select>
             </div>
-            <button class="btn-submit" onclick="loadMyActivity()">조회하기</button>
+            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadMyActivity()">조회하기</button>
         </div>
-        <div id="my_activity_container"></div>
+        <div id="my_activity_container"><p style="text-align:center; color:#999; padding:20px;">조회할 기간을 선택하고 버튼을 눌러주세요.</p></div>
+    </div>
+
+    <div id="approval_area" class="hidden-section">
+        <div class="form-group">
+            <div class="flex-group" style="margin-bottom:10px;">
+                <select id="approval_filter_loc" style="flex:1; padding:10px; background-color:#fff;" onchange="renderPendingRequests()">
+                    <option value="all">전체 안내소</option>
+                </select>
+                <select id="approval_filter_name" style="flex:1; padding:10px; background-color:#fff;" onchange="renderPendingRequests()">
+                    <option value="all">전체 해설사</option>
+                </select>
+            </div>
+
+            <div id="approval_header" class="approval-header" style="display:none;">
+                <label><input type="checkbox" id="chk_all" class="chk-box" onclick="toggleAllApprovals(this)"> 전체 선택</label>
+                <div style="display:flex; gap:5px;"><button class="btn-act btn-in" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('승인완료')">선택 승인</button><button class="btn-act btn-out" style="padding:8px; font-size:0.9rem; margin:0;" onclick="processBulkApp('반려')">반려</button></div>
+            </div>
+            <p style="font-size:0.8rem; color:#e74c3c; margin-bottom:10px; font-weight:bold;">※ 내용 및 장소/시간을 수정한 후 [선택 승인]을 누르면 수정된 내용으로 반영됩니다.</p>
+            <div id="pending_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
+        </div>
     </div>
 
     <div id="team_plan_area" class="hidden-section">
         <div class="form-group">
-            <div class="flex-group"><select id="tp_month"></select><select id="tp_half"><option value="all">전체</option><option value="1">전반기</option><option value="2">하반기</option></select></div>
-            <div class="flex-group"><select id="tp_loc"></select><input type="text" id="tp_name" placeholder="이름 검색"></div>
-            <button class="btn-submit" onclick="loadTeamPlans()">조회하기</button>
+            <div class="flex-group"><select id="tp_month" style="flex:1;"></select><select id="tp_half" style="flex:1.5;"><option value="all">전체</option><option value="1">전반기</option><option value="2">하반기</option></select></div>
+            <div class="flex-group"><select id="tp_loc" style="flex:1;"></select><input type="text" id="tp_name" placeholder="이름" style="flex:1;"></div>
+            <button class="btn-submit" style="margin-top:5px; background-color:#3498db; color:white; border-radius:8px;" onclick="loadTeamPlans()">검색하기</button>
         </div>
-        <div id="team_plan_container"></div>
+        <div id="team_plan_container"><p style="text-align:center; color:#999; padding:20px;">조건 설정 후 검색</p></div>
+    </div>
+
+    <div id="report_area" class="hidden-section">
+        <div class="form-group">
+            <label>📑 출력할 보고서 선택</label>
+            <select id="rep_type" style="margin-bottom:10px;">
+                <option value="log">안내소 운영일지 (A4 서식고정)</option>
+                <option value="plan">활동계획서 (준비중)</option>
+                <option value="result">활동결과보고서 (준비중)</option>
+            </select>
+            <div class="flex-group">
+                <select id="rep_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select>
+                <select id="rep_month" style="flex:1;"></select>
+            </div>
+            <select id="rep_half" style="margin-top:8px;"><option value="1">전반기 (1~15일)</option><option value="2">하반기 (16~말일)</option></select>
+            <button class="btn-submit" style="margin-top:15px; background-color:#2c3e50; color:white; border-radius:8px; font-size:1.1rem; padding:15px;" onclick="generatePDF()">📄 PDF 변환 및 인쇄</button>
+            <p style="font-size:0.8rem; color:#666; text-align:center; margin-top:10px;">인쇄 창이 뜨면 대상 프린터를 'PDF로 저장'으로 변경하세요.</p>
+        </div>
+    </div>
+
+    <div id="admin_attendance_area" class="hidden-section">
+        <div class="form-group"><label>📅 조회 날짜 선택</label><input type="date" id="admin_date_input" onchange="loadAdminAttendance()"></div>
+        <div class="form-group"><button onclick="loadAdminAttendance()" style="padding:5px 10px; background:#333; color:white; border-radius:6px;">새로고침 🔄</button>
+            <div id="admin_attendance_container"><p style="text-align:center; color:#999; padding:20px;">불러오는 중...</p></div>
+        </div>
+    </div>
+
+    <div id="admin_log_area" class="hidden-section">
+        <div class="form-group">
+            <div class="flex-group"><input type="date" id="al_start_date" style="flex:1;"><span style="font-weight:bold;">~</span><input type="date" id="al_end_date" style="flex:1;"></div>
+            <div class="flex-group"><select id="al_loc" style="flex:1;"></select><input type="text" id="al_name" placeholder="이름" style="flex:1;"></div>
+            <button class="btn-submit" style="background-color:#3498db;" onclick="loadAdminLogs()">검색하기</button>
+        </div>
+        <div id="admin_log_container"><p style="text-align:center; color:#999; padding:20px;">검색해주세요.</p></div>
+    </div>
+
+    <div id="admin_plan_area" class="hidden-section">
+        <div class="form-group">
+            <div class="flex-group"><select id="ap_month" style="flex:1;"></select><select id="ap_half" style="flex:1.5;"><option value="all">전체</option><option value="1">전반기</option><option value="2">하반기</option></select></div>
+            <div class="flex-group"><select id="ap_island" style="flex:1;" onchange="updateApLoc()"><option value="전체">전체 섬</option><option value="백령도">백령도</option><option value="대청도">대청도</option><option value="소청도">소청도</option></select><select id="ap_loc" style="flex:1;"><option value="">- 모든 안내소 -</option></select></div>
+            <div class="form-group" style="margin-top:8px;"><input type="text" id="ap_name" placeholder="해설사 이름"></div>
+            <button class="btn-submit" style="background-color:#3498db;" onclick="loadAdminPlans()">조회하기</button>
+        </div>
+        <div id="admin_plan_container"><p style="text-align:center; color:#999; padding:20px;">검색해주세요.</p></div>
+    </div>
+
+    <div id="admin_stats_area" class="hidden-section">
+        <div class="form-group">
+            <div class="flex-group"><select id="stat_year" style="flex:1;"><option value="2025">2025년</option><option value="2026" selected>2026년</option><option value="2027">2027년</option></select><select id="stat_month" style="flex:1;"></select></div>
+            <button class="btn-submit" style="background-color:#2c3e50;" onclick="loadStatistics()">통계 산출하기</button>
+        </div>
+        <div id="stat_container"><p style="text-align:center; color:#999; padding:20px;">선택해주세요.</p></div>
     </div>
 
     <div class="logout" onclick="logout()">로그아웃</div>
 
+    <div id="print_area"></div>
+
     <script>
         const API_BASE = "https://geopark-system-production.up.railway.app"; 
+        
         const userName = localStorage.getItem("user_name");
         const userRole = localStorage.getItem("user_role");
         const userIsland = localStorage.getItem("user_island");
-        let currentLoc = "미출근";
-
-        const now = new Date();
-        const curY = now.getFullYear().toString();
-        const curM = (now.getMonth() + 1).toString();
-        const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        let currentLoc = localStorage.getItem("current_location") || "미출근";
 
         function changeFontSize(delta) {
             const root = document.documentElement;
-            let size = parseInt(getComputedStyle(root).getPropertyValue('--base-font-size')) + delta;
-            if(size >= 12 && size <= 26) root.style.setProperty('--base-font-size', size + 'px');
+            let currentSize = parseInt(getComputedStyle(root).getPropertyValue('--base-font-size'));
+            let newSize = currentSize + delta;
+            if(newSize < 12) newSize = 12;
+            if(newSize > 24) newSize = 24;
+            root.style.setProperty('--base-font-size', newSize + 'px');
         }
 
         function showLoading() { document.getElementById('loading_overlay').style.display = 'flex'; }
@@ -130,187 +341,1049 @@
         if (!userName) location.href = "index.html";
         document.getElementById('name_display').innerText = userName + " 님";
         document.getElementById('role_display').innerText = `[${userRole}] ${userIsland || '관리자'}`;
+        
+        function updateCurrentLocBadge() {
+            if(userRole === '관리자') { document.getElementById('current_loc_badge').style.display = 'none'; return; }
+            const badge = document.getElementById('current_loc_badge');
+            badge.innerText = currentLoc;
+            badge.style.backgroundColor = currentLoc === "미출근" ? "#95a5a6" : "#3498db";
+        }
+        updateCurrentLocBadge();
 
-        const myLocations = (userIsland?.includes('백령')) ? ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'] :
-                           (userIsland?.includes('대청')) ? ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'] :
-                           (userIsland?.includes('소청')) ? ['탑동', '분바위'] : ['거점센터'];
+        async function checkPendingForLeader() {
+            if (userRole !== '조장') return; 
+            try {
+                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`);
+                const data = await res.json();
+                
+                const totalPending = data.plans.length + data.changes.length;
+                const dash = document.getElementById('leader_dashboard');
+                
+                if (totalPending > 0) {
+                    dash.style.display = 'block';
+                    dash.innerHTML = `
+                        <div class="menu-card" style="background-color: #fff3e0; border-left: 6px solid #e67e22; margin-bottom: 0;" onclick="goToApproval()">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:1.8rem;">🚨</span>
+                                <div>
+                                    <div style="font-weight:900; color:#d35400; font-size:1.1rem;">결재 대기 문서가 있습니다!</div>
+                                    <div style="font-size:0.85rem; color:#e67e22; margin-top:4px;">
+                                        활동계획 및 변경 신청 <b style="font-size:1rem;">${totalPending}</b>건이 승인을 기다립니다.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else { dash.style.display = 'none'; }
+            } catch (e) {}
+        }
 
-        ['location_select', 'log_location_select', 'tp_loc'].forEach(id => {
+        function goToApproval() {
+            document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
+            document.getElementById('approval_area').style.display = 'block';
+            loadPendingRequests();
+        }
+
+        const locSelect = document.getElementById('location_select');
+        const logLocSelect = document.getElementById('log_location_select');
+        const batchLocSelect = document.getElementById('batch_loc');
+        
+        let myLocations = [];
+        if (userIsland && userIsland.includes('백령')) myLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
+        else if (userIsland && userIsland.includes('대청')) myLocations = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
+        else if (userIsland && userIsland.includes('소청')) myLocations = ['탑동', '분바위'];
+        else myLocations = ['거점센터'];
+        
+        let allLocations = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항', '선진동', '서풍받이', '농여해변', '옥죽동 해안사구', '탑동', '분바위', '거점센터'];
+
+        let locOptionsHtml = `<option value="휴무">-휴무-</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
+        if(locSelect) { myLocations.forEach(loc => { locSelect.add(new Option(loc, loc)); logLocSelect.add(new Option(loc, loc)); }); }
+        if(batchLocSelect) batchLocSelect.innerHTML = locOptionsHtml;
+
+        if(document.getElementById('tp_loc')) document.getElementById('tp_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + myLocations.map(l => `<option value="${l}">${l}</option>`).join('');
+        if(document.getElementById('al_loc')) document.getElementById('al_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + allLocations.map(l => `<option value="${l}">${l}</option>`).join('');
+
+        const currentYear = new Date().getFullYear().toString();
+        const currentMonth = (new Date().getMonth() + 1).toString();
+        
+        ['plan_month', 'tp_month', 'ap_month', 'stat_month', 'rep_month', 'ma_month'].forEach(id => {
             let el = document.getElementById(id);
             if(el) {
-                if(id === 'tp_loc') el.add(new Option("전체 안내소", ""));
-                myLocations.forEach(l => el.add(new Option(l, l)));
+                el.innerHTML = '';
+                for(let i=1; i<=12; i++) el.innerHTML += `<option value="${i}">${i}월</option>`;
+                el.value = currentMonth;
             }
         });
 
-        ['ma_month', 'tp_month'].forEach(id => {
-            let el = document.getElementById(id);
-            if(el) {
-                for(let i=1; i<=12; i++) el.add(new Option(i+'월', i));
-                el.value = curM;
-            }
-        });
+        let maYearEl = document.getElementById('ma_year');
+        if(maYearEl) maYearEl.value = currentYear;
 
-        if(document.getElementById('ma_day')) {
-            let el = document.getElementById('ma_day');
-            el.add(new Option('전체(월)', 'all'));
-            for(let i=1; i<=31; i++) el.add(new Option(i+'일', i < 10 ? '0'+i : i));
+        let maDayEl = document.getElementById('ma_day');
+        if(maDayEl) {
+            maDayEl.innerHTML = `<option value="all" selected>전체 (월)</option>`;
+            for(let i=1; i<=31; i++) {
+                let d = i < 10 ? '0'+i : i;
+                maDayEl.innerHTML += `<option value="${d}">${i}일</option>`;
+            }
         }
         
-        document.getElementById('ma_year').value = curY;
-        ['attendance_date_input', 'log_date_input', 'status_date_input'].forEach(id => {
-            if(document.getElementById(id)) document.getElementById(id).value = todayStr;
+        let statYearEl = document.getElementById('stat_year');
+        if(statYearEl) statYearEl.value = currentYear;
+        let repYearEl = document.getElementById('rep_year');
+        if(repYearEl) repYearEl.value = currentYear;
+
+        const nowForInit = new Date(); 
+        const offsetInit = nowForInit.getTimezoneOffset() * 60000;
+        const dateOffset = new Date(nowForInit.getTime() - offsetInit).toISOString().split('T')[0];
+        
+        if(document.getElementById('al_start_date')) {
+            document.getElementById('al_start_date').value = dateOffset;
+            document.getElementById('al_end_date').value = dateOffset;
+        }
+        if(document.getElementById('log_date_input')) {
+            document.getElementById('log_date_input').value = dateOffset;
+        }
+        if(document.getElementById('attendance_date_input')) {
+            document.getElementById('attendance_date_input').value = dateOffset;
+        }
+
+        function updateApLoc() {
+            const island = document.getElementById('ap_island').value;
+            let locs = [];
+            if (island === '백령도') locs = ['백령센터', '두무진', '용틀임바위', '진촌리 현무암', '콩돌해안', '사곶해변', '용기포신항'];
+            else if (island === '대청도') locs = ['선진동', '서풍받이', '농여해변', '옥죽동 해안사구'];
+            else if (island === '소청도') locs = ['탑동', '분바위'];
+            else locs = allLocations;
+            document.getElementById('ap_loc').innerHTML = `<option value="">- 모든 안내소 -</option>` + locs.map(l => `<option value="${l}">${l}</option>`).join('');
+        }
+        if(document.getElementById('ap_island')) updateApLoc();
+
+        function setCurrentTimeInput() {
+            const now = new Date();
+            document.getElementById('action_time_input').value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        }
+
+        let logTimeSelect = document.getElementById('log_time_select');
+        let timeOptsHtml = '';
+        if(logTimeSelect) {
+            for(let i=7; i<=18; i++) {
+                let s = i<10 ? '0'+i : i; let e = (i+1)<10 ? '0'+(i+1) : (i+1);
+                timeOptsHtml += `<option value="${s}:00~${e}:00">${s}:00 ~ ${e}:00</option>`;
+            }
+            logTimeSelect.innerHTML = timeOptsHtml;
+        }
+
+        let timeOptionsHtml = '';
+        for(let i=6; i<=20; i++) { 
+            let h = i < 10 ? '0'+i : i; 
+            timeOptionsHtml += `<option value="${h}:00">${h}:00</option>`;
+            if (i !== 20) timeOptionsHtml += `<option value="${h}:30">${h}:30</option>`;
+        }
+        if(document.getElementById('batch_start')) {
+            document.getElementById('batch_start').innerHTML = timeOptionsHtml; 
+            document.getElementById('batch_end').innerHTML = timeOptionsHtml;
+            document.getElementById('batch_start').value = "08:00"; 
+            document.getElementById('batch_end').value = "17:00";
+            document.getElementById('change_time_start').innerHTML = timeOptionsHtml; 
+            document.getElementById('change_time_end').innerHTML = timeOptionsHtml;
+        }
+
+        window.history.pushState(null, "", window.location.href);
+        window.addEventListener('popstate', function() {
+            window.history.pushState(null, "", window.location.href);
+            document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
         });
 
-        let timeSlotHtml = '';
-        for(let i=7; i<=18; i++) {
-            let s = i<10 ? '0'+i : i; let e = (i+1)<10 ? '0'+(i+1) : (i+1);
-            timeSlotHtml += `<option value="${s}:00~${e}:00">${s}:00 ~ ${e}:00</option>`;
-        }
-        document.getElementById('log_time_select').innerHTML = timeSlotHtml;
-
-        const menuData = {
-            '해설사': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '5. 나의 활동계획 조회', '6. 나의 활동 현황'],
-            '조장': ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '10. 나의 활동 현황'],
-            '관리자': ['0. 오늘 통합 현황', '4. 통계']
-        };
-
+        // [복구 완료] 모든 메뉴 데이터와 연결 화면 완벽 복구
         const container = document.getElementById('menu_container');
-        (menuData[userRole] || menuData['해설사']).forEach(m => {
+        
+        let currentMenuData = [];
+        if(userRole === '해설사') {
+            currentMenuData = ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 활동계획서 작성', '4. 활동계획 변경', '5. 나의 활동계획 조회', '6. 나의 활동 현황'];
+        } else if (userRole === '조장') {
+            currentMenuData = ['1. 출퇴근관리', '2. 안내소 운영일지 작성', '3. 출퇴근 및 활동 현황 조회', '4. 활동계획서 작성', '5. 활동계획 변경', '6. 활동계획 및 변경 승인', '7. 나의 활동계획 조회', '8. 조원 활동계획 조회', '9. 보고서 출력 (PDF)', '10. 나의 활동 현황'];
+        } else {
+            currentMenuData = ['0. 오늘 통합 현황', '1. 해설사 출퇴근 현황', '2. 해설사 활동 현황', '3. 활동계획서 조회', '4. 통계'];
+        }
+
+        currentMenuData.forEach(m => {
             const d = document.createElement('div');
             d.className = 'menu-card'; d.innerText = m;
             d.onclick = () => {
                 document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
+                
                 if(m.includes('오늘 통합 현황')) { document.getElementById('admin_dashboard_area').style.display = 'block'; loadAdminDashboard(); }
-                else if(m.includes('출퇴근관리')) { document.getElementById('attendance_area').style.display = 'block'; }
+                else if(m.includes('출퇴근관리')) { document.getElementById('attendance_area').style.display = 'block'; setCurrentTimeInput(); }
                 else if(m.includes('운영일지 작성')) { document.getElementById('log_area').style.display = 'block'; loadTodayLogs(); }
-                else if(m.includes('현황 조회')) { document.getElementById('status_area').style.display = 'block'; loadDailyStatus(); }
-                else if(m.includes('조원 활동계획')) { document.getElementById('team_plan_area').style.display = 'block'; loadTeamPlans(); }
+                else if(m.includes('출퇴근 및 활동 현황 조회')) { document.getElementById('status_area').style.display = 'block'; loadDailyStatus(); }
+                else if(m.includes('활동계획서 작성')) { document.getElementById('plan_area').style.display = 'block'; if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('plan_target_user', 'plan_target_user_group'); }
+                else if(m.includes('활동계획 변경')) { document.getElementById('change_area').style.display = 'block'; loadGuideList(); if(userRole === '조장' || userRole === '관리자') loadPlanTargetUsers('change_target_user', 'change_target_user_group'); }
+                else if(m.includes('변경 승인')) { document.getElementById('approval_area').style.display = 'block'; loadPendingRequests(); }
+                else if(m.includes('나의 활동계획 조회')) { document.getElementById('my_plan_area').style.display = 'block'; loadMyPlans(); }
+                else if(m.includes('조원 활동계획 조회')) { document.getElementById('team_plan_area').style.display = 'block'; loadTeamPlans(); }
+                else if(m.includes('보고서 출력')) { document.getElementById('report_area').style.display = 'block'; }
                 else if(m.includes('나의 활동 현황')) { document.getElementById('my_activity_area').style.display = 'block'; loadMyActivity(); }
+                else if(m.includes('해설사 출퇴근 현황')) { document.getElementById('admin_attendance_area').style.display = 'block'; loadAdminAttendance(); }
+                else if(m.includes('해설사 활동 현황')) { document.getElementById('admin_log_area').style.display = 'block'; loadAdminLogs(); }
+                else if(m.includes('활동계획서 조회')) { document.getElementById('admin_plan_area').style.display = 'block'; loadAdminPlans(); }
+                else if(m.includes('통계')) { document.getElementById('admin_stats_area').style.display = 'block'; }
             };
             container.appendChild(d);
         });
 
+        function loadPlanTargetUsers(selectId, groupId) {
+            document.getElementById(groupId).style.display = 'block';
+            fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=none`)
+            .then(res => res.json())
+            .then(data => {
+                let tg = document.getElementById(selectId);
+                tg.innerHTML = `<option value="${userName}">본인 (${userName})</option>`;
+                data.guides.forEach(g => {
+                    if(g !== userName) tg.innerHTML += `<option value="${g}">${g} 해설사</option>`;
+                });
+            });
+        }
+
         async function syncMyStatus() {
+            if(userRole === '관리자') return;
             try {
                 const res = await fetch(`${API_BASE}/get_my_attendance?name=${encodeURIComponent(userName)}`);
-                const data = await res.json();
-                currentLoc = data.loc;
-                const badge = document.getElementById('current_loc_badge');
-                badge.innerText = currentLoc;
-                badge.style.backgroundColor = currentLoc === "미출근" ? "#95a5a6" : "#3498db";
+                if(res.ok) {
+                    const data = await res.json();
+                    currentLoc = data.loc; localStorage.setItem("current_location", currentLoc); updateCurrentLocBadge();
+                    if(data.in_time) document.getElementById('in_time_display').innerText = `기록됨: ${data.in_time}`;
+                    if(data.out_time) document.getElementById('out_time_display').innerText = `기록됨: ${data.out_time}`;
+                }
             } catch (e) {}
         }
 
         async function sendAction(action) {
             const loc = document.getElementById('location_select').value;
-            const time = document.getElementById('action_time_input').value;
-            const date = document.getElementById('attendance_date_input').value;
-            if(!time || !date) { alert("날짜와 시간을 입력해주세요."); return; }
-            showLoading();
-            const res = await fetch(`${API_BASE}/record`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action, location: loc, action_time: time, action_date: date })
-            });
-            hideLoading();
-            if(res.ok) { alert(action + " 완료!"); syncMyStatus(); }
+            const inputTime = document.getElementById('action_time_input').value; 
+            const actionDate = document.getElementById('attendance_date_input').value;
+            if(!inputTime || !actionDate) { alert("날짜와 시간을 확인해주세요."); return; }
+
+            const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+            if (action === '출근') {
+                const isWorking = currentLoc !== "미출근";
+                const lastInTime = document.getElementById('in_time_display').innerText.replace('기록됨: ', '');
+                
+                if (actionDate === todayStr && isWorking && lastInTime) {
+                    if(!confirm(`이미 ${lastInTime}에 출근(또는 이동) 기록이 존재합니다.\n입력하신 시간(${inputTime})으로 수정(덮어쓰기) 하시겠습니까?`)) return; 
+                } else {
+                    if(!confirm(`[${actionDate}] ${inputTime} 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+                }
+            } else {
+                if(!confirm(`[${actionDate}] ${inputTime} 기준으로 [${loc}]에서 [${action}] 기록하시겠습니까?`)) return;
+            }
+
+            showLoading(); 
+            try {
+                const res = await fetch(`${API_BASE}/record`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: userName, island: userIsland, role: userRole, action: action, location: loc, action_time: inputTime, action_date: actionDate })
+                });
+                if(res.ok) {
+                    alert(action + " 완료!");
+                    await syncMyStatus(); 
+                } else alert("기록 실패!");
+            } catch (e) {
+                alert("네트워크 오류가 발생했습니다.");
+            } finally {
+                hideLoading(); 
+            }
         }
 
         let todayLogDataByTime = {};
+
         async function loadTodayLogs() {
             const loc = document.getElementById('log_location_select').value;
-            const date = document.getElementById('log_date_input').value;
+            const targetDate = document.getElementById('log_date_input').value; 
+            if(!loc) return;
+
             showLoading();
-            const res = await fetch(`${API_BASE}/get_today_logs?name=${encodeURIComponent(userName)}&loc=${encodeURIComponent(loc)}&target_date=${date}`);
-            const data = await res.json();
-            todayLogDataByTime = {};
-            if(data.logs) {
-                data.logs.forEach(log => {
-                    const t = log.time.replace(/\s/g,'');
-                    if(!todayLogDataByTime[t]) todayLogDataByTime[t] = { sessions: [], remark: log.rmk };
-                    todayLogDataByTime[t].sessions.push(log);
-                });
+            try {
+                const res = await fetch(`${API_BASE}/get_today_logs?name=${encodeURIComponent(userName)}&loc=${encodeURIComponent(loc)}&target_date=${targetDate}`);
+                const data = await res.json();
+                
+                todayLogDataByTime = {};
+                if(data.logs && data.logs.length > 0) {
+                    data.logs.forEach(log => {
+                        const t = log.time.replace(/\s/g,'');
+                        if(!todayLogDataByTime[t]) todayLogDataByTime[t] = { sessions: [], remark: '' };
+                        todayLogDataByTime[t].sessions.push(log);
+                        if(log.rmk) todayLogDataByTime[t].remark = log.rmk;
+                    });
+                }
+                renderLogTimeSlot();
+            } catch(e) {
+                renderLogTimeSlot();
+            } finally {
+                hideLoading();
             }
-            renderLogTimeSlot();
-            hideLoading();
         }
 
         function renderLogTimeSlot() {
             const t = document.getElementById('log_time_select').value.replace(/\s/g,'');
             const container = document.getElementById('log_sessions_container');
             container.innerHTML = '';
-            const existing = todayLogDataByTime[t];
-            document.getElementById('log_remarks').value = existing ? existing.remark : '';
-            if(existing && existing.sessions.length > 0) {
-                existing.sessions.forEach((s, i) => addSessionRow(i+1, s));
-                for(let i=existing.sessions.length+1; i<=3; i++) addSessionRow(i);
-            } else { [1,2,3].forEach(i => addSessionRow(i)); }
+            document.getElementById('log_remarks').value = '';
+            
+            let existingData = todayLogDataByTime[t];
+
+            if(existingData && existingData.sessions.length > 0) {
+                existingData.sessions.forEach((s, idx) => { addSessionRow(idx + 1, s); });
+                document.getElementById('log_remarks').value = existingData.remark || '';
+                for(let i = existingData.sessions.length + 1; i <= 3; i++) { addSessionRow(i); }
+            } else {
+                addSessionRow(1); addSessionRow(2); addSessionRow(3);
+            }
         }
 
-        function addSessionRow(idx, data = null) {
+        function addSessionRow(index = null, data = null) {
+            if(!index) index = document.querySelectorAll('.session-row').length + 1;
+            
+            const container = document.getElementById('log_sessions_container');
             const row = document.createElement('div');
-            row.className = 'session-row'; row.style = 'background:#fff; border:1px solid #ddd; padding:12px; border-radius:8px; margin-bottom:10px;';
-            row.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><b>${idx}회차</b><label><input type="checkbox" class="s-co" ${data?.is_co==='O'?'checked':''}> 공동해설</label></div>
-            <div style="display:flex; gap:10px;">
-                <input type="number" class="s-v" value="${data?data.v:0}" style="flex:1; text-align:center;">
-                <input type="number" class="s-l" value="${data?data.l:0}" style="flex:1; text-align:center;">
-                <input type="number" class="s-c" value="${data?data.c:0}" style="flex:1; text-align:center;">
-            </div>`;
-            document.getElementById('log_sessions_container').appendChild(row);
+            row.className = 'session-row';
+            row.style = 'background: white; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);';
+
+            row.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <div style="font-weight:bold; color:#2980b9; font-size:0.95rem;">${index}회차</div>
+                    <label style="font-size:0.8rem; display:flex; align-items:center; gap:5px; background:#f1f2f6; padding:4px 8px; border-radius:4px; font-weight:bold;">
+                        <input type="checkbox" class="s-co chk-box" style="width:16px!important; height:16px!important; margin:0;"> 공동해설
+                    </label>
+                </div>
+                <div class="flex-group">
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">탐방객수</label><input type="number" class="s-v" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">청취자수</label><input type="number" class="s-l" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                    <div style="flex:1;"><label style="font-size:0.75rem; color:#555; text-align:center; margin-bottom:3px;">해설횟수</label><input type="number" class="s-c" value="0" style="padding:8px; text-align:center; background:#fff; border:1px solid #ccc;"></div>
+                </div>
+            `;
+            container.appendChild(row);
+
+            if(data) {
+                row.querySelector('.s-v').value = data.v;
+                row.querySelector('.s-l').value = data.l;
+                row.querySelector('.s-c').value = data.c;
+                if(data.is_co === 'O' || data.is_co === '○') row.querySelector('.s-co').checked = true;
+            }
         }
 
         async function submitTimeSlotLogs() {
             const loc = document.getElementById('log_location_select').value;
             const t = document.getElementById('log_time_select').value;
-            const date = document.getElementById('log_date_input').value;
+            const remarks = document.getElementById('log_remarks').value;
+            const targetDate = document.getElementById('log_date_input').value; 
             let sessions = [];
+            
+            const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            if (targetDate === todayStr && currentLoc === "미출근") {
+                if(!confirm("🚨 현재 '미출근' 상태입니다!\n\n출근 기록 없이 일지를 저장하면 통합 현황판에 '미출근'으로 표시됩니다.\n(권장: [취소]를 누르고 '출퇴근관리'에서 먼저 출근하기)\n\n그래도 이대로 저장하시겠습니까?")) {
+                    return;
+                }
+            }
+
             document.querySelectorAll('.session-row').forEach(row => {
-                sessions.push({ v: parseInt(row.querySelector('.s-v').value)||0, l: parseInt(row.querySelector('.s-l').value)||0, c: parseInt(row.querySelector('.s-c').value)||0, is_co: row.querySelector('.s-co').checked?'O':'X' });
+                const v = parseInt(row.querySelector('.s-v').value) || 0;
+                const l = parseInt(row.querySelector('.s-l').value) || 0;
+                const c = parseInt(row.querySelector('.s-c').value) || 0;
+                const is_co = row.querySelector('.s-co').checked ? 'O' : 'X';
+                sessions.push({ v: v, l: l, c: c, is_co: is_co });
             });
+
+            if(!confirm(`[${targetDate}] [${t}] 시간대의 운영일지를 저장(덮어쓰기)하시겠습니까?\n(기존 입력된 값이 있다면 모두 덮어써집니다.)`)) return;
+
             showLoading();
-            await fetch(`${API_BASE}/save_timeslot_logs`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name: userName, island: userIsland, role: userRole, log_location: loc, target_date: date, target_time: t, remarks: document.getElementById('log_remarks').value, sessions })
-            });
-            hideLoading(); alert("저장되었습니다."); loadTodayLogs();
+            try {
+                const res = await fetch(`${API_BASE}/save_timeslot_logs`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        name: userName, island: userIsland, role: userRole, 
+                        log_location: loc, target_date: targetDate, target_time: t, remarks: remarks, sessions: sessions 
+                    })
+                });
+                if(res.ok) {
+                    alert("성공적으로 저장(수정)되었습니다.");
+                    loadTodayLogs(); 
+                }
+            } catch(e) { alert("저장 중 오류가 발생했습니다."); } finally { hideLoading(); }
         }
 
         async function loadDailyStatus() {
             const container = document.getElementById('status_container');
-            const targetDate = document.getElementById('status_date_input').value;
-            container.innerHTML = '<p style="text-align:center; padding:20px;">불러오는 중...</p>';
+            let targetDate = document.getElementById('status_date_input').value;
+            if(!targetDate) {
+                targetDate = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+                document.getElementById('status_date_input').value = targetDate;
+            }
+            container.innerHTML = '<p style="text-align:center; color:#999;">데이터를 불러오는 중입니다...</p>';
             try {
                 const res = await fetch(`${API_BASE}/get_daily_status?island=${encodeURIComponent(userIsland)}&target_date=${targetDate}`);
+                if (!res.ok) throw new Error("서버 응답 오류");
                 const data = await res.json();
-                let html = `<div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2; text-align:center;"><b>${data.target_date} 실적 합계</b><br>탐방객 ${data.log_summary.total_visitors} / 해설 ${data.log_summary.total_count}</div>`;
-                for (const [loc, users] of Object.entries(data.attendance)) {
-                    html += `<div style="background:white; border:1px solid #ddd; border-radius:12px; margin-bottom:10px; overflow:hidden;"><div style="background:#3498db; color:white; padding:8px 15px; font-weight:bold;">📍 ${loc}</div><div style="padding:10px;">`;
-                    users.forEach(u => { html += `<div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:5px;"><span>${u.name}</span><span>${u.in_time} ~ ${u.out_time || '근무중'}</span></div>`; });
+                let html = ''; let summary = data.log_summary;
+                html += `<div style="background:#fff3e0; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #ffe0b2;"><div style="font-size:0.9rem; font-weight:800; color:#e65100; margin-bottom:10px;">📝 ${data.target_date} 실적 총합 (일지 ${summary.total_logs}건)</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">탐방객</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_visitors}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">청취자</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_listeners}명</div></div><div style="flex:1;"><div style="font-size:0.8rem; color:#d35400;">해설횟수</div><div style="font-weight:800; font-size:1.1rem; color:#b33939;">${summary.total_count}회</div></div></div></div>`;
+                if(Object.keys(data.attendance).length === 0) { html += `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 기록된 활동이 없습니다.</p>`; } else {
+                    for (const [loc, users] of Object.entries(data.attendance)) {
+                        let headerColor = loc === '퇴근' ? '#95a5a6' : '#3498db';
+                        html += `<div style="background:white; border: 1px solid #E5E5E5; border-radius: 12px; margin-bottom: 12px; overflow:hidden;"><div style="background:${headerColor}; color:white; padding:8px 15px; font-weight:bold; font-size:0.95rem;">📍 ${loc} (${users.length}명)</div><div style="padding:10px 15px;">`;
+                        users.forEach(u => { 
+                            let outStr = u.out_time ? u.out_time : '<span style="color:#e74c3c;">미퇴근</span>';
+                            html += `<div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:10px;"><div style="font-weight:800; color:#333; margin-bottom:6px;">${u.name}</div><div style="display:flex; justify-content:space-between; font-size:0.85rem; color:#555; background:#f8f9fa; padding:8px; border-radius:6px;"><span>🟢 출근: <b>${u.in_time}</b></span><span>🔴 퇴근: <b>${outStr}</b></span></div></div>`; 
+                        });
+                        html += `</div></div>`;
+                    }
+                }
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<p style="text-align:center; color:#e74c3c;">조회 실패</p>`;
+            }
+        }
+
+        function generatePlanForm() {
+            const month = parseInt(document.getElementById('plan_month').value); const half = parseInt(document.getElementById('plan_half').value); const year = new Date().getFullYear();
+            let startDay = half === 1 ? 1 : 16; let endDay = half === 1 ? 15 : new Date(year, month, 0).getDate(); 
+            const container = document.getElementById('plan_rows'); container.innerHTML = ''; const days = ['일', '월', '화', '수', '목', '금', '토'];
+            for(let i = startDay; i <= endDay; i++) {
+                let d = new Date(year, month-1, i); let dayIdx = d.getDay(); let dateStr = `${month}월 ${i}일(${days[dayIdx]})`; let isWeekend = dayIdx === 0 || dayIdx === 6 ? 'color:#e74c3c;' : '';
+                container.innerHTML += `<div class="plan-row" data-date="${year}-${month}-${i}" data-day="${dayIdx}"><div class="plan-date-label"><span style="${isWeekend}">${dateStr}</span><span class="calc-hours">0시간</span></div><div class="flex-group"><select class="p-loc" style="flex:1;" onchange="handleRowChange(this)">${locOptionsHtml}</select><select class="p-start" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select><span>~</span><select class="p-end" style="flex:1;" onchange="handleRowChange(this)">${timeOptionsHtml}</select></div><input type="text" class="p-remarks" placeholder="비고 (선택사항)"></div>`;
+            }
+            document.getElementById('plan_list_container').style.display = 'block'; applyBatchSettings(); 
+        }
+
+        function applyBatchSettings() {
+            const loc = document.getElementById('batch_loc').value; const start = document.getElementById('batch_start').value; const end = document.getElementById('batch_end').value;
+            document.querySelectorAll('.plan-row').forEach(row => { row.querySelector('.p-loc').value = loc; row.querySelector('.p-start').value = start; row.querySelector('.p-end').value = end; calcRowHours(row); });
+        }
+
+        function handleRowChange(elem) { calcRowHours(elem.closest('.plan-row')); }
+
+        function calcRowHours(row) {
+            const loc = row.querySelector('.p-loc').value; const start = row.querySelector('.p-start').value; const end = row.querySelector('.p-end').value; const hoursSpan = row.querySelector('.calc-hours');
+            if (loc === '휴무') { hoursSpan.innerText = "휴무"; hoursSpan.className = "calc-hours"; row.querySelector('.p-start').disabled = true; row.querySelector('.p-end').disabled = true; return; }
+            
+            row.querySelector('.p-start').disabled = false; row.querySelector('.p-end').disabled = false;
+            
+            let sParts = start.split(':'); let sHour = parseInt(sParts[0]) + (parseInt(sParts[1])/60.0);
+            let eParts = end.split(':'); let eHour = parseInt(eParts[0]) + (parseInt(eParts[1])/60.0);
+            let rawDiff = eHour - sHour;
+            
+            if (rawDiff <= 0) { 
+                hoursSpan.innerText = "시간 오류"; hoursSpan.className = "calc-hours over"; 
+            } else { 
+                let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
+                hoursSpan.innerText = `${diff}시간 (식사제외)`; 
+                hoursSpan.className = diff > 8 ? "calc-hours over" : "calc-hours"; 
+            }
+        }
+
+        async function submitBulkPlan() {
+            let plans = []; let isValid = true; let totalRestDays = 0; let currentWeekWorkDays = 0; let weekWarningTriggered = false; let requiresApproval = false;
+            
+            let targetName = userName;
+            if(userRole === '조장' || userRole === '관리자') {
+                let tg = document.getElementById('plan_target_user');
+                if(tg && tg.value) targetName = tg.value;
+            }
+
+            document.querySelectorAll('.plan-row').forEach(row => {
+                let dayIdx = parseInt(row.getAttribute('data-day'));
+                let loc = row.querySelector('.p-loc').value; let sTime = row.querySelector('.p-start').value; let eTime = row.querySelector('.p-end').value;
+                
+                let sParts = sTime.split(':'); let sHour = parseInt(sParts[0]) + (parseInt(sParts[1])/60.0);
+                let eParts = eTime.split(':'); let eHour = parseInt(eParts[0]) + (parseInt(eParts[1])/60.0);
+                let rawDiff = eHour - sHour;
+                
+                if (dayIdx === 0) currentWeekWorkDays = 0;
+                if (loc !== '휴무') {
+                    if(rawDiff <= 0) isValid = false; 
+                    currentWeekWorkDays++;
+                    let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
+                    if (diff > 8) requiresApproval = true;
+                } else { totalRestDays++; }
+                
+                if (dayIdx === 6 || row === document.querySelectorAll('.plan-row')[document.querySelectorAll('.plan-row').length - 1]) {
+                    if (currentWeekWorkDays >= 7) weekWarningTriggered = true;
+                }
+                let actStr = loc === '휴무' ? '휴무' : `${sTime}~${eTime} (${rawDiff >= 5 ? rawDiff-1 : rawDiff}시간)`;
+                plans.push({ plan_date: row.querySelector('.plan-date-label span').innerText, location: loc === '휴무' ? '-' : loc, activity_status: actStr, remarks: row.querySelector('.p-remarks').value, status: (loc !== '휴무' && (rawDiff >= 5 ? rawDiff-1 : rawDiff) > 8) ? "초과승인대기" : "승인대기" });
+            });
+            if (!isValid) { alert("시간 설정이 잘못된 날짜가 있습니다."); return; }
+            if (totalRestDays < 5 && !confirm(`경고: 전/하반기 15일 중 5일 이상 휴무가 권장됩니다.\n이대로 제출하시겠습니까?`)) return;
+            
+            let confirmMsg = `[${targetName}] 님의 활동계획을 제출하시겠습니까?`;
+            if(requiresApproval) confirmMsg += `\n※ 8시간 초과 근무 포함되어 추가 승인이 필요합니다.`;
+            if(!confirm(confirmMsg)) return;
+
+            showLoading();
+            try {
+                const res = await fetch(`${API_BASE}/submit_plan_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: targetName, island: userIsland, plans: plans }) });
+                if(res.ok) { alert("제출되었습니다."); document.getElementById('plan_list_container').style.display = 'none'; }
+            } catch (e) { alert("제출 중 오류 발생"); } finally { hideLoading(); }
+        }
+
+        function updateChangeUI() {
+            const type = document.getElementById('change_type').value;
+            document.getElementById('change_ui_time').style.display = type === '시간 변경' ? 'block' : 'none';
+            document.getElementById('change_ui_guide').style.display = type === '해설사 변경(대타)' ? 'block' : 'none';
+            document.getElementById('change_ui_cancel').style.display = type === '계획 취소' ? 'block' : 'none';
+        }
+
+        async function loadGuideList() {
+            let targetName = userName;
+            if(userRole === '조장' || userRole === '관리자') {
+                let tg = document.getElementById('change_target_user');
+                if(tg && tg.value) targetName = tg.value;
+            }
+
+            const select = document.getElementById('change_target_guide');
+            try {
+                const res = await fetch(`${API_BASE}/get_guides?island=${encodeURIComponent(userIsland)}&exclude_name=${encodeURIComponent(targetName)}`);
+                if(res.ok) { const data = await res.json(); select.innerHTML = data.guides.length > 0 ? data.guides.map(g => `<option value="${g}">${g} 해설사</option>`).join('') : '<option value="">동료가 없습니다.</option>'; }
+            } catch (e) {}
+        }
+
+        async function submitPlanChange() {
+            let targetName = userName;
+            if(userRole === '조장' || userRole === '관리자') {
+                let tg = document.getElementById('change_target_user');
+                if(tg && tg.value) targetName = tg.value;
+            }
+
+            const targetDate = document.getElementById('change_target_date').value; const changeType = document.getElementById('change_type').value; const remarks = document.getElementById('change_remarks').value;
+            if(!targetDate || !remarks) { alert("날짜와 사유를 입력해주세요."); return; }
+            let changeDetail = changeType === '시간 변경' ? `${document.getElementById('change_time_start').value}~${document.getElementById('change_time_end').value} 로 변경` : (changeType === '해설사 변경(대타)' ? `${document.getElementById('change_target_guide').value} 대타 요청` : "휴무 처리 요청");
+            if(!confirm(`[${targetName}] 님의 승인 요청을 접수하시겠습니까?`)) return;
+
+            showLoading();
+            try {
+                const res = await fetch(`${API_BASE}/request_plan_change`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: targetName, island: userIsland, target_date: targetDate, change_type: changeType, change_detail: changeDetail, target_guide: changeType === '해설사 변경(대타)' ? document.getElementById('change_target_guide').value : "" }) });
+                if(res.ok) { alert("완료되었습니다."); document.getElementById('change_area').style.display = 'none'; }
+            } catch (e) { alert("오류 발생"); } finally { hideLoading(); }
+        }
+
+        async function loadMyPlans() {
+            const container = document.getElementById('my_plan_container'); container.innerHTML = '<p style="text-align:center; color:#999;">계획서를 불러오는 중...</p>';
+            try {
+                const res = await fetch(`${API_BASE}/get_my_plans?name=${encodeURIComponent(userName)}`); const data = await res.json();
+                if (data.plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">기록이 없습니다.</p>'; return; }
+                let html = ''; data.plans.slice(-30).forEach(p => {
+                    let statusColor = p['상태'].includes('승인완료') ? '#27ae60' : (p['상태'].includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜']}</strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {}
+        }
+
+        let pendingDataCache = { plans: [], changes: [] };
+
+        async function loadPendingRequests() {
+            const container = document.getElementById('pending_container'); 
+            const header = document.getElementById('approval_header');
+            container.innerHTML = '<p style="text-align:center; color:#999;">불러오는 중...</p>'; 
+            header.style.display = 'none'; 
+            document.getElementById('chk_all').checked = false;
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_pending_requests?island=${encodeURIComponent(userIsland)}`); 
+                const data = await res.json();
+                pendingDataCache = data;
+
+                let locs = new Set();
+                let names = new Set();
+
+                data.plans.forEach(p => { locs.add(p['장소']); names.add(p['이름']); });
+                data.changes.forEach(c => { names.add(c['신청자']); }); 
+
+                let locFilter = document.getElementById('approval_filter_loc');
+                let nameFilter = document.getElementById('approval_filter_name');
+
+                let currentLoc = locFilter.value;
+                let currentName = nameFilter.value;
+
+                locFilter.innerHTML = '<option value="all">전체 안내소</option>' + Array.from(locs).map(l => `<option value="${l}">${l}</option>`).join('');
+                nameFilter.innerHTML = '<option value="all">전체 해설사</option>' + Array.from(names).map(n => `<option value="${n}">${n}</option>`).join('');
+
+                if(Array.from(locs).includes(currentLoc)) locFilter.value = currentLoc;
+                if(Array.from(names).includes(currentName)) nameFilter.value = currentName;
+
+                renderPendingRequests();
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
+        }
+
+        function renderPendingRequests() {
+            const container = document.getElementById('pending_container');
+            const header = document.getElementById('approval_header');
+            document.getElementById('chk_all').checked = false;
+
+            let filterLoc = document.getElementById('approval_filter_loc').value;
+            let filterName = document.getElementById('approval_filter_name').value;
+
+            let filteredPlans = pendingDataCache.plans.filter(p => {
+                if (filterLoc !== 'all' && p['장소'] !== filterLoc) return false;
+                if (filterName !== 'all' && p['이름'] !== filterName) return false;
+                return true;
+            });
+
+            let filteredChanges = pendingDataCache.changes.filter(c => {
+                if (filterName !== 'all' && c['신청자'] !== filterName) return false;
+                if (filterLoc !== 'all') return false; 
+                return true;
+            });
+
+            if (filteredPlans.length === 0 && filteredChanges.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">조건에 맞는 대기 내역이 없습니다.</p>';
+                header.style.display = 'none';
+                return;
+            }
+
+            header.style.display = 'flex';
+            let html = '';
+
+            filteredPlans.forEach(p => {
+                let timeMatch = p['활동여부'].match(/(\d{2}:\d{2})~(\d{2}:\d{2})/);
+                let sTime = timeMatch ? timeMatch[1] : '08:00';
+                let eTime = timeMatch ? timeMatch[2] : '17:00';
+                
+                let locOpts = locOptionsHtml.replace(`value="${p['장소']}"`, `value="${p['장소']}" selected`);
+                let startOpts = timeOptionsHtml.replace(`value="${sTime}"`, `value="${sTime}" selected`);
+                let endOpts = timeOptionsHtml.replace(`value="${eTime}"`, `value="${eTime}" selected`);
+
+                html += `
+                    <div class="approval-card">
+                        <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획", row_index: p.row_index})}'> 
+                        <div class="app-content">
+                            <span class="app-tag tag-plan">신규 계획</span>
+                            <div class="app-info"><b>${p['이름']}</b> 해설사<br>날짜: ${p['날짜']}</div>
+                            <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
+                                <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 장소 / 시간 직접 수정</div>
+                                <select class="edit-loc" style="width:100%; padding:6px; margin-bottom:5px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${locOpts}</select>
+                                <div style="display:flex; gap:5px; align-items:center;">
+                                    <select class="edit-start" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${startOpts}</select>
+                                    <span style="font-weight:bold; color:#7f8c8d;">~</span>
+                                    <select class="edit-end" style="flex:1; padding:6px; border:1px solid #ccc; border-radius:4px; font-family:'Pretendard';">${endOpts}</select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`; 
+            });
+            
+            filteredChanges.forEach(c => { 
+                html += `
+                    <div class="approval-card">
+                        <input type="checkbox" class="chk-box item-chk" value='${JSON.stringify({sheet_name: "활동계획_변경신청", row_index: c.row_index})}'> 
+                        <div class="app-content">
+                            <span class="app-tag tag-change">변경/취소</span>
+                            <div class="app-info"><b>${c['신청자']}</b> 해설사<br>날짜: ${c['변경대상일']}<br>유형: ${c['변경유형']}</div>
+                            <div style="background:#fff; padding:8px; border:1px solid #ddd; border-radius:6px; margin-top:5px;">
+                                <div style="font-size:0.75rem; color:#e67e22; margin-bottom:3px; font-weight:bold;">✏️ 상세내용 수정</div>
+                                <input type="text" class="edit-detail" value="${c['상세내용']}" style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem; font-family:'Pretendard'; box-sizing:border-box;">
+                            </div>
+                        </div>
+                    </div>`; 
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleAllApprovals(source) { document.querySelectorAll('.item-chk').forEach(chk => chk.checked = source.checked); }
+
+        async function processBulkApp(status) {
+            const boxes = document.querySelectorAll('.item-chk:checked'); if(boxes.length === 0) { alert("항목을 선택해주세요."); return; }
+            if(!confirm(`선택한 ${boxes.length}건을 [${status}] 하시겠습니까?\n(입력창에서 수정한 내용이 그대로 반영됩니다.)`)) return;
+            
+            let approvals = []; 
+            boxes.forEach(box => { 
+                let d = JSON.parse(box.value); 
+                d.status = status; 
+                let card = box.closest('.approval-card');
+                
+                if (d.sheet_name === '활동계획') {
+                    let eLoc = card.querySelector('.edit-loc').value;
+                    let eStart = card.querySelector('.edit-start').value;
+                    let eEnd = card.querySelector('.edit-end').value;
+
+                    let sParts = eStart.split(':'); let sHour = parseInt(sParts[0]) + (parseInt(sParts[1])/60.0);
+                    let eParts = eEnd.split(':'); let eHour = parseInt(eParts[0]) + (parseInt(eParts[1])/60.0);
+                    let rawDiff = eHour - sHour;
+                    let diff = rawDiff >= 5 ? rawDiff - 1 : rawDiff;
+
+                    let actStr = eLoc === '휴무' ? '휴무' : `${eStart}~${eEnd} (${diff}시간)`;
+                    d.loc = eLoc === '휴무' ? '-' : eLoc;
+                    d.time_str = actStr;
+                } else if (d.sheet_name === '활동계획_변경신청') {
+                    d.detail = card.querySelector('.edit-detail').value;
+                }
+                
+                approvals.push(d); 
+            });
+            
+            showLoading();
+            try {
+                const res = await fetch(`${API_BASE}/process_approval_bulk`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ approvals: approvals }) });
+                if(res.ok) { 
+                    alert("처리가 완료되었습니다."); 
+                    loadPendingRequests(); 
+                    checkPendingForLeader();
+                }
+            } catch (e) { alert("오류 발생"); } finally { hideLoading(); }
+        }
+
+        async function loadAdminAttendance() {
+            const container = document.getElementById('admin_attendance_container');
+            const targetDate = document.getElementById('admin_date_input').value;
+            container.innerHTML = '<p style="text-align:center; color:#999;">전체 섬 데이터를 불러오는 중...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_admin_attendance?target_date=${targetDate}`);
+                const data = await res.json();
+                
+                if(Object.keys(data.data).length === 0) {
+                    container.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${data.target_date}에 등록된 계획이나 기록이 없습니다.</p>`;
+                    return;
+                }
+                
+                let html = '';
+                for (const [island, locs] of Object.entries(data.data)) {
+                    html += `<div class="admin-island-card"><div class="admin-island-header">🏝️ ${island}</div><div style="padding:15px; background:white;">`;
+                    for (const [loc, users] of Object.entries(locs)) {
+                        html += `<div class="admin-loc-group"><div class="admin-loc-title">📍 ${loc}</div>`;
+                        for (const [name, info] of Object.entries(users)) {
+                            let planText = info.plan ? info.plan : '<span style="color:#999;">계획 없음</span>';
+                            let inText = info.in ? info.in : '<span style="color:#e74c3c;">미출근</span>';
+                            let outText = info.out ? info.out : (info.in ? '<span style="color:#f39c12;">미퇴근</span>' : '');
+                            let actualText = info.in ? `출근 ${inText} | 퇴근 ${outText}` : '<span style="color:#e74c3c;">출근 기록 없음</span>';
+                            if (info.plan === '휴무') actualText = info.in ? `출근 ${inText} | 퇴근 ${outText} (휴무자 출근)` : '휴무';
+                            let actualClass = info.in ? 'admin-time-act' : 'admin-time-none';
+                            html += `<div class="admin-guide-row"><div class="admin-guide-name">${name} 해설사</div><div class="admin-time-box"><div class="admin-time-plan">🗓️ <b>계획:</b> ${planText}</div><div class="${actualClass}">✅ <b>실제:</b> ${actualText}</div></div></div>`;
+                        }
+                        html += `</div>`;
+                    }
                     html += `</div></div>`;
                 }
                 container.innerHTML = html;
-            } catch(e) { container.innerHTML = '<p>데이터가 없습니다.</p>'; }
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
+        }
+
+        async function loadAdminDashboard() {
+            const container = document.getElementById('admin_dash_container');
+            document.getElementById('dash_today_date').innerText = new Date().toLocaleDateString('ko-KR', {month:'long', day:'numeric'});
+            container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">현황을 종합하는 중...</p>';
+            
+            showLoading();
+            try {
+                const res = await fetch(`${API_BASE}/get_admin_dashboard`);
+                const data = await res.json();
+                
+                let html = '';
+                const islands = ['백령도', '대청도', '소청도'];
+                
+                islands.forEach(isl => {
+                    html += `
+                        <div style="background:white; border:2px solid #34495e; border-radius:12px; margin-bottom:20px; overflow:hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                            <div style="background:#34495e; color:white; padding:12px 15px; font-weight:800; font-size:1.1rem;">🏝️ ${isl}</div>
+                            <div style="padding:15px;">
+                    `;
+                    
+                    const locs = data.dashboard[isl];
+                    if (Object.keys(locs).length === 0) {
+                        html += `<div style="text-align:center; color:#999; font-size:0.9rem; padding:10px;">등록된 활동이 없습니다.</div>`;
+                    } else {
+                        for (const [locName, info] of Object.entries(locs)) {
+                            let planNames = info.plan.length > 0 ? info.plan.join(', ') : '<span style="color:#999;">없음</span>';
+                            let actNames = info.act.length > 0 ? info.act.join(', ') : '<span style="color:#e74c3c;">미출근</span>';
+                            
+                            html += `
+                                <div style="margin-bottom:15px; border-bottom:1px dashed #ecf0f1; padding-bottom:12px;">
+                                    <div style="font-weight:900; color:#2980b9; margin-bottom:8px; font-size:1.05rem;">📍 ${locName}</div>
+                                    <div style="font-size:0.9rem; margin-bottom:5px;">🗓️ <b>계획:</b> ${planNames}</div>
+                                    <div style="font-size:0.9rem; margin-bottom:10px;">✅ <b>실제:</b> ${actNames}</div>
+                                    <div style="display:flex; gap:10px; font-size:0.85rem; background:#f8f9fa; padding:8px; border-radius:6px; text-align:center;">
+                                        <div style="flex:1; color:#333;">탐방객 <b>${info.v}</b></div>
+                                        <div style="flex:1; color:#333;">청취자 <b>${info.l}</b></div>
+                                        <div style="flex:1; color:#333;">해설 <b>${info.c}</b></div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                    html += `</div></div>`;
+                });
+                
+                container.innerHTML = html;
+            } catch(e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">현황을 불러오는데 실패했습니다.</p>';
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadAdminLogs() {
+            const container = document.getElementById('admin_log_container');
+            const startDate = document.getElementById('al_start_date').value;
+            const endDate = document.getElementById('al_end_date').value;
+            const loc = document.getElementById('al_loc').value;
+            const nameSearch = document.getElementById('al_name').value.trim();
+
+            if (!startDate || !endDate) return;
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">운영일지 기록을 종합하는 중...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_admin_logs?start_date=${startDate}&end_date=${endDate}&loc=${encodeURIComponent(loc)}&name=${encodeURIComponent(nameSearch)}`);
+                const data = await res.json();
+                let summary = data.summary;
+                
+                let html = `
+                    <div style="background:#e8f5e9; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #c8e6c9;">
+                        <div style="font-size:1rem; font-weight:800; color:#2e7d32; margin-bottom:10px;">📊 검색 기간 총 실적</div>
+                        <div style="display:flex; justify-content:space-between; text-align:center;">
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 탐방객</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.visitors}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 청취자</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.listeners}명</div></div>
+                            <div style="flex:1;"><div style="font-size:0.85rem; color:#388e3c;">총 해설횟수</div><div style="font-weight:800; font-size:1.2rem; color:#1b5e20;">${summary.count}회</div></div>
+                        </div>
+                    </div>
+                `;
+
+                if (data.logs.length === 0) {
+                    html += '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 일지 기록이 없습니다.</p>';
+                    container.innerHTML = html; return;
+                }
+
+                data.logs.forEach(log => {
+                    let rLoc = log['장소'] || '장소 미상';
+                    let isCo = log['공동해설'] === 'O' || log['공동해설'] === '○' ? '<span style="color:#e67e22; font-size:0.8rem; border:1px solid #e67e22; padding:2px 4px; border-radius:4px; margin-left:5px;">공동해설</span>' : '';
+                    
+                    html += `
+                        <div class="approval-card" style="display:block;">
+                            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+                                <strong style="font-size:1.05rem;">${log['날짜']} - ${log['이름']} ${isCo}</strong>
+                                <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${log['표시시간']}</span>
+                            </div>
+                            <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px;">
+                                📍 <b>${log['섬']} > ${rLoc}</b>
+                            </div>
+                            <div style="display:flex; gap:10px; font-size:0.85rem; background:#f8f9fa; padding:8px; border-radius:6px; margin-bottom:8px;">
+                                <div style="flex:1; text-align:center;">탐방객 <b>${log['탐방객수'] || 0}</b></div>
+                                <div style="flex:1; text-align:center;">청취자 <b>${log['청취자수'] || 0}</b></div>
+                                <div style="flex:1; text-align:center;">해설 <b>${log['해설횟수'] || 0}</b></div>
+                            </div>
+                            <div style="font-size:0.85rem; color:#555;">
+                                📝 <b>특이사항:</b> ${log['특이사항'] || '없음'}
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<p style="text-align:center; color:#e74c3c;">조회 실패</p>`;
+            }
+        }
+
+        async function loadAdminPlans() {
+            const container = document.getElementById('admin_plan_container');
+            const month = document.getElementById('ap_month').value; const half = document.getElementById('ap_half').value;
+            const island = document.getElementById('ap_island').value; const loc = document.getElementById('ap_loc').value;
+            const nameSearch = document.getElementById('ap_name').value.trim();
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">활동계획서를 불러오는 중...</p>';
+            
+            try {
+                const res = await fetch(`${API_BASE}/get_admin_plans?month=${month}&island=${encodeURIComponent(island)}`);
+                const data = await res.json();
+                let plans = data.plans;
+
+                plans = plans.filter(p => {
+                    let dStr = p['날짜_표준'] || p['날짜'] || '';
+                    let day = 0;
+                    if (dStr.includes('-')) day = parseInt(dStr.split('-')[2]);
+                    else if (dStr.includes('.')) day = parseInt(dStr.split('.')[2]);
+                    else {
+                        let mMatch = dStr.match(/(\d+)일/);
+                        if(mMatch) day = parseInt(mMatch[1]);
+                    }
+
+                    if (half === '1' && (day < 1 || day > 15)) return false;
+                    if (half === '2' && (day < 16)) return false;
+                    if (loc && !(p['장소']||'').includes(loc)) return false;
+                    if (nameSearch && !(p['이름']||'').includes(nameSearch)) return false;
+                    return true;
+                });
+
+                if (plans.length === 0) { container.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">검색 조건에 맞는 계획이 없습니다.</p>'; return; }
+
+                plans.sort((a, b) => {
+                    let aDay = (a['날짜_표준']||a['날짜']||'').match(/(\d+)일/) ? parseInt((a['날짜_표준']||a['날짜']).match(/(\d+)일/)[1]) : 0;
+                    let bDay = (b['날짜_표준']||b['날짜']||'').match(/(\d+)일/) ? parseInt((b['날짜_표준']||b['날짜']).match(/(\d+)일/)[1]) : 0;
+                    if(aDay !== bDay) return aDay - bDay; 
+                    if(a['섬'] !== b['섬']) return (a['섬']||'').localeCompare(b['섬']||'');
+                    return (a['이름']||'').localeCompare(b['이름']||'');
+                });
+
+                let html = '';
+                plans.forEach(p => {
+                    let statusColor = (p['상태']||'').includes('승인완료') ? '#27ae60' : ((p['상태']||'').includes('반려') ? '#e74c3c' : '#f39c12');
+                    html += `<div class="approval-card" style="display:block;"><div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;"><strong style="font-size:1.05rem;">${p['날짜_표준'] || p['날짜']} - ${p['이름']} <span style="font-size:0.85rem; color:#7f8c8d;">(${p['섬']})</span></strong><span style="color:${statusColor}; font-weight:bold; font-size:0.85rem;">${p['상태']}</span></div><div style="font-size:0.95rem; line-height:1.5; color:#333;">장소: <b>${p['장소']}</b><br>시간: ${p['활동여부']}</div></div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<p style="text-align:center; color:#e74c3c;">조회 실패</p>`;
+            }
+        }
+
+        async function loadStatistics() {
+            const container = document.getElementById('stat_container');
+            const year = document.getElementById('stat_year').value;
+            const month = document.getElementById('stat_month').value;
+
+            container.innerHTML = '<p style="text-align:center; color:#999;">통계 데이터와 규정 준수 여부를 분석하는 중입니다...</p>';
+            
+            showLoading();
+            try {
+                const res = await fetch(`${API_BASE}/get_statistics?year=${year}&month=${month}`);
+                const data = await res.json();
+                
+                if (data.total.count === 0 && data.total.visitors === 0 && Object.keys(data.guide_stats).length === 0) {
+                    container.innerHTML = `<p style="text-align:center; color:#999; padding:20px;">${year}년 ${month}월의 기록이 없습니다.</p>`;
+                    return;
+                }
+
+                let html = '';
+                html += `<div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #bbdefb;"><div style="font-size:1.1rem; font-weight:800; color:#1565c0; margin-bottom:10px; text-align:center;">🏆 ${year}년 ${month}월 전체 실적</div><div style="display:flex; justify-content:space-between; text-align:center;"><div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 탐방객</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.visitors.toLocaleString()}명</div></div><div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">총 청취자</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.listeners.toLocaleString()}명</div></div><div style="flex:1;"><div style="font-size:0.85rem; color:#1976d2;">해설 횟수</div><div style="font-weight:800; font-size:1.3rem; color:#0d47a1;">${data.total.count.toLocaleString()}회</div></div></div></div>`;
+
+                html += `<div style="font-weight:800; font-size:1.05rem; margin-bottom:10px; color:#2c3e50;">🏝️ 권역(섬)별 실적</div>`;
+                html += `<table class="stat-table"><thead><tr><th>권역</th><th>탐방객</th><th>청취자</th><th>해설횟수</th></tr></thead><tbody>`;
+                for (const [island, stats] of Object.entries(data.island_stats)) {
+                    if(!island) continue;
+                    html += `<tr><td class="t-left">${island}</td><td>${stats.visitors.toLocaleString()}</td><td>${stats.listeners.toLocaleString()}</td><td>${stats.count.toLocaleString()}</td></tr>`;
+                }
+                html += `</tbody></table>`;
+
+                html += `<div style="font-weight:800; font-size:1.05rem; margin-top:25px; margin-bottom:10px; color:#2c3e50;">🧑‍🏫 해설사별 개인 실적 및 근무 알림</div>`;
+                
+                html += `
+                    <div style="overflow-x:auto;">
+                    <table class="stat-table" style="min-width: 600px;">
+                        <thead>
+                            <tr>
+                                <th>이름 (소속)</th>
+                                <th style="background-color:#d35400;">활동시간</th>
+                                <th>탐방객</th>
+                                <th>청취자</th>
+                                <th>해설횟수</th>
+                                <th>비고(알림)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                const sortedGuides = Object.entries(data.guide_stats).sort((a, b) => b[1].count - a[1].count);
+                for (const [name, stats] of sortedGuides) {
+                    let alertHtml = '';
+                    if (stats.alerts && stats.alerts.length > 0) {
+                        stats.alerts.forEach(al => {
+                            alertHtml += `<span class="alert-badge">${al}</span><br>`;
+                        });
+                    } else {
+                        alertHtml = `<span style="color:#27ae60; font-weight:bold; font-size:0.8rem;">정상</span>`;
+                    }
+
+                    html += `
+                        <tr>
+                            <td class="t-left">${name}<br><span style="font-weight:normal; font-size:0.75rem; color:#7f8c8d;">${stats.island}</span></td>
+                            <td style="font-weight:900; color:#d35400;">${stats.hours}h</td>
+                            <td>${stats.visitors.toLocaleString()}</td>
+                            <td>${stats.listeners.toLocaleString()}</td>
+                            <td><b>${stats.count.toLocaleString()}</b></td>
+                            <td style="text-align:center;">${alertHtml}</td>
+                        </tr>
+                    `;
+                }
+                html += `</tbody></table></div>`;
+                html += `<ul style="font-size:0.8rem; color:#666; margin-top:10px; padding-left:20px;">
+                            <li><b>월 20일 초과:</b> 해당 월 출근 기록이 20일을 초과함</li>
+                            <li><b>일 8시간 초과:</b> 식사시간 1시간을 제외하고 하루 순수 활동시간이 8시간을 넘음</li>
+                            <li><b>주 1일 휴무 미준수:</b> 휴일(비번) 없이 연속으로 7일 이상 출근함</li>
+                         </ul>`;
+
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">통계 산출 중 오류가 발생했습니다.</p>';
+            } finally {
+                hideLoading();
+            }
         }
 
         async function loadMyActivity() {
             const y = document.getElementById('ma_year').value;
             const m = document.getElementById('ma_month').value;
             const d = document.getElementById('ma_day').value;
+            
+            if(!y || !m || !d) {
+                alert("연도, 월, 일을 모두 선택해주세요.");
+                return;
+            }
+
             const container = document.getElementById('my_activity_container');
-            container.innerHTML = '<p style="text-align:center; padding:20px;">활동 내역을 불러오는 중...</p>';
+            container.innerHTML = '<p style="text-align:center; color:#999;">활동 내역을 불러오는 중...</p>';
+            
             try {
                 const res = await fetch(`${API_BASE}/get_my_activity?name=${encodeURIComponent(userName)}&year=${y}&month=${m}&day=${d}`);
+                if (!res.ok) throw new Error("서버 오류");
                 const data = await res.json();
-                let html = `<div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; text-align:center;"><b>총 ${data.total_hours}시간 근무</b><br><small>탐방객 ${data.total_v} / 청취자 ${data.total_l} / 해설 ${data.total_c}</small></div>`;
-                if(data.records.length === 0) html += '<p style="text-align:center; color:#999;">기록이 없습니다.</p>';
-                data.records.forEach(r => {
-                    html += `<div class="menu-card" style="display:block; font-size:0.9rem;"><b>${r.date} ${r.time}</b><br>📍 ${r.loc} (탐방객 ${r.v} / 청취자 ${r.l} / 해설 ${r.c})<br><small>${r.rmk || ''}</small></div>`;
-                });
+                
+                let html = '';
+                let dateTitle = day === 'all' ? `${year}년 ${month}월 총 활동 내역` : `${year}년 ${month}월 ${parseInt(day)}일 활동 내역`;
+
+                html += `
+                    <div style="background:#e3f2fd; padding:15px; border-radius:12px; margin-bottom:15px; border:1px solid #bbdefb; text-align:center;">
+                        <div style="font-size:0.9rem; font-weight:800; color:#1565c0; margin-bottom:5px;">${dateTitle}</div>
+                        <div style="font-size:1.3rem; font-weight:900; color:#0d47a1; margin-bottom:10px;">총 ${data.total_hours} 시간 근무</div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.85rem; background:white; padding:10px; border-radius:8px; color:#333;">
+                            <div style="flex:1;">탐방객 <b>${data.total_v}</b>명</div>
+                            <div style="flex:1;">청취자 <b>${data.total_l}</b>명</div>
+                            <div style="flex:1;">해설 <b>${data.total_c}</b>회</div>
+                        </div>
+                    </div>
+                `;
+                
+                if(data.records.length === 0) {
+                    html += '<p style="text-align:center; color:#999; padding:20px;">해당 기간의 해설 기록이 없습니다.</p>';
+                } else {
+                    data.records.forEach(r => {
+                        html += `
+                            <div class="approval-card" style="display:block;">
+                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:8px; margin-bottom:8px;">
+                                    <strong style="font-size:1.05rem;">${r.date}</strong>
+                                    <span style="color:#d35400; font-weight:bold; font-size:0.9rem;">🎤 ${r.time}</span>
+                                </div>
+                                <div style="font-size:0.95rem; line-height:1.5; color:#333; margin-bottom:8px;">
+                                    📍 <b>${r.loc}</b>
+                                </div>
+                                <div style="display:flex; gap:10px; font-size:0.85rem; background:#f8f9fa; padding:8px; border-radius:6px; margin-bottom:8px;">
+                                    <div style="flex:1; text-align:center;">탐방객 <b>${r.v}</b></div>
+                                    <div style="flex:1; text-align:center;">청취자 <b>${r.l}</b></div>
+                                    <div style="flex:1; text-align:center;">해설 <b>${r.c}</b></div>
+                                </div>
+                                <div style="font-size:0.85rem; color:#555;">
+                                    📝 <b>비고:</b> ${r.rmk || '없음'}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
                 container.innerHTML = html;
-            } catch(e) { container.innerHTML = '<p>조회 실패</p>'; }
+            } catch(e) {
+                container.innerHTML = '<p style="text-align:center; color:#e74c3c;">데이터를 불러오지 못했습니다.</p>';
+            }
         }
 
-        // [핵심] 조원 활동계획 조회 시 날짜의 '일(Day)' 형식을 유연하게 파싱
         async function loadTeamPlans() {
             const m = document.getElementById('tp_month').value;
             const half = document.getElementById('tp_half').value;
@@ -320,12 +1393,13 @@
             container.innerHTML = '<p style="text-align:center; padding:20px;">계획서를 불러오는 중...</p>';
             try {
                 const res = await fetch(`${API_BASE}/get_island_plans?island=${encodeURIComponent(userIsland)}&month=${m}`);
+                if (!res.ok) throw new Error("서버 오류");
                 const data = await res.json();
                 let filtered = data.plans.filter(p => {
-                    if(loc && !(p.장소||'').includes(loc)) return false;
-                    if(name && !(p.이름||'').includes(name)) return false;
+                    if(loc && !(p['장소']||'').includes(loc)) return false;
+                    if(name && !(p['이름']||'').includes(name)) return false;
                     
-                    let stdDate = p.날짜_표준 || p.날짜 || '';
+                    let stdDate = p['날짜_표준'] || p['날짜'] || '';
                     let day = 0;
                     if (stdDate.includes('-')) {
                         day = parseInt(stdDate.split('-')[2]);
@@ -342,33 +1416,187 @@
                 });
                 let html = '';
                 filtered.forEach(p => {
-                    html += `<div class="menu-card" style="display:block; font-size:0.9rem;"><b>${p.날짜} - ${p.이름}</b><br>📍 ${p.장소} (${p.활동여부})<br><small>상태: ${p.상태}</small></div>`;
+                    html += `<div class="menu-card" style="display:block; font-size:0.9rem;"><b>${p['날짜_표준'] || p['날짜']} - ${p['이름']}</b><br>📍 ${p['장소']} (${p['활동여부']})<br><small>상태: ${p['상태']}</small></div>`;
                 });
                 container.innerHTML = html || '<p style="text-align:center; padding:20px;">검색 결과가 없습니다.</p>';
             } catch(e) { container.innerHTML = '<p>조회 실패</p>'; }
         }
 
-        async function loadAdminDashboard() {
+        async function generatePDF() {
+            const type = document.getElementById('rep_type').value;
+            const year = document.getElementById('rep_year').value;
+            const month = document.getElementById('rep_month').value;
+            const half = document.getElementById('rep_half').value;
+            
+            const btn = document.querySelector('#report_area .btn-submit');
+            btn.innerText = "데이터를 불러오는 중...";
+            btn.disabled = true;
+
             showLoading();
             try {
-                const res = await fetch(`${API_BASE}/get_admin_dashboard`);
+                const res = await fetch(`${API_BASE}/get_report_data?island=${encodeURIComponent(userIsland)}&year=${year}&month=${month}`);
                 const data = await res.json();
+                
                 let html = '';
-                ['백령도', '대청도', '소청도'].forEach(isl => {
-                    html += `<div class="admin-island-card"><div class="admin-island-header">🏝️ ${isl}</div><div style="padding:15px;">`;
-                    for(const [loc, info] of Object.entries(data.dashboard[isl])) {
-                        html += `<div style="margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:8px;"><b>📍 ${loc}</b><br><small>계획: ${info.plan.join(', ') || '없음'} / 실제: ${info.act.join(', ') || '미출근'}</small>
-                        <div style="display:flex; gap:10px; margin-top:5px; font-size:0.8rem; color:#666;"><div>탐방객 <b>${info.v}</b></div><div>해설 <b>${info.c}</b></div></div></div>`;
+                let printArea = document.getElementById('print_area');
+
+                if(type === 'log') {
+                    let dailyData = data.daily_data;
+                    let sortedDates = Object.keys(dailyData).sort();
+                    
+                    if(half === '1') sortedDates = sortedDates.filter(d => parseInt(d.split('-')[2]) <= 15);
+                    else sortedDates = sortedDates.filter(d => parseInt(d.split('-')[2]) > 15);
+
+                    if(sortedDates.length === 0) { 
+                        alert("해당 기간의 운영일지 기록이 없습니다."); 
+                        btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return; 
                     }
-                    html += `</div></div>`;
-                });
-                document.getElementById('admin_dash_container').innerHTML = html;
-            } catch(e) {}
-            hideLoading();
+
+                    const times = [
+                        "07:00~08:00",
+                        "08:00~09:00", "09:00~10:00", "10:00~11:00", "11:00~12:00",
+                        "12:00~13:00", "13:00~14:00", "14:00~15:00", "15:00~16:00",
+                        "16:00~17:00", "17:00~18:00", 
+                        "18:00~19:00"
+                    ];
+
+                    sortedDates.forEach(dateStr => {
+                        let locs = dailyData[dateStr];
+                        let dObj = new Date(dateStr);
+                        let dateFormatted = `(${dObj.getFullYear()}년 ${dObj.getMonth()+1}월 ${dObj.getDate()}일)`;
+
+                        for (const [loc, info] of Object.entries(locs)) {
+                            
+                            let displayLoc = loc.replace(/ 안내소|안내소/g, '').trim();
+                            
+                            let guideRows = '';
+                            for(let i=0; i<4; i++) {
+                                if(info.guides && info.guides[i]) {
+                                    let g = info.guides[i];
+                                    let tIn = g.in || '';
+                                    let tOut = g.out || '';
+                                    let timeStr = (tIn || tOut) ? `${tIn} ~ ${tOut}` : '';
+                                    guideRows += `<tr class="row-guide"><td>${g.name}</td><td colspan="2">${timeStr}</td></tr>`;
+                                } else {
+                                    guideRows += `<tr class="row-guide"><td></td><td colspan="2"></td></tr>`;
+                                }
+                            }
+
+                            let logRows = '';
+                            let totalV = 0, totalL = 0, totalC = 0;
+                            let remarkSum = '';
+
+                            times.forEach(t => {
+                                let log = info.logs ? info.logs.find(x => x.time && x.time.replace(/\s/g,'').substring(0,2) === t.substring(0,2)) : null;
+
+                                if(log) {
+                                    totalV += parseInt(log.visitors||0);
+                                    totalL += parseInt(log.listeners||0);
+                                    totalC += parseInt(log.count||0);
+                                    if(log.remarks) remarkSum += log.remarks + " ";
+
+                                    logRows += `
+                                        <tr class="row-log">
+                                            <td>${t}</td>
+                                            <td>${log.visitors || ''}</td>
+                                            <td>${log.listeners || ''}</td>
+                                            <td>${log.count || ''}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="text-align:left; padding-left:5px;">${log.remarks || ''}</td>
+                                        </tr>
+                                    `;
+                                } else {
+                                    logRows += `<tr class="row-log"><td>${t}</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+                                }
+                            });
+
+                            html += `
+                                <div class="print-page">
+                                    <div class="print-top-left">【서식 3】 지질공원 안내소 운영일지</div>
+                                    <div class="print-main-title">지질공원 안내소 운영일지</div>
+                                    <div class="print-date">${dateFormatted}</div>
+
+                                    <table class="fixed-table">
+                                        <tr class="row-loc">
+                                            <th class="t1-col1">안내소</th>
+                                            <td class="t1-col2" style="font-size:12pt; font-weight:bold;">${displayLoc}</td>
+                                            <th class="t1-col3">지시사항</th>
+                                            <td class="t1-col4" style="text-align:left;"></td>
+                                        </tr>
+                                        <tr class="row-guide-header">
+                                            <th rowspan="5" class="t1-col1">해설사</th>
+                                            <th class="t1-col2">성명</th>
+                                            <th colspan="2">활동 시간</th>
+                                        </tr>
+                                        ${guideRows}
+                                    </table>
+
+                                    <div class="print-sub-title">■ 운영일지</div>
+                                    <table class="fixed-table">
+                                        <tr class="row-log-header">
+                                            <th class="t2-col1">시간</th>
+                                            <th class="t2-col2">지질명소<br>탐방객(명)</th>
+                                            <th class="t2-col3">해설<br>청취자(명)</th>
+                                            <th class="t2-col4">해설<br>횟수(회)</th>
+                                            <th class="t2-col5">교육<br>청취자(명)</th>
+                                            <th class="t2-col6">교육<br>횟수(회)</th>
+                                            <th class="t2-col7" style="font-size:9pt; line-height:1.2;">비고<br>(환경정비, 시설점검 등)</th>
+                                        </tr>
+                                        ${logRows}
+                                        <tr class="row-sum">
+                                            <th>합계</th>
+                                            <td>${totalV || ''}</td>
+                                            <td>${totalL || ''}</td>
+                                            <td>${totalC || ''}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr class="row-remark">
+                                            <th>특이사항</th>
+                                            <td colspan="6" style="text-align:left;">${remarkSum}</td>
+                                        </tr>
+                                    </table>
+
+                                    <div class="signature-box">
+                                        <span>조장 확인</span>
+                                        <span style="margin-left: 4mm;">(서명)</span>
+                                        <span style="margin-left: 20mm;">면 팀장 확인</span>
+                                        <span style="margin-left: 5mm;">(서명)</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                } else {
+                    alert("활동계획서와 활동결과보고서는 현재 개발 진행 중입니다. '안내소 운영일지'를 선택해주세요."); 
+                    btn.innerText = "📄 PDF 변환 및 인쇄"; btn.disabled = false; return;
+                }
+
+                printArea.innerHTML = html;
+                btn.innerText = "📄 PDF 변환 및 인쇄";
+                btn.disabled = false;
+                
+                window.print();
+                
+            } catch(e) {
+                alert("보고서 생성 중 오류가 발생했습니다.");
+                btn.innerText = "📄 PDF 변환 및 인쇄";
+                btn.disabled = false;
+            } finally {
+                hideLoading();
+            }
         }
 
         function logout() { if(confirm("로그아웃 하시겠습니까?")) { localStorage.clear(); location.href = "index.html"; } }
-        syncMyStatus().then(checkPendingForLeader);
+
+        if(userRole === '관리자') {
+            document.getElementById('admin_dashboard_area').style.display = 'block';
+            loadAdminDashboard();
+        } else {
+            syncMyStatus().then(() => { checkPendingForLeader(); });
+        }
     </script>
 </body>
 </html>
